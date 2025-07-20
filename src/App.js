@@ -152,19 +152,19 @@ function TestimonialCard({ imageSrc, alt, text, author }) {
 function TestimonialsSection() {
     const testimonials = [
         {
-            img: "https://placehold.co/100x100/E9D5FF/4C1D95?text=J+&+L",
+            img: "https://placehold.co/100x100/E9D5FF/4C1D95?text=J+e+L",
             alt: "Casal Joana e Lucas",
             text: "A plataforma foi essencial para organizar nosso casamento. O site ficou lindo e a lista de presentes em dinheiro foi super prática! Recomendamos de olhos fechados.",
             author: "Joana & Lucas"
         },
         {
-            img: "https://placehold.co/100x100/FECACA/7F1D1D?text=M+&+P",
+            img: "https://placehold.co/100x100/FECACA/7F1D1D?text=M+e+P",
             alt: "Casal Mariana e Pedro",
             text: "Fácil de usar, intuitivo e com um design maravilhoso. Nossos convidados amaram a facilidade de encontrar todas as informações e confirmar a presença online.",
             author: "Mariana & Pedro"
         },
         {
-            img: "https://placehold.co/100x100/A7F3D0/064E3B?text=C+&+G",
+            img: "https://placehold.co/100x100/A7F3D0/064E3B?text=C+e+G",
             alt: "Casal Carla e Gabriel",
             text: "O checklist foi nosso salva-vidas! Ajudou a gente a não surtar com tantos detalhes. Ter tudo centralizado no Sim, Perfeito fez toda a diferença.",
             author: "Carla & Gabriel"
@@ -247,7 +247,7 @@ function Footer() {
 // --- Componente Principal da Aplicação ---
 export default function App() {
   return (
-    <>
+    <div className="bg-gray-50 font-sans">
       <Header />
       <main>
         <HeroSection />
@@ -256,6 +256,6 @@ export default function App() {
         <FinalCTASection />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
