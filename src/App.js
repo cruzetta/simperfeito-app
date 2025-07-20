@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // --- Ícones como Componentes ---
 // Usar SVGs diretamente como componentes React é uma prática recomendada.
@@ -246,45 +246,6 @@ function Footer() {
 
 // --- Componente Principal da Aplicação ---
 export default function App() {
-  // Adiciona as fontes do Google Fonts ao cabeçalho do documento
-  useEffect(() => {
-    const head = document.head;
-    const links = [
-      "https://fonts.googleapis.com",
-      "https://fonts.gstatic.com"
-    ];
-    const fontLink = document.createElement('link');
-    fontLink.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap";
-    fontLink.rel = "stylesheet";
-
-    links.forEach(href => {
-      const link = document.createElement('link');
-      link.rel = "preconnect";
-      link.href = href;
-      if(href.includes("gstatic")){
-        link.crossOrigin = "true";
-      }
-      head.appendChild(link);
-    });
-    
-    head.appendChild(fontLink);
-
-    // Adiciona o estilo global para as fontes
-    const style = document.createElement('style');
-    style.innerHTML = `
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F9FAFB; /* bg-gray-50 */
-            color: #1F2937; /* text-gray-800 */
-        }
-        .font-display {
-            font-family: 'Playfair Display', serif;
-        }
-    `;
-    head.appendChild(style);
-
-  }, []);
-
   return (
     <>
       <Header />
