@@ -24,6 +24,9 @@ const initialGuests = [
 ];
 
 function GuestManagement() {
+    // IMPORTANTE: Altere esta URL para o link real do site do casamento
+    const WEDDING_SITE_URL = 'https://simperfeito.com/casamento-exemplo';
+
     const [guests, setGuests] = useState(initialGuests);
     const [newGuestName, setNewGuestName] = useState('');
     const [newGuestPhone, setNewGuestPhone] = useState('');
@@ -48,7 +51,7 @@ function GuestManagement() {
     };
     
     const handleSendInvite = (guest) => {
-        const message = encodeURIComponent(`Olá ${guest.name}! Você está convidado(a) para o nosso casamento. Para mais detalhes e confirmar sua presença, acesse: https://simperfeito.com/seu-casamento`);
+        const message = encodeURIComponent(`Olá ${guest.name}! Você está convidado(a) para o nosso casamento. Para mais detalhes e confirmar sua presença, acesse: ${WEDDING_SITE_URL}`);
         const whatsappUrl = `https://wa.me/${guest.phone}?text=${message}`;
         window.open(whatsappUrl, '_blank');
 
