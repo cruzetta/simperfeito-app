@@ -218,7 +218,7 @@ function Footer() {
                     </div>
                 </div>
                 <div className="mt-8 border-t border-gray-700 pt-8 text-center text-gray-400">
-                    <p>&copy; 2024 Sim, Perfeito. Todos os direitos reservados.</p>
+                    <p>&copy; 2024 Sim, Perfeito. Todos os direitos reservados. (v1.2)</p>
                 </div>
             </div>
         </footer>
