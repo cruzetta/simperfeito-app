@@ -30,7 +30,7 @@ const InstagramIcon = () => (
 );
 
 
-function Header({ onLogin }) {
+function Header({ onLoginClick }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
@@ -45,7 +45,7 @@ function Header({ onLogin }) {
                         <a href="#features" className="text-gray-600 hover:text-pink-500 transition duration-300">Recursos</a>
                         <a href="#gifts" className="text-gray-600 hover:text-pink-500 transition duration-300">Lista de Presentes</a>
                         <a href="#inspiration" className="text-gray-600 hover:text-pink-500 transition duration-300">Inspiração</a>
-                        <button onClick={onLogin} className="text-gray-600 hover:text-pink-500 transition duration-300">Login</button>
+                        <button onClick={onLoginClick} className="text-gray-600 hover:text-pink-500 transition duration-300">Login</button>
                     </nav>
                     
                     <a href="#!" className="hidden md:inline-block bg-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-pink-600 transition duration-300 shadow-md">
@@ -62,7 +62,7 @@ function Header({ onLogin }) {
                         <a href="#features" className="block py-2 text-gray-600 hover:text-pink-500">Recursos</a>
                         <a href="#gifts" className="block py-2 text-gray-600 hover:text-pink-500">Lista de Presentes</a>
                         <a href="#inspiration" className="block py-2 text-gray-600 hover:text-pink-500">Inspiração</a>
-                        <button onClick={onLogin} className="block w-full text-left py-2 text-gray-600 hover:text-pink-500">Login</button>
+                        <button onClick={onLoginClick} className="block w-full text-left py-2 text-gray-600 hover:text-pink-500">Login</button>
                         <a href="#!" className="mt-4 inline-block w-full text-center bg-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-pink-600 transition duration-300">
                             Criar meu site grátis
                         </a>
@@ -225,10 +225,10 @@ function Footer() {
     );
 }
 
-export default function LandingPage({ onLogin }) {
+export default function LandingPage({ onLoginClick }) {
     return (
         <div className="bg-gray-50 font-sans">
-          <Header onLogin={onLogin} />
+          <Header onLoginClick={onLoginClick} />
           <main>
             <HeroSection />
             <FeaturesSection />
