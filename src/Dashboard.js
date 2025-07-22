@@ -1,241 +1,259 @@
 import React, { useState } from 'react';
 
-// --- Ícones como Componentes ---
-const ShieldIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+// --- Ícones ---
+const PlusIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" /></svg>
 );
 
-const GiftIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+const TrashIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
 );
 
-const RsvpIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+const SendIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
 );
 
-const ChecklistIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-);
+// --- COMPONENTES DO PAINEL ---
 
-const MenuIcon = () => (
-     <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-);
+// Dados de exemplo para a lista de convidados
+const initialGuests = [
+    { id: 1, name: 'João da Silva', phone: '5511999999999', status: 'Pendente' },
+    { id: 2, name: 'Maria Oliveira', phone: '5521988888888', status: 'Confirmado' },
+    { id: 3, name: 'Pedro Souza', phone: '5531977777777', status: 'Convite Enviado' },
+    { id: 4, name: 'Ana Costa', phone: '5541966666666', status: 'Recusado' },
+];
 
-const FacebookIcon = () => (
-    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
-);
+function GuestManagement() {
+    const [guests, setGuests] = useState(initialGuests);
+    const [newGuestName, setNewGuestName] = useState('');
+    const [newGuestPhone, setNewGuestPhone] = useState('');
 
-const InstagramIcon = () => (
-    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 012.153 2.153c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-2.153 2.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-2.153-2.153c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049 1.064.218-1.791.465-2.427a4.902 4.902 0 012.153-2.153c.636-.247 1.363.416 2.427.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0 8a3 3 0 110-6 3 3 0 010 6zm6.406-11.845a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z" clipRule="evenodd" /></svg>
-);
+    const handleAddGuest = (e) => {
+        e.preventDefault();
+        if (newGuestName.trim() === '' || newGuestPhone.trim() === '') return;
 
-
-function Header({ onLogin }) {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    return (
-        <header className="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
-            <div className="container mx-auto px-6 py-4">
-                <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold text-gray-800 font-display">
-                        <a href="#">Sim, Perfeito</a>
-                    </div>
-                    
-                    <nav className="hidden md:flex items-center space-x-8">
-                        <a href="#features" className="text-gray-600 hover:text-pink-500 transition duration-300">Recursos</a>
-                        <a href="#gifts" className="text-gray-600 hover:text-pink-500 transition duration-300">Lista de Presentes</a>
-                        <a href="#inspiration" className="text-gray-600 hover:text-pink-500 transition duration-300">Inspiração</a>
-                        <button onClick={onLogin} className="text-gray-600 hover:text-pink-500 transition duration-300">Login</button>
-                    </nav>
-                    
-                    <a href="#" className="hidden md:inline-block bg-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-pink-600 transition duration-300 shadow-md">
-                        Criar meu site grátis
-                    </a>
-
-                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden">
-                        <MenuIcon />
-                    </button>
-                </div>
-
-                {isMenuOpen && (
-                    <div className="md:hidden mt-4">
-                        <a href="#features" className="block py-2 text-gray-600 hover:text-pink-500">Recursos</a>
-                        <a href="#gifts" className="block py-2 text-gray-600 hover:text-pink-500">Lista de Presentes</a>
-                        <a href="#inspiration" className="block py-2 text-gray-600 hover:text-pink-500">Inspiração</a>
-                        <button onClick={onLogin} className="block w-full text-left py-2 text-gray-600 hover:text-pink-500">Login</button>
-                        <a href="#" className="mt-4 inline-block w-full text-center bg-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-pink-600 transition duration-300">
-                            Criar meu site grátis
-                        </a>
-                    </div>
-                )}
-            </div>
-        </header>
-    );
-}
-
-function HeroSection() {
-    const heroStyle = {
-        backgroundImage: "url('https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=2070&auto=format&fit=crop')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        const newGuest = {
+            id: Date.now(),
+            name: newGuestName,
+            phone: newGuestPhone.replace(/\D/g, ''), // Remove non-digit characters
+            status: 'Pendente',
+        };
+        setGuests([...guests, newGuest]);
+        setNewGuestName('');
+        setNewGuestPhone('');
     };
 
+    const handleRemoveGuest = (id) => {
+        setGuests(guests.filter(guest => guest.id !== id));
+    };
+    
+    const handleSendInvite = (guest) => {
+        const message = encodeURIComponent(`Olá ${guest.name}! Você está convidado(a) para o nosso casamento. Para mais detalhes e confirmar sua presença, acesse: https://simperfeito.com/seu-casamento`);
+        const whatsappUrl = `https://wa.me/${guest.phone}?text=${message}`;
+        window.open(whatsappUrl, '_blank');
+
+        setGuests(guests.map(g => 
+            g.id === guest.id ? { ...g, status: 'Convite Enviado' } : g
+        ));
+    };
+
+    const handleSendAllInvites = () => {
+        const pendingGuests = guests.filter(g => g.status === 'Pendente');
+        if (pendingGuests.length === 0) {
+            alert('Não há convites pendentes para enviar.');
+            return;
+        }
+        
+        setGuests(guests.map(g => 
+            g.status === 'Pendente' ? { ...g, status: 'Convite Enviado' } : g
+        ));
+        alert(`${pendingGuests.length} convites foram marcados como "Enviado". Em um aplicativo real, isso iniciaria um processo de envio em massa.`);
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Confirmado': return 'bg-green-100 text-green-800';
+            case 'Pendente': return 'bg-yellow-100 text-yellow-800';
+            case 'Convite Enviado': return 'bg-blue-100 text-blue-800';
+            case 'Recusado': return 'bg-red-100 text-red-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const confirmedCount = guests.filter(g => g.status === 'Confirmado').length;
+    const pendingCount = guests.filter(g => g.status === 'Pendente' || g.status === 'Convite Enviado').length;
+
     return (
-        <section style={heroStyle} className="text-white">
-            <div className="bg-black/50 min-h-[70vh] flex items-center">
-                <div className="container mx-auto px-6 text-center">
-                    <h1 className="text-4xl md:text-6xl font-bold font-display mb-4 leading-tight">Seu casamento, <span className="text-pink-300">perfeitamente</span> planejado.</h1>
-                    <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-gray-200">
-                        Crie um site de casamento personalizado, gerencie sua lista de presentes e convidados, tudo em um só lugar.
-                    </p>
-                    <a href="#" className="bg-white text-pink-500 font-bold px-8 py-4 rounded-lg hover:bg-gray-100 transition duration-300 text-lg shadow-xl">
-                        Comece agora, é grátis!
-                    </a>
+        <div>
+            <div className="flex flex-col md:flex-row justify-between md:items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Lista de Convidados</h2>
+                <button 
+                  onClick={handleSendAllInvites}
+                  className="mt-4 md:mt-0 flex items-center justify-center bg-green-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+                >
+                    <SendIcon /> <span className="ml-2">Enviar para todos pendentes</span>
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-500">Total de Convidados</h3>
+                    <p className="text-2xl font-bold text-gray-800">{guests.length}</p>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-500">Confirmados</h3>
+                    <p className="text-2xl font-bold text-green-600">{confirmedCount}</p>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-500">Pendentes / Não Responderam</h3>
+                    <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
                 </div>
             </div>
-        </section>
-    );
-}
 
-function FeatureCard({ icon, title, children }) {
-    return (
-        <div className="text-center p-6 bg-white border border-gray-200 rounded-lg hover:shadow-lg transition-shadow duration-300">
-            <div className="flex items-center justify-center h-16 w-16 bg-pink-100 text-pink-500 rounded-full mx-auto mb-4">
-                {icon}
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Adicionar Novo Convidado</h3>
+                <form onSubmit={handleAddGuest} className="flex flex-col md:flex-row gap-4">
+                    <input
+                        type="text"
+                        placeholder="Nome completo"
+                        value={newGuestName}
+                        onChange={(e) => setNewGuestName(e.target.value)}
+                        className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    <input
+                        type="tel"
+                        placeholder="Celular (Ex: 5511999999999)"
+                        value={newGuestPhone}
+                        onChange={(e) => setNewGuestPhone(e.target.value)}
+                        className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
+                    />
+                    <button type="submit" className="flex items-center justify-center bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition duration-300">
+                        <PlusIcon /> Adicionar
+                    </button>
+                </form>
             </div>
-            <h3 className="text-xl font-semibold mb-2">{title}</h3>
-            <p className="text-gray-600">{children}</p>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Convidado</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" className="relative px-6 py-3"><span className="sr-only">Ações</span></th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {guests.map(guest => (
+                                <tr key={guest.id}>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-medium text-gray-900">{guest.name}</div>
+                                        <div className="text-sm text-gray-500">{guest.phone}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(guest.status)}`}>
+                                            {guest.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div className="flex items-center justify-end space-x-2">
+                                            <button onClick={() => handleSendInvite(guest)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="Enviar Convite via WhatsApp">
+                                                <SendIcon />
+                                            </button>
+                                            <button onClick={() => handleRemoveGuest(guest.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-full" title="Remover Convidado">
+                                                <TrashIcon />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 }
 
-function FeaturesSection() {
+// Componente Placeholder para outras seções do painel
+function PlaceholderSection({ title }) {
     return (
-        <section id="features" className="py-20 bg-gray-50">
-            <div className="container mx-auto px-6">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold font-display text-gray-800">Tudo que você precisa para o grande dia</h2>
-                    <p className="text-gray-600 mt-2 max-w-2xl mx-auto">Ferramentas fáceis de usar para um planejamento sem estresse.</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <FeatureCard icon={<ShieldIcon />} title="Site de Casamento">
-                        Crie um site lindo e personalizado com todas as informações para seus convidados.
-                    </FeatureCard>
-                    <FeatureCard icon={<GiftIcon />} title="Lista de Presentes">
-                        Receba presentes em dinheiro de forma elegante e segura, ou crie uma lista em lojas parceiras.
-                    </FeatureCard>
-                    <FeatureCard icon={<RsvpIcon />} title="RSVP Online">
-                        Seus convidados confirmam a presença de forma rápida e você organiza tudo com facilidade.
-                    </FeatureCard>
-                    <FeatureCard icon={<ChecklistIcon />} title="Checklist de Tarefas">
-                        Um guia completo para você não esquecer de nenhum detalhe importante do seu casamento.
-                    </FeatureCard>
-                </div>
+        <div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">{title}</h2>
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <p className="text-gray-500">Esta seção está em desenvolvimento. Em breve, você poderá gerenciar sua {title.toLowerCase()} por aqui!</p>
             </div>
-        </section>
-    );
-}
-
-function TestimonialCard({ imageSrc, alt, text, author }) {
-    return (
-        <div className="bg-white p-8 rounded-lg shadow-md">
-            <img src={imageSrc} alt={alt} className="w-24 h-24 rounded-full mx-auto -mt-16 border-4 border-white" />
-            <p className="text-gray-600 italic mt-4">{text}</p>
-            <p className="text-right font-semibold text-pink-500 mt-4">- {author}</p>
         </div>
     );
 }
 
-function TestimonialsSection() {
-    const testimonials = [
-        { img: "https://placehold.co/100x100/E9D5FF/4C1D95?text=J+e+L", alt: "Casal Joana e Lucas", text: "A plataforma foi essencial para organizar nosso casamento. O site ficou lindo e a lista de presentes em dinheiro foi super prática! Recomendamos de olhos fechados.", author: "Joana & Lucas" },
-        { img: "https://placehold.co/100x100/FECACA/7F1D1D?text=M+e+P", alt: "Casal Mariana e Pedro", text: "Fácil de usar, intuitivo e com um design maravilhoso. Nossos convidados amaram a facilidade de encontrar todas as informações e confirmar a presença online.", author: "Mariana & Pedro" },
-        { img: "https://placehold.co/100x100/A7F3D0/064E3B?text=C+e+G", alt: "Casal Carla e Gabriel", text: "O checklist foi nosso salva-vidas! Ajudou a gente a não surtar com tantos detalhes. Ter tudo centralizado no Sim, Perfeito fez toda a diferença.", author: "Carla & Gabriel" }
-    ];
+export default function Dashboard({ onLogout }) {
+    const [activeTab, setActiveTab] = useState('guests');
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'guests':
+                return <GuestManagement />;
+            case 'gifts':
+                return <PlaceholderSection title="Lista de Presentes" />;
+            case 'overview':
+                return <PlaceholderSection title="Visão Geral" />;
+            case 'suppliers':
+                return <PlaceholderSection title="Fornecedores" />;
+            default:
+                return <GuestManagement />;
+        }
+    };
+
+    const NavLink = ({ tabName, children }) => (
+        <button
+            onClick={() => setActiveTab(tabName)}
+            className={`w-full text-left flex items-center px-4 py-2 mt-2 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700 ${activeTab === tabName ? 'bg-gray-200 text-gray-800 font-semibold' : ''}`}
+        >
+            {children}
+        </button>
+    );
 
     return (
-        <section id="inspiration" className="py-20 bg-pink-50">
-            <div className="container mx-auto px-6">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold font-display text-gray-800">Histórias de Amor</h2>
-                    <p className="text-gray-600 mt-2">Veja o que os casais dizem sobre o Sim, Perfeito.</p>
+        <div className="flex h-screen bg-gray-100 font-sans">
+            {/* Sidebar */}
+            <div className="hidden md:flex flex-col w-64 bg-white border-r">
+                <div className="flex items-center justify-center h-16 border-b">
+                    <span className="text-xl font-bold text-gray-800 font-display">Sim, Perfeito</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8">
-                    {testimonials.map((t, index) => (
-                        <TestimonialCard key={index} imageSrc={t.img} alt={t.alt} text={t.text} author={t.author} />
-                    ))}
+                <div className="flex flex-col flex-grow p-4">
+                    <nav>
+                        <NavLink tabName="overview">
+                           <span className="mx-4 font-medium">Visão Geral</span>
+                        </NavLink>
+                        <NavLink tabName="guests">
+                           <span className="mx-4 font-medium">Lista de Convidados</span>
+                        </NavLink>
+                        <NavLink tabName="gifts">
+                           <span className="mx-4 font-medium">Lista de Presentes</span>
+                        </NavLink>
+                         <NavLink tabName="suppliers">
+                           <span className="mx-4 font-medium">Fornecedores</span>
+                        </NavLink>
+                    </nav>
+                    <div className="mt-auto">
+                       <button onClick={onLogout} className="w-full flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700">
+                         <span className="mx-4 font-medium">Sair</span>
+                       </button>
+                    </div>
                 </div>
             </div>
-        </section>
-    );
-}
 
-function FinalCTASection() {
-    return (
-        <section className="py-20 bg-white">
-            <div className="container mx-auto px-6 text-center">
-                <h2 className="text-3xl md:text-4xl font-bold font-display text-gray-800">Prontos para dizer "Sim"?</h2>
-                <p className="text-gray-600 mt-2 mb-8 max-w-xl mx-auto">Crie seu site de casamento grátis e comece a planejar o dia mais feliz da sua vida.</p>
-                <a href="#" className="bg-pink-500 text-white font-bold px-8 py-4 rounded-lg hover:bg-pink-600 transition duration-300 text-lg shadow-lg">
-                    Começar o planejamento
-                </a>
+            {/* Main Content */}
+            <div className="flex flex-col flex-1 overflow-y-auto">
+                 <header className="flex items-center justify-between h-16 px-6 bg-white border-b md:hidden">
+                    <span className="text-xl font-bold text-gray-800 font-display">Sim, Perfeito</span>
+                    {/* Aqui você pode adicionar um botão de menu para mobile */}
+                </header>
+                <main className="p-4 sm:p-6 md:p-8">
+                    {renderContent()}
+                </main>
             </div>
-        </section>
-    );
-}
-
-function Footer() {
-    return (
-        <footer className="bg-gray-800 text-white">
-            <div className="container mx-auto px-6 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div>
-                        <h3 className="text-xl font-bold font-display mb-4">Sim, Perfeito</h3>
-                        <p className="text-gray-400">Planejando sonhos, celebrando o amor.</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold mb-4">Plataforma</h4>
-                        <ul className="space-y-2">
-                            <li><a href="#features" className="text-gray-400 hover:text-white">Recursos</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white">Planos e Preços</a></li>
-                            <li><a href="#inspiration" className="text-gray-400 hover:text-white">Inspiração</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold mb-4">Suporte</h4>
-                        <ul className="space-y-2">
-                            <li><a href="#" className="text-gray-400 hover:text-white">FAQ</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white">Contato</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white">Termos de Uso</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold mb-4">Siga-nos</h4>
-                        <div className="flex space-x-4">
-                            <a href="#" className="text-gray-400 hover:text-white"><FacebookIcon /></a>
-                            <a href="#" className="text-gray-400 hover:text-white"><InstagramIcon /></a>
-                        </div>
-                    </div>
-                </div>
-                <div className="mt-8 border-t border-gray-700 pt-8 text-center text-gray-400">
-                    <p>&copy; 2024 Sim, Perfeito. Todos os direitos reservados.</p>
-                </div>
-            </div>
-        </footer>
-    );
-}
-
-export default function LandingPage({ onLogin }) {
-    return (
-        <div className="bg-gray-50 font-sans">
-          <Header onLogin={onLogin} />
-          <main>
-            <HeroSection />
-            <FeaturesSection />
-            <TestimonialsSection />
-            <FinalCTASection />
-          </main>
-          <Footer />
         </div>
     );
 }

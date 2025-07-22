@@ -38,7 +38,7 @@ function Header({ onLogin }) {
             <div className="container mx-auto px-6 py-4">
                 <div className="flex items-center justify-between">
                     <div className="text-2xl font-bold text-gray-800 font-display">
-                        <a href="#">Sim, Perfeito</a>
+                        <a href="#!">Sim, Perfeito</a>
                     </div>
                     
                     <nav className="hidden md:flex items-center space-x-8">
@@ -48,7 +48,7 @@ function Header({ onLogin }) {
                         <button onClick={onLogin} className="text-gray-600 hover:text-pink-500 transition duration-300">Login</button>
                     </nav>
                     
-                    <a href="#" className="hidden md:inline-block bg-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-pink-600 transition duration-300 shadow-md">
+                    <a href="#!" className="hidden md:inline-block bg-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-pink-600 transition duration-300 shadow-md">
                         Criar meu site grátis
                     </a>
 
@@ -63,7 +63,7 @@ function Header({ onLogin }) {
                         <a href="#gifts" className="block py-2 text-gray-600 hover:text-pink-500">Lista de Presentes</a>
                         <a href="#inspiration" className="block py-2 text-gray-600 hover:text-pink-500">Inspiração</a>
                         <button onClick={onLogin} className="block w-full text-left py-2 text-gray-600 hover:text-pink-500">Login</button>
-                        <a href="#" className="mt-4 inline-block w-full text-center bg-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-pink-600 transition duration-300">
+                        <a href="#!" className="mt-4 inline-block w-full text-center bg-pink-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-pink-600 transition duration-300">
                             Criar meu site grátis
                         </a>
                     </div>
@@ -88,7 +88,7 @@ function HeroSection() {
                     <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-gray-200">
                         Crie um site de casamento personalizado, gerencie sua lista de presentes e convidados, tudo em um só lugar.
                     </p>
-                    <a href="#" className="bg-white text-pink-500 font-bold px-8 py-4 rounded-lg hover:bg-gray-100 transition duration-300 text-lg shadow-xl">
+                    <a href="#!" className="bg-white text-pink-500 font-bold px-8 py-4 rounded-lg hover:bg-gray-100 transition duration-300 text-lg shadow-xl">
                         Comece agora, é grátis!
                     </a>
                 </div>
@@ -176,7 +176,7 @@ function FinalCTASection() {
             <div className="container mx-auto px-6 text-center">
                 <h2 className="text-3xl md:text-4xl font-bold font-display text-gray-800">Prontos para dizer "Sim"?</h2>
                 <p className="text-gray-600 mt-2 mb-8 max-w-xl mx-auto">Crie seu site de casamento grátis e comece a planejar o dia mais feliz da sua vida.</p>
-                <a href="#" className="bg-pink-500 text-white font-bold px-8 py-4 rounded-lg hover:bg-pink-600 transition duration-300 text-lg shadow-lg">
+                <a href="#!" className="bg-pink-500 text-white font-bold px-8 py-4 rounded-lg hover:bg-pink-600 transition duration-300 text-lg shadow-lg">
                     Começar o planejamento
                 </a>
             </div>
@@ -197,23 +197,23 @@ function Footer() {
                         <h4 className="font-semibold mb-4">Plataforma</h4>
                         <ul className="space-y-2">
                             <li><a href="#features" className="text-gray-400 hover:text-white">Recursos</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white">Planos e Preços</a></li>
+                            <li><a href="#!" className="text-gray-400 hover:text-white">Planos e Preços</a></li>
                             <li><a href="#inspiration" className="text-gray-400 hover:text-white">Inspiração</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-semibold mb-4">Suporte</h4>
                         <ul className="space-y-2">
-                            <li><a href="#" className="text-gray-400 hover:text-white">FAQ</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white">Contato</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white">Termos de Uso</a></li>
+                            <li><a href="#!" className="text-gray-400 hover:text-white">FAQ</a></li>
+                            <li><a href="#!" className="text-gray-400 hover:text-white">Contato</a></li>
+                            <li><a href="#!" className="text-gray-400 hover:text-white">Termos de Uso</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-semibold mb-4">Siga-nos</h4>
                         <div className="flex space-x-4">
-                            <a href="#" className="text-gray-400 hover:text-white"><FacebookIcon /></a>
-                            <a href="#" className="text-gray-400 hover:text-white"><InstagramIcon /></a>
+                            <a href="#!" className="text-gray-400 hover:text-white"><FacebookIcon /></a>
+                            <a href="#!" className="text-gray-400 hover:text-white"><InstagramIcon /></a>
                         </div>
                     </div>
                 </div>

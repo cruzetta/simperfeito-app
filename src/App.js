@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import LandingPage from './LandingPage';
 import Dashboard from './Dashboard';
+import './index.css'; // Garante que o Tailwind CSS é carregado
 
 // --- Componente Principal da Aplicação ---
 // A única responsabilidade do App.js agora é controlar qual página exibir.
