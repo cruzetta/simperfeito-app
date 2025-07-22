@@ -224,8 +224,8 @@ export default function Dashboard({ onLogout }) {
                 <div className="flex items-center justify-center h-16 border-b">
                     <span className="text-xl font-bold text-gray-800 font-display">Sim, Perfeito</span>
                 </div>
-                <div className="flex flex-col flex-grow p-4">
-                    <nav>
+                <div className="flex flex-col flex-grow">
+                    <nav className="flex-grow px-4 pt-4">
                         <NavLink tabName="overview">
                            <span className="mx-4 font-medium">Visão Geral</span>
                         </NavLink>
@@ -239,8 +239,8 @@ export default function Dashboard({ onLogout }) {
                            <span className="mx-4 font-medium">Fornecedores</span>
                         </NavLink>
                     </nav>
-                    <div className="mt-auto">
-                       <button onClick={onLogout} className="w-full flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700">
+                    <div className="p-4 border-t border-gray-200">
+                       <button onClick={onLogout} className="w-full flex items-center px-4 py-2 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700">
                          <span className="mx-4 font-medium">Sair</span>
                        </button>
                     </div>
