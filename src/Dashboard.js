@@ -63,14 +63,15 @@ function GuestManagement() {
     const handleSendAllInvites = () => {
         const pendingGuests = guests.filter(g => g.status === 'Pendente');
         if (pendingGuests.length === 0) {
-            alert('Não há convites pendentes para enviar.');
+            // Substituindo alert por um método mais visual no futuro
+            console.log('Não há convites pendentes para enviar.');
             return;
         }
         
         setGuests(guests.map(g => 
             g.status === 'Pendente' ? { ...g, status: 'Convite Enviado' } : g
         ));
-        alert(`${pendingGuests.length} convites foram marcados como "Enviado". Em um aplicativo real, isso iniciaria um processo de envio em massa.`);
+        console.log(`${pendingGuests.length} convites foram marcados como "Enviado".`);
     };
 
     const getStatusColor = (status) => {
@@ -221,9 +222,11 @@ export default function Dashboard({ onLogout }) {
         <div className="flex h-screen bg-gray-100 font-sans">
             {/* Sidebar */}
             <div className="hidden md:flex flex-col w-64 bg-white border-r">
-                <div className="flex items-center justify-center h-16 border-b">
+                <div className="flex items-center justify-center h-16 border-b flex-shrink-0">
                     <span className="text-xl font-bold text-gray-800 font-display">Sim, Perfeito</span>
                 </div>
+                
+                {/* Container que permite que a navegação cresça e o logout fique no final */}
                 <div className="flex flex-col flex-grow">
                     <nav className="flex-grow px-4 pt-4">
                         <NavLink tabName="overview">
@@ -239,9 +242,10 @@ export default function Dashboard({ onLogout }) {
                            <span className="mx-4 font-medium">Fornecedores</span>
                         </NavLink>
                     </nav>
+                    {/* Div para o botão de Sair */}
                     <div className="p-4 border-t border-gray-200">
-                       <button onClick={onLogout} className="w-full flex items-center px-4 py-2 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700">
-                         <span className="mx-4 font-medium">Sair</span>
+                       <button onClick={onLogout} className="w-full flex items-center justify-center px-4 py-2 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700">
+                         <span className="font-medium">Sair</span>
                        </button>
                     </div>
                 </div>
