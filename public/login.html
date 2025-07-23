@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sim, Perfeito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md m-4">
+            <h2 id="form-title" class="text-3xl font-bold text-center text-gray-800 font-display mb-2">
+                Acesse seu Painel
+            </h2>
+            <p id="form-subtitle" class="text-center text-gray-600 mb-6">
+                Bem-vindo(a) de volta!
+            </p>
+            
+            <form id="auth-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                        E-mail
+                    </label>
+                    <input
+                        id="email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        required
+                    />
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                        Senha
+                    </label>
+                    <input
+                        id="password"
+                        type="password"
+                        placeholder="********"
+                        class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        required
+                    />
+                </div>
+
+                <div id="error-message" class="hidden bg-red-100 text-red-700 p-3 rounded-lg text-center mb-4"></div>
+
+                <button
+                    type="submit"
+                    id="auth-action-button"
+                    class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300"
+                >
+                    Entrar
+                </button>
+            </form>
+
+            <div class="my-6 flex items-center">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="flex-shrink mx-4 text-gray-500">ou</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <button
+                id="google-login-button"
+                class="w-full flex items-center justify-center bg-white hover:bg-gray-100 text-gray-700 font-semibold py-3 px-4 border border-gray-300 rounded-lg shadow-sm transition duration-300"
+            >
+                <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48">
+                    <path fill="#4285F4" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path>
+                    <path fill="#34A853" d="M43.611 20.083L42 20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l5.657 5.657C40.058 36.318 44 30.657 44 24c0-1.341-.138-2.65-.389-3.917z"></path>
+                    <path fill="#FBBC05" d="M10.222 28.427a11.956 11.956 0 0 1 0-8.854l-5.657-5.657A20.007 20.007 0 0 0 4 24c0 3.518 1.01 6.766 2.657 9.473l5.565-5.046z"></path>
+                    <path fill="#EA4335" d="M24 4c5.268 0 9.954 2.053 13.389 5.447l-5.657 5.657A11.956 11.956 0 0 1 24 12c-6.627 0-12 5.373-12 12s5.373 12 12 12c5.221 0 9.604-3.344 11.303-8H24v-8h19.611c.251 1.267.389 2.576.389 3.917c0 6.657-3.942 12.318-9.268 15.447l-5.657-5.657A11.956 11.956 0 0 1 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12z"></path>
+                </svg>
+                Entrar com Google
+            </button>
+
+            <p class="text-center text-gray-600 text-sm mt-6">
+                <span id="toggle-text">Não tem uma conta?</span>
+                <button
+                    id="toggle-mode-button"
+                    class="font-bold text-pink-500 hover:text-pink-700 ml-1"
+                >
+                    Registre-se
+                </button>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Firebase SDKs -->
+    <!-- Adicionaremos os scripts do Firebase aqui no futuro -->
+
+</body>
+</html>
