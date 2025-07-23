@@ -99,8 +99,95 @@
         </div>
     </div>
     
-    <!-- Firebase SDKs -->
-    <!-- Adicionaremos os scripts do Firebase aqui no futuro -->
+    <!-- Scripts do Firebase e da nossa página -->
+    <script type="module">
+        // Importa as funções do nosso arquivo de configuração
+        import { 
+            auth, 
+            onAuthStateChanged,
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            googleProvider, 
+            signInWithPopup,
+            getFriendlyErrorMessage
+        } from './auth.js';
+
+        // Verifica se o usuário já está logado. Se estiver, redireciona para o painel.
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = '/areadousuario.html';
+            }
+        });
+
+        // Pega os elementos da página que vamos usar
+        const authForm = document.getElementById('auth-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const googleLoginButton = document.getElementById('google-login-button');
+        const errorMessageDiv = document.getElementById('error-message');
+        
+        // Elementos para alternar entre Login e Registro
+        const toggleModeButton = document.getElementById('toggle-mode-button');
+        const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
+        const authActionButton = document.getElementById('auth-action-button');
+        const toggleText = document.getElementById('toggle-text');
+
+        let isRegistering = false; // Controla se estamos em modo de registro ou login
+
+        // Lógica para o formulário de E-mail/Senha
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMessageDiv.classList.add('hidden');
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            try {
+                if (isRegistering) {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+                // Se der certo, o onAuthStateChanged vai redirecionar
+            } catch (error) {
+                errorMessageDiv.textContent = getFriendlyErrorMessage(error.code);
+                errorMessageDiv.classList.remove('hidden');
+            }
+        });
+
+        // Lógica para o botão do Google
+        googleLoginButton.addEventListener('click', async () => {
+            errorMessageDiv.classList.add('hidden');
+            try {
+                await signInWithPopup(auth, googleProvider);
+                // Se der certo, o onAuthStateChanged vai redirecionar
+            } catch (error) {
+                errorMessageDiv.textContent = getFriendlyErrorMessage(error.code);
+                errorMessageDiv.classList.remove('hidden');
+            }
+        });
+
+        // Lógica para o botão de alternar entre Login e Registro
+        toggleModeButton.addEventListener('click', () => {
+            isRegistering = !isRegistering;
+            errorMessageDiv.classList.add('hidden');
+
+            if (isRegistering) {
+                formTitle.textContent = 'Crie sua Conta';
+                formSubtitle.textContent = 'Para começar a planejar seu sonho.';
+                authActionButton.textContent = 'Registrar';
+                toggleText.textContent = 'Já tem uma conta?';
+                toggleModeButton.textContent = 'Faça login';
+            } else {
+                formTitle.textContent = 'Acesse seu Painel';
+                formSubtitle.textContent = 'Bem-vindo(a) de volta!';
+                authActionButton.textContent = 'Entrar';
+                toggleText.textContent = 'Não tem uma conta?';
+                toggleModeButton.textContent = 'Registre-se';
+            }
+        });
+
+    </script>
 
 </body>
 </html>

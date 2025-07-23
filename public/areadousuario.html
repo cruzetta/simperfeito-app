@@ -123,8 +123,46 @@
         <p class="text-xl text-gray-600">Verificando sua autenticação...</p>
     </div>
 
-    <!-- Firebase SDKs e nosso script de autenticação -->
-    <!-- Adicionaremos os scripts aqui no próximo passo -->
+    <!-- Scripts do Firebase e da nossa página -->
+    <script type="module">
+        // Importa as funções do nosso arquivo de configuração
+        import { auth, onAuthStateChanged, signOut } from './auth.js';
+
+        const dashboardContent = document.getElementById('dashboard-content');
+        const loadingState = document.getElementById('loading-state');
+        const logoutButton = document.getElementById('logout-button');
+        const userDisplayName = document.getElementById('user-display-name');
+        const userDisplayNameMobile = document.getElementById('user-display-name-mobile');
+
+        // Fica "ouvindo" o status do login
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Se TEM um usuário, mostra o painel
+                loadingState.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+
+                // Mostra o e-mail do usuário (ou nome, se disponível)
+                const displayName = user.displayName || user.email;
+                userDisplayName.textContent = displayName;
+                userDisplayNameMobile.textContent = displayName;
+
+            } else {
+                // Se NÃO TEM um usuário, chuta ele para a página de login
+                window.location.href = '/login.html';
+            }
+        });
+
+        // Adiciona a funcionalidade ao botão de sair
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                // Se der certo, o onAuthStateChanged vai pegar a mudança e redirecionar
+                window.location.href = '/index.html';
+            } catch (error) {
+                console.error("Erro ao fazer logout:", error);
+            }
+        });
+    </script>
 
 </body>
 </html>
