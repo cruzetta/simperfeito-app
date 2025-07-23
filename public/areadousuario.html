@@ -9,28 +9,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .font-display {
-            font-family: 'Playfair Display', serif;
-        }
-        /* Animação de fade-in para os cartões e modal */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        .modal-fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .modal-fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        /* Estilo para o botão de filtro ativo */
+        .filter-button-active {
+            background-color: #EC4899; /* pink-500 */
+            color: white;
         }
     </style>
 </head>
 <body class="bg-gray-100">
 
-    <!-- Conteúdo principal do Dashboard, inicialmente escondido -->
+    <!-- Conteúdo principal do Dashboard -->
     <div id="dashboard-content" class="hidden">
         <div class="flex h-screen bg-gray-100 font-sans">
             <!-- Sidebar -->
@@ -52,45 +48,39 @@
                     <span class="text-xl font-bold text-gray-800 font-display">Lista de Convidados</span>
                     <div class="flex items-center space-x-4">
                         <p class="text-sm text-gray-600 hidden sm:block">Olá, <strong id="user-display-name-header"></strong></p>
-                        <button id="logout-button-header" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition duration-300 text-sm">
-                            Sair
-                        </button>
+                        <button id="logout-button-header" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600">Sair</button>
                     </div>
                 </header>
                 <main class="p-4 sm:p-6 md:p-8">
                     
                     <!-- Cards de Resumo -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                            <h3 class="text-sm font-medium text-gray-500">Famílias</h3>
-                            <p id="total-families" class="text-2xl font-bold text-gray-800">0</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                            <h3 class="text-sm font-medium text-gray-500">Adultos</h3>
-                            <p id="total-adults" class="text-2xl font-bold text-blue-600">0</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                            <h3 class="text-sm font-medium text-gray-500">Adolescentes</h3>
-                            <p id="total-teens" class="text-2xl font-bold text-yellow-600">0</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                            <h3 class="text-sm font-medium text-gray-500">Crianças</h3>
-                            <p id="total-children" class="text-2xl font-bold text-green-600">0</p>
-                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border"><h3 class="text-sm font-medium text-gray-500">Famílias</h3><p id="total-families" class="text-2xl font-bold text-gray-800">0</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border"><h3 class="text-sm font-medium text-gray-500">Adultos</h3><p id="total-adults" class="text-2xl font-bold text-blue-600">0</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border"><h3 class="text-sm font-medium text-gray-500">Adolescentes</h3><p id="total-teens" class="text-2xl font-bold text-yellow-600">0</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border"><h3 class="text-sm font-medium text-gray-500">Crianças</h3><p id="total-children" class="text-2xl font-bold text-green-600">0</p></div>
                     </div>
+
+                    <!-- Filtros de Relação -->
+                    <div id="relationship-filters" class="mb-6 flex flex-wrap gap-2"></div>
 
                     <!-- Formulário para Adicionar Família -->
                     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Adicionar Nova Família</h3>
                         <form id="add-family-form">
-                            <div class="mb-4">
-                                <label for="family-name" class="block text-sm font-medium text-gray-700 mb-1">Nome da Família</label>
-                                <input type="text" id="family-name" placeholder="Ex: Família Silva" class="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500" required />
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="family-name" class="block text-sm font-medium text-gray-700 mb-1">Nome da Família</label>
+                                    <input type="text" id="family-name" placeholder="Ex: Família Silva" class="w-full p-2 border border-gray-300 rounded-md" required />
+                                </div>
+                                <div id="relationship-container">
+                                    <!-- O seletor de relação será inserido aqui pelo JS -->
+                                </div>
                             </div>
                             <div id="members-container" class="space-y-3 mb-4"></div>
-                            <button type="button" id="add-member-button" class="text-sm text-pink-600 font-semibold hover:text-pink-800 transition duration-200 mb-4">+ Adicionar membro</button>
+                            <button type="button" id="add-member-button" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar membro</button>
                             <div id="form-error-message" class="hidden bg-red-100 text-red-700 p-3 rounded-lg text-center mb-4 text-sm"></div>
-                            <button type="submit" class="w-full flex items-center justify-center bg-pink-500 text-white font-semibold px-4 py-3 rounded-lg hover:bg-pink-600 transition duration-300">
+                            <button type="submit" class="w-full flex items-center justify-center bg-pink-500 text-white font-semibold px-4 py-3 rounded-lg hover:bg-pink-600">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
                                 Salvar Família
                             </button>
@@ -109,17 +99,38 @@
         </div>
     </div>
 
-    <!-- Modal de Edição -->
-    <div id="edit-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-30 flex items-center justify-center">
+    <!-- Modal de Seleção de Evento -->
+    <div id="event-type-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 h-full w-full z-40 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 modal-fade-in">
+            <h3 class="text-2xl font-bold text-gray-800 font-display mb-2">Bem-vindo(a)!</h3>
+            <p class="text-gray-600 mb-6">Para começar, selecione o tipo do seu evento. Isso ajudará a organizar os seus convidados.</p>
+            <form id="event-type-form">
+                <select id="event-type-select" class="w-full p-3 border border-gray-300 rounded-md mb-6">
+                    <option value="casamento">Casamento</option>
+                    <option value="aniversario_infantil">Aniversário Infantil</option>
+                    <option value="formatura">Formatura</option>
+                    <option value="bodas">Bodas</option>
+                    <option value="outro">Outro Evento</option>
+                </select>
+                <button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-600">Confirmar Evento</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Outros Modais (Edição e Confirmação) -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-30 flex items-center justify-center overflow-y-auto p-4">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg mx-4 modal-fade-in">
             <form id="edit-family-form">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Editar Família</h3>
                 <input type="hidden" id="edit-family-id">
-                <div class="mb-4">
-                    <label for="edit-family-name" class="block text-sm font-medium text-gray-700 mb-1">Nome da Família</label>
-                    <input type="text" id="edit-family-name" class="w-full p-2 border border-gray-300 rounded-md" required>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="edit-family-name" class="block text-sm font-medium text-gray-700 mb-1">Nome da Família</label>
+                        <input type="text" id="edit-family-name" class="w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div id="edit-relationship-container"></div>
                 </div>
-                <div id="edit-members-container" class="space-y-3 mb-4"></div>
+                <div id="edit-members-container" class="space-y-3 mb-4 max-h-60 overflow-y-auto pr-2"></div>
                 <button type="button" id="edit-add-member-button" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar membro</button>
                 <div id="edit-form-error-message" class="hidden bg-red-100 text-red-700 p-3 rounded-lg text-center mb-4 text-sm"></div>
                 <div class="mt-4 flex justify-end space-x-2">
@@ -129,9 +140,7 @@
             </form>
         </div>
     </div>
-
-    <!-- Modal de Confirmação para Apagar -->
-    <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-4 modal-fade-in">
             <h3 class="text-lg font-medium text-gray-900">Confirmar Ação</h3>
             <p id="modal-message" class="mt-2 text-sm text-gray-600">Tem a certeza?</p>
@@ -144,13 +153,13 @@
 
     <!-- Tela de Carregamento -->
     <div id="loading-state" class="min-h-screen flex items-center justify-center">
-        <p class="text-xl text-gray-600">Verificando sua autenticação...</p>
+        <p class="text-xl text-gray-600">A carregar os seus dados...</p>
     </div>
 
-    <!-- Scripts do Firebase e da nossa página -->
+    <!-- Scripts -->
     <script type="module">
         import { auth, onAuthStateChanged, signOut, db } from './auth.js';
-        import { collection, addDoc, onSnapshot, query, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { collection, addDoc, onSnapshot, query, doc, deleteDoc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         // --- ELEMENTOS DA UI ---
         const dashboardContent = document.getElementById('dashboard-content');
@@ -160,13 +169,20 @@
         const userDisplayNameHeader = document.getElementById('user-display-name-header');
         const familyListContainer = document.getElementById('family-list-container');
         const noFamiliesMessage = document.getElementById('no-families-message');
-        
+        const relationshipFiltersContainer = document.getElementById('relationship-filters');
+
         // --- ELEMENTOS DO FORMULÁRIO DE ADIÇÃO ---
         const addFamilyForm = document.getElementById('add-family-form');
         const familyNameInput = document.getElementById('family-name');
         const membersContainer = document.getElementById('members-container');
         const addMemberButton = document.getElementById('add-member-button');
         const formErrorMessage = document.getElementById('form-error-message');
+        const relationshipContainer = document.getElementById('relationship-container');
+
+        // --- ELEMENTOS DO MODAL DE EVENTO ---
+        const eventTypeModal = document.getElementById('event-type-modal');
+        const eventTypeForm = document.getElementById('event-type-form');
+        const eventTypeSelect = document.getElementById('event-type-select');
 
         // --- ELEMENTOS DO MODAL DE EDIÇÃO ---
         const editModal = document.getElementById('edit-modal');
@@ -177,6 +193,7 @@
         const editAddMemberButton = document.getElementById('edit-add-member-button');
         const editFormErrorMessage = document.getElementById('edit-form-error-message');
         const editModalCancelButton = document.getElementById('edit-modal-cancel-button');
+        const editRelationshipContainer = document.getElementById('edit-relationship-container');
 
         // --- ELEMENTOS DO MODAL DE CONFIRMAÇÃO ---
         const confirmModal = document.getElementById('confirm-modal');
@@ -192,19 +209,26 @@
 
         let currentUser;
         let allFamilies = [];
+        let eventConfig = null;
         let confirmCallback = null;
+        let currentFilter = 'todos';
+
+        const eventDefinitions = {
+            casamento: { label: 'Casamento', relations: ['Família da Noiva', 'Família do Noivo', 'Amigos da Noiva', 'Amigos do Noivo'] },
+            aniversario_infantil: { label: 'Aniversário Infantil', relations: ['Família da Mãe', 'Família do Pai', 'Amigos'] },
+            formatura: { label: 'Formatura', relations: ['Família do Formando(a)', 'Amigos do Formando(a)'] },
+            bodas: { label: 'Bodas', relations: ['Família da Esposa', 'Família do Marido', 'Amigos do Casal'] },
+            outro: { label: 'Outro Evento', relations: ['Convidados'] }
+        };
 
         // --- LÓGICA DE AUTENTICAÇÃO E GERAL ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                loadingState.classList.add('hidden');
-                dashboardContent.classList.remove('hidden');
                 const displayName = user.displayName || user.email;
                 userDisplayName.textContent = displayName;
                 userDisplayNameHeader.textContent = displayName;
-                listenForFamilies();
-                addMemberField(membersContainer);
+                checkEventConfig();
             } else {
                 window.location.href = '/login.html';
             }
@@ -214,6 +238,77 @@
             try { await signOut(auth); window.location.href = '/index.html'; } 
             catch (error) { console.error("Erro ao fazer logout:", error); }
         });
+
+        // --- LÓGICA DE CONFIGURAÇÃO DO EVENTO ---
+        async function checkEventConfig() {
+            const configRef = doc(db, 'users', currentUser.uid, 'config', 'event');
+            const configSnap = await getDoc(configRef);
+
+            if (configSnap.exists()) {
+                eventConfig = configSnap.data();
+                initializePage();
+            } else {
+                loadingState.classList.add('hidden');
+                eventTypeModal.classList.remove('hidden');
+            }
+        }
+
+        eventTypeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const selectedType = eventTypeSelect.value;
+            const config = { type: selectedType, ...eventDefinitions[selectedType] };
+            const configRef = doc(db, 'users', currentUser.uid, 'config', 'event');
+            await setDoc(configRef, config);
+            eventConfig = config;
+            eventTypeModal.classList.add('hidden');
+            initializePage();
+        });
+
+        function initializePage() {
+            loadingState.classList.add('hidden');
+            dashboardContent.classList.remove('hidden');
+            setupDynamicUI();
+            listenForFamilies();
+        }
+        
+        function setupDynamicUI() {
+            // Configura o formulário de adição
+            relationshipContainer.innerHTML = createRelationshipSelector(eventConfig.relations);
+            // Configura o formulário de edição
+            editRelationshipContainer.innerHTML = createRelationshipSelector(eventConfig.relations, 'edit-relationship-select');
+            // Configura os botões de filtro
+            createFilterButtons();
+        }
+        
+        function createRelationshipSelector(relations, id = 'relationship-select') {
+             const options = relations.map(r => `<option value="${r}">${r}</option>`).join('');
+             return `
+                <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">Relação/Vínculo</label>
+                <select id="${id}" class="w-full p-2 border border-gray-300 rounded-md" required>
+                    ${options}
+                </select>`;
+        }
+
+        function createFilterButtons() {
+            relationshipFiltersContainer.innerHTML = '';
+            const relations = ['Todos', ...eventConfig.relations];
+            relations.forEach(relation => {
+                const button = document.createElement('button');
+                button.textContent = relation;
+                button.dataset.filter = relation.toLowerCase();
+                button.className = 'px-3 py-1 border rounded-full text-sm font-medium transition-colors';
+                if (button.dataset.filter === 'todos') {
+                    button.classList.add('filter-button-active');
+                }
+                button.addEventListener('click', () => {
+                    currentFilter = button.dataset.filter === 'todos' ? 'todos' : relation;
+                    document.querySelectorAll('#relationship-filters button').forEach(btn => btn.classList.remove('filter-button-active'));
+                    button.classList.add('filter-button-active');
+                    renderFamilies(allFamilies);
+                });
+                relationshipFiltersContainer.appendChild(button);
+            });
+        }
 
         // --- LÓGICA DO FORMULÁRIO (CRIAR E EDITAR) ---
         const createMemberField = (parentContainer) => {
@@ -227,7 +322,7 @@
                     <option value="crianca">Criança</option>
                 </select>
                 <button type="button" class="remove-member-button text-red-500 hover:text-red-700 p-1 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                    <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
                 </button>
             `;
             div.querySelector('.remove-member-button').addEventListener('click', () => {
@@ -245,6 +340,7 @@
             e.preventDefault();
             formErrorMessage.classList.add('hidden');
             const familyName = familyNameInput.value.trim();
+            const relationship = document.getElementById('relationship-select').value;
             const members = Array.from(membersContainer.querySelectorAll('.member-field')).map(field => ({
                 name: field.querySelector('input[type="text"]').value.trim(),
                 type: field.querySelector('select').value
@@ -257,7 +353,7 @@
             }
 
             try {
-                await addDoc(collection(db, 'users', currentUser.uid, 'families'), { name: familyName, members, createdAt: new Date() });
+                await addDoc(collection(db, 'users', currentUser.uid, 'families'), { name: familyName, relationship, members, createdAt: new Date() });
                 addFamilyForm.reset();
                 membersContainer.innerHTML = '';
                 addMemberField(membersContainer);
@@ -278,52 +374,53 @@
         };
 
         const renderFamilies = (families) => {
+            const filteredFamilies = families.filter(f => currentFilter === 'todos' || f.relationship === currentFilter);
             familyListContainer.innerHTML = '';
-            noFamiliesMessage.classList.toggle('hidden', families.length > 0);
+            noFamiliesMessage.classList.toggle('hidden', filteredFamilies.length > 0);
+            
             let adultCount = 0, teenCount = 0, childCount = 0;
-
-            families.forEach(family => {
+            
+            filteredFamilies.forEach(family => {
                 const card = document.createElement('div');
-                card.className = 'bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col fade-in';
+                card.className = 'bg-white p-5 rounded-lg shadow-sm border flex flex-col fade-in';
                 const membersHtml = family.members.map((member, index) => {
                     let badgeClass = '';
                     if (member.type === 'adulto') { adultCount++; badgeClass = 'bg-blue-100 text-blue-800'; }
                     else if (member.type === 'adolescente') { teenCount++; badgeClass = 'bg-yellow-100 text-yellow-800'; }
                     else { childCount++; badgeClass = 'bg-green-100 text-green-800'; }
                     
-                    return `
-                        <li class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                            <span class="text-gray-700">${member.name}</span>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-medium px-2 py-1 rounded-full ${badgeClass}">${member.type}</span>
-                                <button data-family-id="${family.id}" data-member-index="${index}" class="delete-member-button text-gray-400 hover:text-red-600 p-1">
-                                    <svg class="h-4 w-4 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
-                                </button>
-                            </div>
-                        </li>`;
+                    return `<li class="flex justify-between items-center py-2 border-b last:border-b-0"><span class="text-gray-700">${member.name}</span><div class="flex items-center gap-2"><span class="text-xs font-medium px-2 py-1 rounded-full ${badgeClass}">${member.type}</span><button data-family-id="${family.id}" data-member-index="${index}" class="delete-member-button text-gray-400 hover:text-red-600 p-1"><svg class="h-4 w-4 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button></div></li>`;
                 }).join('');
+                
                 card.innerHTML = `
                     <div class="flex-grow">
                         <div class="flex justify-between items-start mb-3">
-                            <h4 class="text-lg font-bold text-gray-800">${family.name}</h4>
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-800">${family.name}</h4>
+                                <span class="text-xs font-semibold px-2 py-1 rounded-full bg-pink-100 text-pink-800">${family.relationship}</span>
+                            </div>
                             <div class="flex items-center space-x-2">
-                                <button data-family-id="${family.id}" class="edit-family-button text-gray-400 hover:text-blue-600">
-                                    <svg class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                                </button>
-                                <button data-family-id="${family.id}" class="delete-family-button text-gray-400 hover:text-red-600">
-                                    <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                                </button>
+                                <button data-family-id="${family.id}" class="edit-family-button text-gray-400 hover:text-blue-600"><svg class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                                <button data-family-id="${family.id}" class="delete-family-button text-gray-400 hover:text-red-600"><svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>
                             </div>
                         </div>
                         <ul class="mb-4">${membersHtml}</ul>
                     </div>
-                    <div class="text-xs text-gray-400 pt-2 border-t border-gray-100">Total: ${family.members.length} membro(s)</div>`;
+                    <div class="text-xs text-gray-400 pt-2 border-t">Total: ${family.members.length} membro(s)</div>`;
                 familyListContainer.appendChild(card);
             });
+            
+            // Atualiza contadores totais (não filtrados)
+            let totalAdults = 0, totalTeens = 0, totalChildren = 0;
+            families.forEach(f => f.members.forEach(m => {
+                if (m.type === 'adulto') totalAdults++;
+                else if (m.type === 'adolescente') totalTeens++;
+                else totalChildren++;
+            }));
             totalFamiliesEl.textContent = families.length;
-            totalAdultsEl.textContent = adultCount;
-            totalTeensEl.textContent = teenCount;
-            totalChildrenEl.textContent = childCount;
+            totalAdultsEl.textContent = totalAdults;
+            totalTeensEl.textContent = totalTeens;
+            totalChildrenEl.textContent = totalChildren;
         };
         
         // --- LÓGICA DE EVENTOS E MODAIS ---
@@ -347,6 +444,7 @@
             if (!family) return;
             editFamilyIdInput.value = family.id;
             editFamilyNameInput.value = family.name;
+            document.getElementById('edit-relationship-select').value = family.relationship;
             editMembersContainer.innerHTML = '';
             family.members.forEach(member => {
                 const field = addMemberField(editMembersContainer);
@@ -391,6 +489,7 @@
             editFormErrorMessage.classList.add('hidden');
             const familyId = editFamilyIdInput.value;
             const familyName = editFamilyNameInput.value.trim();
+            const relationship = document.getElementById('edit-relationship-select').value;
             const members = Array.from(editMembersContainer.querySelectorAll('.member-field')).map(field => ({
                 name: field.querySelector('input[type="text"]').value.trim(),
                 type: field.querySelector('select').value
@@ -404,7 +503,7 @@
 
             try {
                 const docRef = doc(db, 'users', currentUser.uid, 'families', familyId);
-                await updateDoc(docRef, { name: familyName, members: members });
+                await updateDoc(docRef, { name: familyName, relationship, members });
                 closeEditModal();
             } catch (error) {
                 console.error("Erro ao atualizar família:", error);
@@ -412,7 +511,6 @@
                 editFormErrorMessage.classList.remove('hidden');
             }
         });
-
     </script>
 </body>
 </html>
