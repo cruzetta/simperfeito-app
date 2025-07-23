@@ -4,10 +4,10 @@
   "description": "A static HTML and JavaScript site.",
   "main": "index.js",
   "scripts": {
-    "start": "serve public"
+    "start": "http-server public"
   },
   "dependencies": {
-    "serve": "^14.2.3"
+    "http-server": "^14.1.1"
   },
   "author": "",
   "license": "ISC"
