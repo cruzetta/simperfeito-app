@@ -22,23 +22,22 @@
     <!-- Conteúdo principal do Dashboard, inicialmente escondido -->
     <div id="dashboard-content" class="hidden">
         <div class="flex h-screen bg-gray-100 font-sans">
-            <!-- Sidebar -->
+            <!-- Sidebar (visível em telas médias e maiores) -->
             <div class="hidden md:flex flex-col w-64 bg-white border-r h-screen">
                 <!-- Header da Sidebar -->
                 <div class="flex items-center justify-center h-16 border-b flex-shrink-0">
                     <span class="text-xl font-bold text-gray-800 font-display">Sim, Perfeito</span>
                 </div>
 
-                <!-- Área de Navegação (com rolagem se necessário) -->
+                <!-- Área de Navegação -->
                 <nav class="flex-grow px-4 pt-4 overflow-y-auto">
                     <p class="text-gray-700 mx-4 my-2">Olá, <strong id="user-display-name"></strong>!</p>
                     <a href="#" class="w-full text-left flex items-center px-4 py-2 mt-2 text-gray-600 bg-gray-200 font-semibold rounded-md">
                        <span class="mx-4 font-medium">Lista de Convidados</span>
                     </a>
-                    <!-- Outros links podem ser adicionados aqui no futuro -->
                 </nav>
 
-                <!-- Botão de Sair (fixo no final) -->
+                <!-- Botão de Sair (fixo no final da sidebar) -->
                 <div class="p-4 border-t border-gray-200 flex-shrink-0">
                    <button id="logout-button" class="w-full flex items-center justify-center px-4 py-2 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700">
                      <span class="font-medium">Sair</span>
@@ -49,9 +48,17 @@
 
             <!-- Conteúdo Principal -->
             <div class="flex flex-col flex-1 overflow-y-auto">
+                 <!-- Cabeçalho do Conteúdo Principal -->
                  <header class="flex items-center justify-between h-16 px-6 bg-white border-b">
                     <span class="text-xl font-bold text-gray-800 font-display">Lista de Convidados</span>
-                    <p class="text-sm text-gray-600 md:hidden">Logado como <strong id="user-display-name-mobile"></strong></p>
+                    
+                    <!-- Informações do usuário e botão Sair para Mobile -->
+                    <div class="flex items-center space-x-4 md:hidden">
+                        <p class="text-sm text-gray-600">Olá, <strong id="user-display-name-mobile"></strong></p>
+                        <button id="logout-button-mobile" class="text-sm font-medium text-pink-600 hover:text-pink-800 focus:outline-none">
+                            Sair
+                        </button>
+                    </div>
                 </header>
                 <main class="p-4 sm:p-6 md:p-8">
                     
@@ -132,9 +139,11 @@
         // Importa as funções do nosso arquivo de configuração
         import { auth, onAuthStateChanged, signOut } from './auth.js';
 
+        // Elementos da UI
         const dashboardContent = document.getElementById('dashboard-content');
         const loadingState = document.getElementById('loading-state');
         const logoutButton = document.getElementById('logout-button');
+        const logoutButtonMobile = document.getElementById('logout-button-mobile'); // Novo botão
         const userDisplayName = document.getElementById('user-display-name');
         const userDisplayNameMobile = document.getElementById('user-display-name-mobile');
 
@@ -151,21 +160,28 @@
                 userDisplayNameMobile.textContent = displayName;
 
             } else {
-                // Se NÃO TEM um usuário, chuta ele para a página de login
+                // Se NÃO TEM um usuário, redireciona para a página de login
                 window.location.href = '/login.html';
             }
         });
 
-        // Adiciona a funcionalidade ao botão de sair
-        logoutButton.addEventListener('click', async () => {
+        // Função para lidar com o logout para evitar repetição de código
+        const handleLogout = async () => {
             try {
                 await signOut(auth);
-                // Se der certo, o onAuthStateChanged vai pegar a mudança e redirecionar
+                // Se der certo, o onAuthStateChanged vai pegar a mudança e redirecionar para o login
+                // Mas para garantir uma saída imediata, redirecionamos para a home
                 window.location.href = '/index.html';
             } catch (error) {
                 console.error("Erro ao fazer logout:", error);
+                // Opcional: Mostrar uma mensagem de erro para o usuário
             }
-        });
+        };
+
+        // Adiciona a funcionalidade aos dois botões de sair (desktop e mobile)
+        logoutButton.addEventListener('click', handleLogout);
+        logoutButtonMobile.addEventListener('click', handleLogout);
+
     </script>
 
 </body>
