@@ -10,8 +10,18 @@ import {
     GoogleAuthProvider,
     signInWithPopup
 } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+// IMPORTAÇÕES DO FIRESTORE (BASE DE DADOS)
+import { 
+    getFirestore,
+    collection,
+    addDoc,
+    onSnapshot,
+    query,
+    where
+} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// A configuração do seu projeto Firebase que você já me passou
+
+// A configuração do seu projeto Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY",
   authDomain: "simperfeito.firebaseapp.com",
@@ -22,10 +32,15 @@ const firebaseConfig = {
   measurementId: "G-CB5X7JY7Y6"
 };
 
-// Inicializa o Firebase e o serviço de autenticação
+// Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
+// Inicializa a Autenticação
 const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider(); // Provedor de login do Google
+// Inicializa o provedor do Google
+const googleProvider = new GoogleAuthProvider();
+// INICIALIZA O FIRESTORE (BASE DE DADOS)
+const db = getFirestore(app);
+
 
 // Função para traduzir os erros do Firebase para mensagens mais fáceis de entender
 const getFriendlyErrorMessage = (code) => {
@@ -49,6 +64,7 @@ const getFriendlyErrorMessage = (code) => {
 
 // Disponibiliza (exporta) as funções e variáveis do Firebase para que outros scripts possam usá-las
 export { 
+    // Funções de Autenticação
     auth, 
     onAuthStateChanged, 
     signOut, 
@@ -56,5 +72,12 @@ export {
     signInWithEmailAndPassword,
     googleProvider,
     signInWithPopup,
-    getFriendlyErrorMessage
+    getFriendlyErrorMessage,
+    // Funções do Firestore (Base de dados)
+    db,
+    collection,
+    addDoc,
+    onSnapshot,
+    query,
+    where
 };

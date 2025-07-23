@@ -1,0 +1,11 @@
+{
+  "name": "simperfeito-static-site",
+  "version": "1.0.0",
+  "description": "A static HTML and JavaScript site.",
+  "main": "index.js",
+  "scripts": {
+    "start": "echo 'No start script needed for static site.' && exit 0"
+  },
+  "author": "",
+  "license": "ISC"
+}
