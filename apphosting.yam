@@ -2,5 +2,5 @@
 # Este ficheiro dá instruções explícitas ao Firebase App Hosting.
 runtime: nodejs20
 run:
-  # Comando para iniciar o servidor e servir os ficheiros da pasta 'public'.
-  command: http-server public
+  # Executa o comando 'start' definido no package.json
+  command: npm start
