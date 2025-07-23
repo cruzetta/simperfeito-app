@@ -37,12 +37,7 @@
                     </a>
                 </nav>
 
-                <!-- Botão de Sair (fixo no final da sidebar) -->
-                <div class="p-4 border-t border-gray-200 flex-shrink-0">
-                   <button id="logout-button" class="w-full flex items-center justify-center px-4 py-2 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700">
-                     <span class="font-medium">Sair</span>
-                   </button>
-                </div>
+                <!-- O botão de sair foi movido para o cabeçalho principal -->
             </div>
 
 
@@ -50,13 +45,12 @@
             <div class="flex flex-col flex-1 overflow-y-auto">
                  <!-- Cabeçalho do Conteúdo Principal -->
                  <header class="flex items-center justify-between h-16 px-6 bg-white border-b">
-                    <!-- TÍTULO DE TESTE -->
-                    <span class="text-xl font-bold text-red-500 font-display">TESTE DE DEPLOY - Título Alterado</span>
+                    <span class="text-xl font-bold text-gray-800 font-display">Lista de Convidados</span>
                     
-                    <!-- Informações do usuário e botão Sair para Mobile -->
-                    <div class="flex items-center space-x-4 md:hidden">
-                        <p class="text-sm text-gray-600">Olá, <strong id="user-display-name-mobile"></strong></p>
-                        <button id="logout-button-mobile" class="text-sm font-medium text-pink-600 hover:text-pink-800 focus:outline-none">
+                    <!-- Informações do usuário e botão Sair (agora sempre visível) -->
+                    <div class="flex items-center space-x-4">
+                        <p class="text-sm text-gray-600 hidden sm:block">Olá, <strong id="user-display-name-header"></strong></p>
+                        <button id="logout-button-header" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition duration-300 text-sm">
                             Sair
                         </button>
                     </div>
@@ -143,10 +137,9 @@
         // Elementos da UI
         const dashboardContent = document.getElementById('dashboard-content');
         const loadingState = document.getElementById('loading-state');
-        const logoutButton = document.getElementById('logout-button');
-        const logoutButtonMobile = document.getElementById('logout-button-mobile'); // Novo botão
+        const logoutButtonHeader = document.getElementById('logout-button-header');
         const userDisplayName = document.getElementById('user-display-name');
-        const userDisplayNameMobile = document.getElementById('user-display-name-mobile');
+        const userDisplayNameHeader = document.getElementById('user-display-name-header');
 
         // Fica "ouvindo" o status do login
         onAuthStateChanged(auth, (user) => {
@@ -155,10 +148,10 @@
                 loadingState.classList.add('hidden');
                 dashboardContent.classList.remove('hidden');
 
-                // Mostra o e-mail do usuário (ou nome, se disponível)
+                // Mostra o e-mail do usuário (ou nome, se disponível) em ambos os locais
                 const displayName = user.displayName || user.email;
                 userDisplayName.textContent = displayName;
-                userDisplayNameMobile.textContent = displayName;
+                userDisplayNameHeader.textContent = displayName;
 
             } else {
                 // Se NÃO TEM um usuário, redireciona para a página de login
@@ -166,22 +159,18 @@
             }
         });
 
-        // Função para lidar com o logout para evitar repetição de código
+        // Função para lidar com o logout
         const handleLogout = async () => {
             try {
                 await signOut(auth);
-                // Se der certo, o onAuthStateChanged vai pegar a mudança e redirecionar para o login
-                // Mas para garantir uma saída imediata, redirecionamos para a home
                 window.location.href = '/index.html';
             } catch (error) {
                 console.error("Erro ao fazer logout:", error);
-                // Opcional: Mostrar uma mensagem de erro para o usuário
             }
         };
 
-        // Adiciona a funcionalidade aos dois botões de sair (desktop e mobile)
-        logoutButton.addEventListener('click', handleLogout);
-        logoutButtonMobile.addEventListener('click', handleLogout);
+        // Adiciona a funcionalidade ao botão de sair do cabeçalho
+        logoutButtonHeader.addEventListener('click', handleLogout);
 
     </script>
 
