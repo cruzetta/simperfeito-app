@@ -4,7 +4,10 @@
   "description": "A static HTML and JavaScript site.",
   "main": "index.js",
   "scripts": {
-    "start": "echo 'No start script needed for static site.' && exit 0"
+    "start": "serve public"
+  },
+  "dependencies": {
+    "serve": "^14.2.3"
   },
   "author": "",
   "license": "ISC"
