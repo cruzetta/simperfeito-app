@@ -44,18 +44,22 @@ const db = getFirestore(app);
 
 // Função para traduzir os erros do Firebase para mensagens mais fáceis de entender
 const getFriendlyErrorMessage = (code) => {
+    console.log("Firebase Auth Error Code:", code); // Adicionado para depuração
     switch (code) {
         case 'auth/invalid-email':
             return 'O formato do e-mail é inválido.';
         case 'auth/user-not-found':
         case 'auth/wrong-password':
-            return 'E-mail ou senha incorretos.';
+        case 'auth/invalid-credential': // Caso adicionado para credenciais inválidas
+            return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.';
         case 'auth/email-already-in-use':
             return 'Este e-mail já está em uso.';
         case 'auth/weak-password':
             return 'A senha precisa ter pelo menos 6 caracteres.';
         case 'auth/popup-closed-by-user':
             return 'A janela de login com Google foi fechada.';
+        case 'auth/too-many-requests': // Caso adicionado para múltiplas tentativas
+            return 'O acesso a esta conta foi temporariamente desativado devido a muitas tentativas de login. Tente novamente mais tarde ou redefina sua senha.';
         default:
             console.error("Código de erro não tratado:", code);
             return 'Ocorreu um erro desconhecido. Tente novamente.';
