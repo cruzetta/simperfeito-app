@@ -50,19 +50,23 @@ const getFriendlyErrorMessage = (code) => {
             return 'O formato do e-mail é inválido.';
         case 'auth/user-not-found':
         case 'auth/wrong-password':
-        case 'auth/invalid-credential': // Caso adicionado para credenciais inválidas
+        case 'auth/invalid-credential':
             return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.';
         case 'auth/email-already-in-use':
             return 'Este e-mail já está em uso.';
         case 'auth/weak-password':
             return 'A senha precisa ter pelo menos 6 caracteres.';
         case 'auth/popup-closed-by-user':
-            return 'A janela de login com Google foi fechada.';
-        case 'auth/too-many-requests': // Caso adicionado para múltiplas tentativas
-            return 'O acesso a esta conta foi temporariamente desativado devido a muitas tentativas de login. Tente novamente mais tarde ou redefina sua senha.';
+            return 'A janela de login com Google foi fechada antes da conclusão.';
+        case 'auth/popup-blocked-by-browser': // Caso adicionado
+            return 'O pop-up de login foi bloqueado pelo navegador. Por favor, habilite os pop-ups para este site.';
+        case 'auth/operation-not-allowed': // Caso adicionado
+            return 'O login com Google não está habilitado. Por favor, contacte o suporte.';
+        case 'auth/too-many-requests':
+            return 'O acesso a esta conta foi temporariamente desativado devido a muitas tentativas de login. Tente novamente mais tarde.';
         default:
             console.error("Código de erro não tratado:", code);
-            return 'Ocorreu um erro desconhecido. Tente novamente.';
+            return 'Ocorreu um erro desconhecido. Verifique sua conexão ou a configuração do Firebase.';
     }
 };
 
