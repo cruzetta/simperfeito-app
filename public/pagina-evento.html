@@ -353,50 +353,61 @@
         async function loadPageData() {
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
             const docSnap = await getDoc(pageDataRef);
+
+            // Começa com uma cópia profunda dos dados padrão. Isto é o mais seguro.
+            pageData = JSON.parse(JSON.stringify(defaultData));
+
             if (docSnap.exists()) {
                 const loadedData = docSnap.data();
-                
-                // Começa com uma cópia profunda dos dados padrão
-                pageData = JSON.parse(JSON.stringify(defaultData));
 
-                // Mescla cada seção de forma segura
-                if (loadedData.header) {
+                // --- MIGRAÇÃO E FUSÃO DE DADOS ---
+                // Esta seção mescla com segurança os dados carregados na estrutura padrão,
+                // lidando com possíveis formatos antigos e partes em falta.
+
+                // 1. Mesclar Cabeçalho
+                if (loadedData.header && typeof loadedData.header === 'object') {
                     pageData.header = { ...pageData.header, ...loadedData.header };
                 }
-                if (loadedData.story) {
-                    // Lida com o formato antigo (string) vs o novo (objeto)
-                    if (typeof loadedData.story === 'object') {
-                         pageData.story = { ...pageData.story, ...loadedData.story };
-                    } else {
-                        // Migração da primeira versão
-                        pageData.story.text = loadedData.story;
-                    }
-                }
-                if (loadedData.gallery) {
-                    pageData.gallery = { ...pageData.gallery, ...loadedData.gallery };
-                }
-                if (loadedData.details) {
-                    if(loadedData.details.ceremony) {
-                        pageData.details.ceremony = { ...pageData.details.ceremony, ...loadedData.details.ceremony };
-                    }
-                    if(loadedData.details.reception) {
-                        pageData.details.reception = { ...pageData.details.reception, ...loadedData.details.reception };
-                    }
+                // Garantir que coupleNames é um array
+                if (!Array.isArray(pageData.header.coupleNames)) {
+                    pageData.header.coupleNames = defaultData.header.coupleNames;
                 }
 
-                // Migração da estrutura plana inicial
-                if (loadedData.title && !loadedData.story) {
+                // 2. Mesclar História (lida com formato de string antigo e novo formato de objeto)
+                if (loadedData.story) {
+                    if (typeof loadedData.story === 'object' && loadedData.story !== null) {
+                        pageData.story = { ...pageData.story, ...loadedData.story };
+                    } else if (typeof loadedData.story === 'string') {
+                        pageData.story.text = loadedData.story; // Migrar do formato antigo
+                    }
+                }
+                // Migrar campo 'title' antigo se existir e story.title for o padrão
+                if (loadedData.title && pageData.story.title === defaultData.story.title) {
                     pageData.story.title = loadedData.title;
                 }
-                if (loadedData.imageUrl && !loadedData.header) {
+                 // Migrar campo 'imageUrl' antigo
+                if (loadedData.imageUrl && pageData.header.imageUrl === defaultData.header.imageUrl) {
                     pageData.header.imageUrl = loadedData.imageUrl;
                 }
 
-            } else {
-                // Nenhum dado existe, usa os padrões
-                pageData = JSON.parse(JSON.stringify(defaultData));
+                // 3. Mesclar Galeria
+                if (loadedData.gallery && typeof loadedData.gallery === 'object' && Array.isArray(loadedData.gallery.photos)) {
+                    pageData.gallery = { ...pageData.gallery, ...loadedData.gallery };
+                }
+
+                // 4. Mesclar Detalhes
+                if (loadedData.details && typeof loadedData.details === 'object') {
+                    if (loadedData.details.ceremony && typeof loadedData.details.ceremony === 'object') {
+                        pageData.details.ceremony = { ...pageData.details.ceremony, ...loadedData.details.ceremony };
+                    }
+                    if (loadedData.details.reception && typeof loadedData.details.reception === 'object') {
+                        pageData.details.reception = { ...pageData.details.reception, ...loadedData.details.reception };
+                    }
+                }
             }
+            // Se o documento não existir, pageData já está definido como o padrão, então não fazemos nada.
         }
+
 
         // --- LÓGICA DE RENDERIZAÇÃO ---
         function renderAllPreviews() {
@@ -408,7 +419,9 @@
 
         function renderHeaderPreview() {
             const { coupleNames, eventDate, imageUrl } = pageData.header;
-            document.getElementById('couple-names-preview').textContent = coupleNames.join(' & ');
+            // Verificação de segurança: garantir que coupleNames é um array antes de juntar.
+            const namesText = Array.isArray(coupleNames) ? coupleNames.join(' & ') : defaultData.header.coupleNames.join(' & ');
+            document.getElementById('couple-names-preview').textContent = namesText;
             document.getElementById('event-date-preview').textContent = eventDate;
             const imgPreview = document.getElementById('header-image-preview');
             imgPreview.src = imageUrl || defaultData.header.imageUrl;
