@@ -63,7 +63,7 @@
         }
         #event-page-preview.template-romantic #header-section { border-bottom: 4px solid var(--color-primary); }
 
-        /* NOVO Template: Elegância */
+        /* Template: Elegância */
         #event-page-preview.template-elegancia {
             --font-display: 'Dancing Script', cursive;
             --font-body: 'Playfair Display', serif;
@@ -110,6 +110,15 @@
         }
         .template-card:hover { border-color: var(--color-primary); transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
         .template-card.active { border-color: var(--color-primary); border-width: 3px; }
+
+        /* Estilos do Uploader de Imagem */
+        .drop-zone {
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .drop-zone.drag-over {
+            background-color: #FCE7F3; /* pink-100 */
+            border-color: #F472B6; /* pink-400 */
+        }
     </style>
 </head>
 <body>
@@ -216,7 +225,7 @@
                     </div>
                 </section>
 
-                <!-- NOVA Seção de RSVP -->
+                <!-- Seção de RSVP -->
                 <section id="rsvp-section" class="editable-section p-8 md:p-16 text-center">
                     <button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
@@ -280,7 +289,7 @@
             </div>
         </div>
 
-        <!-- Outros modais (cabeçalho, história, etc.) -->
+        <!-- Modal do Cabeçalho -->
         <div id="header-modal" class="modal">
             <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Editar Cabeçalho</h3>
@@ -294,8 +303,8 @@
                         <input type="text" id="event-date-input" class="w-full p-2 border border-gray-300 rounded-md">
                     </div>
                     <div>
-                        <label for="header-image-input" class="block text-sm font-medium text-gray-700 mb-1">URL da Foto Principal</label>
-                        <input type="url" id="header-image-input" class="w-full p-2 border border-gray-300 rounded-md">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto Principal</label>
+                        <div id="header-image-uploader" class="image-uploader"></div>
                     </div>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
@@ -304,6 +313,23 @@
                 </form>
             </div>
         </div>
+
+        <!-- Modal da Galeria -->
+        <div id="gallery-modal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos</h3>
+                <form id="gallery-form">
+                    <div id="gallery-inputs-container" class="space-y-6 mb-4"></div>
+                    <button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
+                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Modal da História -->
         <div id="story-modal" class="modal">
             <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Editar História</h3>
@@ -323,38 +349,53 @@
                 </form>
             </div>
         </div>
-        <div id="gallery-modal" class="modal">
-            <div class="modal-content">
-                <h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos</h3>
-                <form id="gallery-form">
-                    <div id="gallery-inputs-container" class="space-y-4 mb-4"></div>
-                    <button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
-                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+
+        <!-- Modal de Detalhes do Evento -->
         <div id="details-modal" class="modal">
              <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3>
                 <form id="details-form" class="space-y-6">
-                    <fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Cerimónia</legend>
+                    <fieldset class="border p-4 rounded-md">
+                        <legend class="text-lg font-semibold px-2">Cerimónia</legend>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                            <div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div>
+                            <div>
+                                <label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label>
+                                <input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md">
+                            </div>
+                             <div>
+                                <label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label>
+                                <input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00">
+                            </div>
                         </div>
-                        <div class="mt-4"><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div class="mt-4"><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div class="mt-4">
+                            <label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                            <input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="mt-4">
+                            <label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label>
+                            <input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
                     </fieldset>
-                    <fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Recepção</legend>
+                    <fieldset class="border p-4 rounded-md">
+                        <legend class="text-lg font-semibold px-2">Recepção</legend>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                            <div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div>
+                            <div>
+                                <label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label>
+                                <input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md">
+                            </div>
+                             <div>
+                                <label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+                                <input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia">
+                            </div>
                         </div>
-                        <div class="mt-4"><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div class="mt-4"><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div class="mt-4">
+                            <label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                            <input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="mt-4">
+                            <label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label>
+                            <input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
                     </fieldset>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
@@ -363,7 +404,8 @@
                 </form>
             </div>
         </div>
-        <!-- NOVO Modal de RSVP -->
+
+        <!-- Modal de RSVP -->
         <div id="rsvp-modal" class="modal">
             <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Editar Confirmação de Presença</h3>
@@ -395,7 +437,7 @@
 
     <!-- Scripts -->
     <script type="module">
-        import { auth, onAuthStateChanged, db } from './auth.js';
+        import { auth, onAuthStateChanged, db, storage, ref, uploadBytes, getDownloadURL } from './auth.js';
         import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         // --- ELEMENTOS GLOBAIS ---
@@ -408,36 +450,15 @@
 
         let currentUser;
         let eventConfig;
-        let pageData = {}; // Objeto local para armazenar os dados da página
+        let pageData = {};
 
         const defaultData = {
             template: 'elegancia',
-            header: {
-                coupleNames: ["Noiva & Noivo"],
-                eventDate: "Data do Evento",
-                imageUrl: "https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui"
-            },
-            story: {
-                title: "Nossa História",
-                text: "Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!"
-            },
-            gallery: {
-                photos: [
-                    { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" },
-                    { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" },
-                    { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+3" }
-                ]
-            },
-            details: {
-                ceremony: { name: "Local da Cerimônia", address: "Endereço do Local, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" },
-                reception: { name: "Local da Recepção", address: "Endereço do Local, 456", time: "Logo após a cerimónia", mapUrl: "#" }
-            },
-            rsvp: {
-                title: "Confirme sua Presença",
-                text: "Sua presença é o nosso maior presente! Por favor, confirme até o dia DD/MM/AAAA.",
-                buttonText: "Confirmar Presença",
-                buttonLink: "#"
-            }
+            header: { coupleNames: ["Noiva & Noivo"], eventDate: "Data do Evento", imageUrl: "https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui" },
+            story: { title: "Nossa História", text: "Clique no botão de edição para contar a sua história de amor..." },
+            gallery: { photos: [{ url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" }, { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" }, { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+3" }] },
+            details: { ceremony: { name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" }, reception: { name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "#" } },
+            rsvp: { title: "Confirme sua Presença", text: "Sua presença é o nosso maior presente! Por favor, confirme até o dia DD/MM/AAAA.", buttonText: "Confirmar Presença", buttonLink: "#" }
         };
 
         // --- INICIALIZAÇÃO ---
@@ -464,6 +485,7 @@
             applyTemplate(pageData.template || 'elegancia');
             renderAllPreviews();
             setupEventListeners();
+            createImageUploader(document.getElementById('header-image-uploader'), pageData.header.imageUrl);
         }
 
         async function loadEventConfig() {
@@ -471,7 +493,7 @@
             const configSnap = await getDoc(configRef);
             eventConfig = configSnap.exists() ? configSnap.data() : { type: 'outro' };
         }
-
+        
         async function loadPageData() {
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
             const docSnap = await getDoc(pageDataRef);
@@ -485,7 +507,6 @@
                 });
             } else {
                 const loadedData = docSnap.data();
-                // Merge loaded data with defaults to ensure all properties exist
                 pageData = {
                     ...JSON.parse(JSON.stringify(defaultData)),
                     ...loadedData,
@@ -500,8 +521,166 @@
                 }
             }
         }
+        
+        // --- LÓGICA DE UPLOAD DE IMAGEM ---
+        function createImageUploader(container, existingUrl = '') {
+            container.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg border">
+                    <label class="drop-zone border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-pink-400 bg-white">
+                        <div class="uploader-prompt">
+                            <svg class="mx-auto h-10 w-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                            <p class="mt-2 text-sm text-gray-600">Arraste uma foto aqui ou <span class="font-semibold text-pink-600">clique para selecionar</span></p>
+                        </div>
+                        <input type="file" class="hidden" accept="image/*">
+                    </label>
+                    <div class="preview-container mt-4 text-center" style="display: none;">
+                        <img class="preview-image max-h-40 rounded-lg inline-block">
+                        <p class="loading-text text-sm text-gray-500 mt-2" style="display: none;">A enviar...</p>
+                    </div>
+                    <div class="my-3 flex items-center"><div class="flex-grow border-t"></div><span class="flex-shrink mx-4 text-gray-400 text-xs">OU</span><div class="flex-grow border-t"></div></div>
+                    <div><input type="url" class="url-input w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="Cole a URL da imagem aqui"></div>
+                </div>
+            `;
+            const dropZone = container.querySelector('.drop-zone');
+            const fileInput = container.querySelector('input[type="file"]');
+            const urlInput = container.querySelector('.url-input');
+            const previewContainer = container.querySelector('.preview-container');
+            const previewImage = container.querySelector('.preview-image');
+            const loadingText = container.querySelector('.loading-text');
 
-        // --- LÓGICA DE TEMPLATES ---
+            container.dataSource = { type: 'url', value: existingUrl };
+
+            const showPreview = (src) => {
+                previewImage.src = src;
+                previewContainer.style.display = 'block';
+                loadingText.style.display = 'none';
+            };
+            
+            if (existingUrl) {
+                showPreview(existingUrl);
+                urlInput.value = existingUrl;
+            }
+
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                if (e.dataTransfer.files.length) {
+                    const file = e.dataTransfer.files[0];
+                    handleFile(file);
+                }
+            });
+            fileInput.addEventListener('change', e => {
+                if (e.target.files.length) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+            urlInput.addEventListener('input', () => {
+                const url = urlInput.value.trim();
+                container.dataSource = { type: 'url', value: url };
+                if(url) showPreview(url);
+            });
+
+            const handleFile = (file) => {
+                if (!file.type.startsWith('image/')) return;
+                container.dataSource = { type: 'file', value: file };
+                const reader = new FileReader();
+                reader.onload = (e) => showPreview(e.target.result);
+                reader.readAsDataURL(file);
+            };
+        }
+
+        async function uploadImageAndGetURL(file) {
+            if (!file) return null;
+            const storageRef = ref(storage, `users/${currentUser.uid}/eventImages/${Date.now()}-${file.name}`);
+            await uploadBytes(storageRef, file);
+            return await getDownloadURL(storageRef);
+        }
+
+        // --- LÓGICA DE SALVAMENTO DOS FORMULÁRIOS ---
+        async function handleHeaderSave(e) {
+            e.preventDefault();
+            const uploader = document.getElementById('header-image-uploader');
+            const saveBtn = e.target.querySelector('.modal-save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'A salvar...';
+
+            pageData.header.coupleNames = document.getElementById('couple-names-input').value.split(',').map(name => name.trim());
+            pageData.header.eventDate = document.getElementById('event-date-input').value;
+
+            const { type, value } = uploader.dataSource;
+            if (type === 'file') {
+                uploader.querySelector('.loading-text').style.display = 'block';
+                try {
+                    pageData.header.imageUrl = await uploadImageAndGetURL(value);
+                } catch (err) {
+                    console.error("Upload failed", err);
+                    alert("O envio da imagem falhou.");
+                }
+            } else {
+                pageData.header.imageUrl = value;
+            }
+            
+            renderHeaderPreview();
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Salvar';
+            closeModal(e.target.closest('.modal'));
+        }
+
+        async function handleGallerySave(e) {
+            e.preventDefault();
+            const saveBtn = e.target.querySelector('.modal-save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'A salvar...';
+
+            const uploaderDivs = document.querySelectorAll('#gallery-inputs-container .image-uploader-wrapper');
+            const uploadPromises = Array.from(uploaderDivs).map(async (wrapper) => {
+                const uploader = wrapper.querySelector('.image-uploader');
+                const { type, value } = uploader.dataSource;
+                if (type === 'file') {
+                    wrapper.querySelector('.loading-text').style.display = 'block';
+                    return uploadImageAndGetURL(value);
+                }
+                return value; // It's already a URL
+            });
+            
+            try {
+                const urls = await Promise.all(uploadPromises);
+                pageData.gallery.photos = urls.filter(url => url).map(url => ({ url }));
+            } catch (err) {
+                console.error("Gallery upload failed", err);
+                alert("O envio de uma ou mais imagens da galeria falhou.");
+            }
+
+            renderGalleryPreview();
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Salvar';
+            closeModal(e.target.closest('.modal'));
+        }
+
+        function addPhotoField(url = '') {
+            const container = document.getElementById('gallery-inputs-container');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'image-uploader-wrapper relative border-t pt-6 mt-6';
+            
+            const uploaderDiv = document.createElement('div');
+            uploaderDiv.className = 'image-uploader';
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'absolute top-0 right-0 text-red-500 hover:text-red-700 p-1 rounded-full';
+            removeBtn.innerHTML = `<svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>`;
+            removeBtn.onclick = () => wrapper.remove();
+            
+            wrapper.appendChild(uploaderDiv);
+            wrapper.appendChild(removeBtn);
+            container.appendChild(wrapper);
+            
+            createImageUploader(uploaderDiv, url);
+        }
+
         function applyTemplate(templateId) {
             eventPagePreview.classList.remove('template-classic', 'template-modern', 'template-romantic', 'template-elegancia');
             eventPagePreview.classList.add(`template-${templateId}`);
@@ -512,7 +691,6 @@
             });
         }
 
-        // --- LÓGICA DE RENDERIZAÇÃO ---
         function renderAllPreviews() {
             renderHeaderPreview();
             renderStoryPreview();
@@ -568,7 +746,6 @@
             button.href = buttonLink || '#';
         }
 
-        // --- LÓGICA DOS MODAIS ---
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
@@ -576,7 +753,7 @@
                     case 'header-modal':
                         document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
                         document.getElementById('event-date-input').value = pageData.header.eventDate;
-                        document.getElementById('header-image-input').value = pageData.header.imageUrl;
+                        // O uploader é recriado sempre, então não precisa preencher aqui
                         break;
                     case 'story-modal':
                         document.getElementById('story-title-input').value = pageData.story.title;
@@ -628,16 +805,6 @@
             document.getElementById('add-photo-btn').addEventListener('click', () => addPhotoField());
         }
 
-        // --- LÓGICA DE SALVAMENTO DOS FORMULÁRIOS ---
-        function handleHeaderSave(e) {
-            e.preventDefault();
-            pageData.header.coupleNames = document.getElementById('couple-names-input').value.split(',').map(name => name.trim());
-            pageData.header.eventDate = document.getElementById('event-date-input').value;
-            pageData.header.imageUrl = document.getElementById('header-image-input').value;
-            renderHeaderPreview();
-            closeModal(e.target.closest('.modal'));
-        }
-
         function handleStorySave(e) {
             e.preventDefault();
             pageData.story.title = document.getElementById('story-title-input').value;
@@ -646,14 +813,6 @@
             closeModal(e.target.closest('.modal'));
         }
         
-        function handleGallerySave(e) {
-            e.preventDefault();
-            const inputs = document.querySelectorAll('.gallery-photo-input');
-            pageData.gallery.photos = Array.from(inputs).map(input => ({ url: input.value.trim() })).filter(p => p.url);
-            renderGalleryPreview();
-            closeModal(e.target.closest('.modal'));
-        }
-
         function handleDetailsSave(e) {
             e.preventDefault();
             pageData.details.ceremony = { name: document.getElementById('ceremony-name').value, time: document.getElementById('ceremony-time').value, address: document.getElementById('ceremony-address').value, mapUrl: document.getElementById('ceremony-map').value };
@@ -678,16 +837,6 @@
             (pageData.gallery.photos || []).forEach(photo => addPhotoField(photo.url));
         }
 
-        function addPhotoField(url = '') {
-            const container = document.getElementById('gallery-inputs-container');
-            const div = document.createElement('div');
-            div.className = 'flex items-center gap-2';
-            div.innerHTML = `<input type="url" class="gallery-photo-input flex-grow p-2 border border-gray-300 rounded-md" value="${url}" placeholder="https://exemplo.com/foto.jpg"><button type="button" class="remove-photo-btn text-red-500 hover:text-red-700 p-1 rounded-full"><svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button>`;
-            div.querySelector('.remove-photo-btn').addEventListener('click', () => div.remove());
-            container.appendChild(div);
-        }
-
-        // --- SALVAMENTO FINAL NO FIREBASE ---
         async function handleFullSave() {
             saveButton.disabled = true;
             saveButton.innerHTML = 'A salvar...';
@@ -705,7 +854,6 @@
                 saveButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg> Salvar Alterações`;
             }
         }
-
     </script>
 </body>
 </html>
