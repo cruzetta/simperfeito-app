@@ -350,41 +350,54 @@
             eventConfig = configSnap.exists() ? configSnap.data() : { type: 'outro' };
         }
 
+        // --- CORREÇÃO APLICADA AQUI ---
         async function loadPageData() {
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
             const docSnap = await getDoc(pageDataRef);
 
+            // Começa com uma cópia profunda da estrutura de dados padrão.
             pageData = JSON.parse(JSON.stringify(defaultData));
 
             if (docSnap.exists()) {
                 const loadedData = docSnap.data();
-                if (!loadedData) return;
 
-                // --- FUSÃO DE DADOS SEGURA E ROBUSTA ---
-                pageData.header = { ...defaultData.header, ...(loadedData.header || {}) };
-                if (!Array.isArray(pageData.header.coupleNames)) {
-                    pageData.header.coupleNames = [...defaultData.header.coupleNames];
-                }
+                // Verifica se loadedData é válido antes de continuar
+                if (loadedData) {
+                    // Funde os dados do cabeçalho
+                    pageData.header = { ...defaultData.header, ...(loadedData.header || {}) };
+                    // Garante que coupleNames seja sempre um array
+                    if (!Array.isArray(pageData.header.coupleNames) || pageData.header.coupleNames.length === 0) {
+                        pageData.header.coupleNames = [...defaultData.header.coupleNames];
+                    }
 
-                if (typeof loadedData.story === 'object' && loadedData.story !== null) {
-                    pageData.story = { ...defaultData.story, ...loadedData.story };
-                } else if (typeof loadedData.story === 'string') {
-                    pageData.story.text = loadedData.story;
-                }
-                
-                if (loadedData.title) pageData.story.title = loadedData.title;
-                if (loadedData.imageUrl) pageData.header.imageUrl = loadedData.imageUrl;
+                    // Funde os dados da história (lida com o formato de string antigo e o novo formato de objeto)
+                    if (typeof loadedData.story === 'object' && loadedData.story !== null) {
+                        pageData.story = { ...defaultData.story, ...loadedData.story };
+                    } else if (typeof loadedData.story === 'string') {
+                        // Compatibilidade com versões anteriores para quando a história era apenas uma string
+                        pageData.story.text = loadedData.story;
+                    }
+                    
+                    // Lida com propriedades de nível superior legadas
+                    if (loadedData.title) pageData.story.title = loadedData.title;
+                    if (loadedData.imageUrl) pageData.header.imageUrl = loadedData.imageUrl;
 
-                if (loadedData.gallery && Array.isArray(loadedData.gallery.photos)) {
-                    pageData.gallery.photos = loadedData.gallery.photos;
-                }
+                    // Funde os dados da galeria, garantindo que cada foto seja um objeto válido com um URL
+                    if (loadedData.gallery && Array.isArray(loadedData.gallery.photos)) {
+                        pageData.gallery.photos = loadedData.gallery.photos.filter(
+                            p => p && typeof p === 'object' && typeof p.url === 'string' && p.url.trim() !== ''
+                        );
+                    }
 
-                if (loadedData.details && typeof loadedData.details === 'object') {
-                    pageData.details.ceremony = { ...defaultData.details.ceremony, ...(loadedData.details.ceremony || {}) };
-                    pageData.details.reception = { ...defaultData.details.reception, ...(loadedData.details.reception || {}) };
+                    // Funde os dados dos detalhes do evento
+                    if (loadedData.details && typeof loadedData.details === 'object') {
+                        pageData.details.ceremony = { ...defaultData.details.ceremony, ...(loadedData.details.ceremony || {}) };
+                        pageData.details.reception = { ...defaultData.details.reception, ...(loadedData.details.reception || {}) };
+                    }
                 }
             }
         }
+
 
         // --- LÓGICA DE RENDERIZAÇÃO ---
         function renderAllPreviews() {
@@ -414,6 +427,17 @@
             const container = document.getElementById('gallery-preview-container');
             container.innerHTML = '';
             const photos = Array.isArray(pageData.gallery.photos) ? pageData.gallery.photos : [];
+            if (photos.length === 0) {
+                // Adiciona placeholders se a galeria estiver vazia após a filtragem
+                defaultData.gallery.photos.forEach(photo => {
+                    const img = document.createElement('img');
+                    img.src = photo.url;
+                    img.alt = 'Foto da galeria';
+                    img.className = 'rounded-lg shadow-md object-cover w-full h-full aspect-square';
+                    container.appendChild(img);
+                });
+                return;
+            }
             photos.forEach(photo => {
                 const img = document.createElement('img');
                 img.src = photo.url;
