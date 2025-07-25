@@ -284,20 +284,26 @@
             <h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3>
             <form id="details-form" class="space-y-6">
                 <fieldset class="border p-4 rounded-md">
-                    <legend class="text-lg font-semibold px-2">Cerimónia</legend>
-                    <div class="space-y-4">
+                    <legend class="text-lg font-semibold px-2 flex items-center gap-2">
+                        <label for="ceremony-title" class="text-sm font-medium text-gray-700">Título da Seção</label>
+                        <input type="text" id="ceremony-title" class="w-full p-1 border border-gray-300 rounded-md text-base">
+                    </legend>
+                    <div class="space-y-4 mt-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div><label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md"></div>
                             <div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div>
                         </div>
                         <div><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://maps.app.goo.gl/exemplo"></div>
                     </div>
                 </fieldset>
                 
                 <fieldset class="border p-4 rounded-md">
-                    <legend class="text-lg font-semibold px-2">Recepção</legend>
-                    <div class="flex items-center mb-4">
+                     <legend class="text-lg font-semibold px-2 flex items-center gap-2">
+                        <label for="reception-title" class="text-sm font-medium text-gray-700">Título da Seção</label>
+                        <input type="text" id="reception-title" class="w-full p-1 border border-gray-300 rounded-md text-base">
+                    </legend>
+                    <div class="flex items-center my-4">
                         <input type="checkbox" id="same-location-checkbox" class="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500">
                         <label for="same-location-checkbox" class="ml-2 block text-sm font-medium text-gray-900">A recepção será no mesmo local</label>
                     </div>
@@ -307,7 +313,7 @@
                             <div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div>
                         </div>
                         <div><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://maps.app.goo.gl/exemplo"></div>
                     </div>
                 </fieldset>
 
@@ -355,14 +361,14 @@
             },
             story: { title: "Nossa História", text: "Clique no botão de edição para contar a sua história de amor..." },
             gallery: { 
-                photos: [], // Começa com a galeria adicional vazia
+                photos: [],
                 autoplay: false,
                 duration: 5 
             },
             details: { 
-                sameLocation: false, // NOVO CAMPO
-                ceremony: { name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" }, 
-                reception: { name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "#" } 
+                sameLocation: false,
+                ceremony: { title: "Cerimónia", name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "" }, 
+                reception: { title: "Recepção", name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "" } 
             },
             rsvp: { title: "Confirme sua Presença", text: "Sua presença é o nosso maior presente!", buttonText: "Confirmar Presença", buttonLink: "#" }
         };
@@ -371,7 +377,6 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                // Define o link para a página pública
                 viewPublicPageLink.href = `/convite.html?user=${currentUser.uid}`;
                 await loadPageData();
                 initializePage();
@@ -385,14 +390,13 @@
             const docSnap = await getDoc(pageDataRef);
             if (docSnap.exists()) {
                 const loadedData = docSnap.data();
-                // Merge profundo para garantir que todos os campos padrão existam
                 pageData = {
                     ...JSON.parse(JSON.stringify(defaultData)),
                     ...loadedData,
                     header: { ...defaultData.header, ...(loadedData.header || {}), titleStyle: { ...defaultData.header.titleStyle, ...(loadedData.header?.titleStyle || {}) }, dateStyle: { ...defaultData.header.dateStyle, ...(loadedData.header?.dateStyle || {}) } },
                     story: { ...defaultData.story, ...(loadedData.story || {}) },
                     gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) },
-                    details: { ...defaultData.details, ...(loadedData.details || {}) },
+                    details: { ...defaultData.details, ...(loadedData.details || {}), ceremony: { ...defaultData.details.ceremony, ...(loadedData.details?.ceremony || {}) }, reception: { ...defaultData.details.reception, ...(loadedData.details?.reception || {}) } },
                     rsvp: { ...defaultData.rsvp, ...(loadedData.rsvp || {}) }
                 };
             } else {
@@ -566,7 +570,7 @@
             const storySection = document.getElementById('story-section');
             storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${story.title}</h2> <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${story.text}</p>`;
             const detailsSection = document.getElementById('details-section');
-            detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"> <div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">Cerimónia</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.ceremony.name || ''}</p><p style="color: var(--color-text-light);">${details.ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> <div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">Recepção</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.reception.name || ''}</p><p style="color: var(--color-text-light);">${details.reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> </div>`;
+            detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"> <div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">${details.ceremony.title}</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.ceremony.name || ''}</p><p style="color: var(--color-text-light);">${details.ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> <div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">${details.reception.title}</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.reception.name || ''}</p><p style="color: var(--color-text-light);">${details.reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> </div>`;
             const rsvpSection = document.getElementById('rsvp-section');
             rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${rsvp.title}</h2> <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${rsvp.text}</p> <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">${rsvp.buttonText}</a>`;
         }
@@ -619,7 +623,6 @@
                 if (closeModalBtn) closeModal(closeModalBtn.closest('.modal'));
             });
 
-            // Adicionar manipuladores de submissão de formulário
             document.getElementById('header-form').addEventListener('submit', handleHeaderFormSubmit);
             document.getElementById('story-form').addEventListener('submit', handleStoryFormSubmit);
             document.getElementById('details-form').addEventListener('submit', handleDetailsFormSubmit);
@@ -647,7 +650,6 @@
             const modal = document.getElementById(modalId);
             if (!modal) return;
 
-            // Preencher formulários com dados atuais
             if (modalId === 'header-modal') {
                 document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
                 document.getElementById('event-date-input').value = pageData.header.eventDate;
@@ -661,16 +663,18 @@
                 autoplayCheck.onchange = () => { durationContainer.style.display = autoplayCheck.checked ? 'flex' : 'none'; };
                 const galleryContainer = document.getElementById('gallery-inputs-container');
                 galleryContainer.innerHTML = '';
-                pageData.gallery.photos.forEach((photo, index) => createGalleryUploader(photo.url, index));
+                (pageData.gallery.photos || []).forEach((photo, index) => createGalleryUploader(photo.url, index));
             } else if (modalId === 'story-modal') {
                 document.getElementById('story-title-input').value = pageData.story.title;
                 document.getElementById('story-text-input').value = pageData.story.text;
             } else if (modalId === 'details-modal') {
                 const { ceremony, reception, sameLocation } = pageData.details;
+                document.getElementById('ceremony-title').value = ceremony.title;
                 document.getElementById('ceremony-name').value = ceremony.name;
                 document.getElementById('ceremony-time').value = ceremony.time;
                 document.getElementById('ceremony-address').value = ceremony.address;
                 document.getElementById('ceremony-map').value = ceremony.mapUrl;
+                document.getElementById('reception-title').value = reception.title;
                 document.getElementById('reception-name').value = reception.name;
                 document.getElementById('reception-time').value = reception.time;
                 document.getElementById('reception-address').value = reception.address;
@@ -678,9 +682,9 @@
                 
                 const sameLocationCheckbox = document.getElementById('same-location-checkbox');
                 sameLocationCheckbox.checked = sameLocation || false;
-                sameLocationCheckbox.removeEventListener('change', toggleReceptionFields); // Evita múltiplos listeners
+                sameLocationCheckbox.removeEventListener('change', toggleReceptionFields);
                 sameLocationCheckbox.addEventListener('change', toggleReceptionFields);
-                toggleReceptionFields(); // Define o estado inicial
+                toggleReceptionFields();
             } else if (modalId === 'rsvp-modal') {
                 document.getElementById('rsvp-title-input').value = pageData.rsvp.title;
                 document.getElementById('rsvp-text-input').value = pageData.rsvp.text;
@@ -724,7 +728,6 @@
             });
         }
         
-        // --- UPLOAD DE IMAGEM E SUBMISSÃO DE FORMULÁRIOS ---
         function setupImageUploader(containerId, currentUrl) {
             const container = document.getElementById(containerId);
             container.innerHTML = `<img id="uploader-preview" src="${currentUrl}" class="w-full h-48 object-contain rounded-md mb-2 bg-gray-100 border" onerror="this.onerror=null;this.src='${defaultData.header.imageUrl}';"> <div class="flex items-center justify-between gap-2"> <label for="header-image-input" class="flex-grow text-center px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 rounded-md cursor-pointer hover:bg-gray-50"> Trocar Imagem </label> <input type="file" id="header-image-input" class="hidden" accept="image/jpeg, image/png, image/webp"> <button type="button" id="remove-image-btn" class="px-4 py-2 bg-red-100 border border-red-200 text-sm font-medium text-red-700 rounded-md hover:bg-red-200">Remover</button> </div>`;
@@ -776,18 +779,6 @@
             container.appendChild(div);
         }
         
-        function handleGenericFormSubmit(e, modalId, dataKey) {
-            e.preventDefault();
-            const form = e.target;
-            const inputs = form.querySelectorAll('input, textarea');
-            inputs.forEach(input => {
-                const key = input.id.split('-')[1];
-                pageData[dataKey][key] = input.value;
-            });
-            renderAllPreviews();
-            closeModal(document.getElementById(modalId));
-        }
-        
         function handleStoryFormSubmit(e) {
             e.preventDefault();
             pageData.story.title = document.getElementById('story-title-input').value;
@@ -802,12 +793,14 @@
             pageData.details = {
                 sameLocation: sameLocation,
                 ceremony: {
+                    title: document.getElementById('ceremony-title').value,
                     name: document.getElementById('ceremony-name').value,
                     time: document.getElementById('ceremony-time').value,
                     address: document.getElementById('ceremony-address').value,
                     mapUrl: document.getElementById('ceremony-map').value,
                 },
                 reception: {
+                    title: document.getElementById('reception-title').value,
                     name: sameLocation ? '' : document.getElementById('reception-name').value,
                     time: document.getElementById('reception-time').value,
                     address: sameLocation ? '' : document.getElementById('reception-address').value,
