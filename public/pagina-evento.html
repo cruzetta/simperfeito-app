@@ -301,7 +301,7 @@
         // --- DADOS E ESTADO ---
         let currentUser;
         let pageData = {};
-        let headerSwiper = null; // Renomeado para maior clareza
+        let headerSwiper = null;
 
         const defaultData = {
             template: 'elegancia',
@@ -315,7 +315,7 @@
             },
             story: { title: "Nossa História", text: "Clique no botão de edição para contar a sua história de amor..." },
             gallery: { 
-                photos: [{ url: "https://placehold.co/800x600/FCE7F3/DB2777?text=Foto+Adicional" }],
+                photos: [], // Começa com a galeria adicional vazia
                 autoplay: false,
                 duration: 5 
             },
@@ -356,7 +356,6 @@
             pageContent.classList.remove('hidden');
             renderAllPreviews();
             setupEventListeners();
-            setupDraggableText();
             populateIconModal();
         }
         
@@ -484,7 +483,6 @@
         function renderAllPreviews() {
             const { header, story, details, gallery, rsvp, icon } = pageData;
             
-            // Renderiza o cabeçalho e o carrossel
             const allPhotos = [header.imageUrl, ...gallery.photos.map(p => p.url)];
             const slidesHtml = allPhotos.map(url => `<div class="swiper-slide"><img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/></div>`).join('');
             headerContentWrapper.innerHTML = `
@@ -509,9 +507,8 @@
             dateEl.textContent = header.eventDate;
             Object.assign(titleEl.style, header.titleStyle);
             Object.assign(dateEl.style, header.dateStyle);
-            setupDraggableText(); // Re-associa os eventos de arrastar aos novos elementos de texto
+            setupDraggableText();
 
-            // Renderiza outras seções
             const storySection = document.getElementById('story-section');
             storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${story.title}</h2> <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${story.text}</p>`;
             const detailsSection = document.getElementById('details-section');
@@ -529,8 +526,8 @@
                 pagination: { el: '.swiper-pagination', clickable: true },
                 navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
             };
-            if (pageData.gallery.autoplay) {
-                swiperOptions.autoplay = {
+            if (pageData.gallery.autoplay && (pageData.gallery.photos.length > 0 || pageData.header.imageUrl !== defaultData.header.imageUrl)) {
+                 swiperOptions.autoplay = {
                     delay: pageData.gallery.duration * 1000,
                     disableOnInteraction: false,
                 };
@@ -556,6 +553,7 @@
             });
 
             document.getElementById('header-form').addEventListener('submit', handleHeaderFormSubmit);
+            document.getElementById('add-photo-btn').addEventListener('click', () => createGalleryUploader());
         }
         
         async function handleFullSave() {
@@ -594,6 +592,13 @@
                 autoplayCheck.onchange = () => {
                     durationContainer.style.display = autoplayCheck.checked ? 'flex' : 'none';
                 };
+
+                // Popula a lista de fotos adicionais
+                const galleryContainer = document.getElementById('gallery-inputs-container');
+                galleryContainer.innerHTML = '';
+                pageData.gallery.photos.forEach((photo, index) => {
+                    createGalleryUploader(photo.url, index);
+                });
             }
             
             modal.classList.add('is-open');
@@ -633,30 +638,99 @@
             removeBtn.addEventListener('click', () => { fileInput.value = ''; preview.src = defaultData.header.imageUrl; preview.dataset.shouldRemove = "true"; });
         }
 
+        function createGalleryUploader(url = '', index = -1) {
+            const container = document.getElementById('gallery-inputs-container');
+            const uploaderId = `gallery-image-input-${Date.now()}`;
+            const isNew = url === '';
+            const placeholder = 'https://placehold.co/400x200/F3F4F6/9CA3AF?text=Nova+Foto';
+
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2 gallery-item';
+            div.dataset.index = index; // Guarda o índice original se for uma foto existente
+            div.dataset.url = url; // Guarda a URL original
+
+            div.innerHTML = `
+                <img src="${isNew ? placeholder : url}" class="w-24 h-16 object-cover rounded-md bg-gray-100 border">
+                <div class="flex-grow">
+                    <label for="${uploaderId}" class="w-full text-center px-3 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 rounded-md cursor-pointer hover:bg-gray-50">
+                        ${isNew ? 'Selecionar Foto' : 'Trocar Foto'}
+                    </label>
+                    <input type="file" id="${uploaderId}" class="hidden" accept="image/jpeg, image/png, image/webp">
+                </div>
+                <button type="button" class="remove-gallery-item-btn p-2 text-red-500 hover:bg-red-100 rounded-full">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                </button>
+            `;
+
+            const fileInput = div.querySelector('input[type="file"]');
+            const previewImg = div.querySelector('img');
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    previewImg.src = URL.createObjectURL(e.target.files[0]);
+                    div.dataset.file = 'true'; // Marca que há um novo arquivo
+                }
+            });
+
+            div.querySelector('.remove-gallery-item-btn').addEventListener('click', () => {
+                div.remove();
+            });
+
+            container.appendChild(div);
+        }
+
         async function handleHeaderFormSubmit(e) {
             e.preventDefault();
             const saveBtn = e.target.querySelector('.modal-save-btn');
             saveBtn.disabled = true; saveBtn.textContent = 'A salvar...';
             try {
+                // Salva textos e foto principal
                 pageData.header.coupleNames = document.getElementById('couple-names-input').value.split(',').map(n => n.trim());
                 pageData.header.eventDate = document.getElementById('event-date-input').value;
-                const fileInput = document.getElementById('header-image-input');
-                const preview = document.getElementById('uploader-preview');
-                if (fileInput && fileInput.files[0]) {
-                    const file = fileInput.files[0];
+                const mainFileInput = document.getElementById('header-image-input');
+                const mainPreview = document.getElementById('uploader-preview');
+                if (mainFileInput && mainFileInput.files[0]) {
+                    const file = mainFileInput.files[0];
                     const imageRef = ref(storage, `users/${currentUser.uid}/eventPage/header_image`);
                     await uploadBytes(imageRef, file);
                     pageData.header.imageUrl = await getDownloadURL(imageRef);
-                } else if (preview.dataset.shouldRemove === "true") {
+                } else if (mainPreview.dataset.shouldRemove === "true") {
                     pageData.header.imageUrl = defaultData.header.imageUrl;
                 }
                 
+                // Salva configurações do carrossel
                 pageData.gallery.autoplay = document.getElementById('gallery-autoplay').checked;
                 pageData.gallery.duration = parseInt(document.getElementById('gallery-duration').value, 10) || 5;
 
+                // Salva fotos adicionais
+                const galleryItems = document.querySelectorAll('#gallery-inputs-container .gallery-item');
+                const uploadPromises = [];
+                const newPhotosData = [];
+
+                galleryItems.forEach((item, index) => {
+                    const fileInput = item.querySelector('input[type="file"]');
+                    const hasNewFile = fileInput && fileInput.files[0];
+                    const existingUrl = item.dataset.url;
+
+                    if (hasNewFile) {
+                        const file = fileInput.files[0];
+                        const imageRef = ref(storage, `users/${currentUser.uid}/gallery/${Date.now()}-${file.name}`);
+                        const uploadTask = uploadBytes(imageRef, file).then(() => getDownloadURL(imageRef));
+                        
+                        uploadPromises.push(uploadTask.then(url => {
+                            newPhotosData[index] = { url };
+                        }));
+                    } else if (existingUrl && existingUrl !== 'undefined') {
+                        newPhotosData[index] = { url: existingUrl };
+                    }
+                });
+
+                await Promise.all(uploadPromises);
+                pageData.gallery.photos = newPhotosData.filter(Boolean); // Remove itens vazios/removidos
+
                 renderAllPreviews();
                 closeModal(document.getElementById('header-modal'));
-            } catch (error) { console.error("Erro ao atualizar cabeçalho:", error); showToast("Erro ao carregar a nova imagem.", true);
+            } catch (error) { console.error("Erro ao atualizar cabeçalho:", error); showToast("Erro ao carregar uma ou mais imagens.", true);
             } finally { saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; const preview = document.getElementById('uploader-preview'); if(preview) preview.dataset.shouldRemove = "false"; }
         }
 
