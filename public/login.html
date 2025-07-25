@@ -11,18 +11,26 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
         }
         .font-display {
             font-family: 'Playfair Display', serif;
         }
+        /* Ocultar o corpo até que a autenticação seja verificada */
+        .auth-loading {
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s 0.5s, opacity 0.5s linear;
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 auth-loading">
 
-    <div class="min-h-screen flex items-center justify-center">
+    <!-- *** MUDANÇA: Ecrã de carregamento para evitar o pisca-pisca *** -->
+    <div id="page-loader" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <p class="text-xl text-gray-600">A verificar autenticação...</p>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=2070&auto=format&fit=crop');">
         <div class="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-2xl w-full max-w-md m-4">
             <h2 id="form-title" class="text-3xl font-bold text-center text-gray-800 font-display mb-2">
                 Acesse seu Painel
@@ -99,9 +107,7 @@
         </div>
     </div>
     
-    <!-- Scripts do Firebase e da nossa página -->
     <script type="module">
-        // Importa as funções do nosso arquivo de configuração
         import { 
             auth, 
             onAuthStateChanged,
@@ -112,69 +118,78 @@
             getFriendlyErrorMessage
         } from './auth.js';
 
-        // *** MUDANÇA PRINCIPAL AQUI ***
-        // Verifica se o utilizador já está logado E NÃO é anónimo.
-        onAuthStateChanged(auth, (user) => {
+        const pageLoader = document.getElementById('page-loader');
+        const body = document.querySelector('body');
+
+        // *** LÓGICA DE AUTENTICAÇÃO REFORÇADA ***
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            // Este listener só executa uma vez para a verificação inicial
+            unsubscribe(); 
+
             if (user && !user.isAnonymous) {
-                // Se for um utilizador real, redireciona para o painel.
+                // Se for um utilizador real, redireciona imediatamente.
                 window.location.href = '/areadousuario.html';
+            } else {
+                // Se o utilizador for nulo ou anónimo, remove o loader e mostra a página de login.
+                pageLoader.style.display = 'none';
+                body.classList.remove('auth-loading');
             }
-            // Se o utilizador for nulo ou anónimo, ele permanece na página de login.
         });
 
-        // Pega os elementos da página que vamos usar
+        // O resto do código para os formulários permanece o mesmo,
+        // pois eles só são executados após a interação do utilizador.
+        
         const authForm = document.getElementById('auth-form');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const googleLoginButton = document.getElementById('google-login-button');
         const errorMessageDiv = document.getElementById('error-message');
-        
-        // Elementos para alternar entre Login e Registro
         const toggleModeButton = document.getElementById('toggle-mode-button');
         const formTitle = document.getElementById('form-title');
         const formSubtitle = document.getElementById('form-subtitle');
         const authActionButton = document.getElementById('auth-action-button');
         const toggleText = document.getElementById('toggle-text');
 
-        let isRegistering = false; // Controla se estamos em modo de registro ou login
+        let isRegistering = false;
 
-        // Lógica para o formulário de E-mail/Senha
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             errorMessageDiv.classList.add('hidden');
             const email = emailInput.value;
             const password = passwordInput.value;
-
             try {
+                let userCredential;
                 if (isRegistering) {
-                    await createUserWithEmailAndPassword(auth, email, password);
+                    userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 } else {
-                    await signInWithEmailAndPassword(auth, email, password);
+                    userCredential = await signInWithEmailAndPassword(auth, email, password);
                 }
-                // Se der certo, o onAuthStateChanged vai redirecionar
+                // Após o login/registo bem-sucedido, redireciona
+                if (userCredential.user) {
+                    window.location.href = '/areadousuario.html';
+                }
             } catch (error) {
                 errorMessageDiv.textContent = getFriendlyErrorMessage(error.code);
                 errorMessageDiv.classList.remove('hidden');
             }
         });
 
-        // Lógica para o botão do Google
         googleLoginButton.addEventListener('click', async () => {
             errorMessageDiv.classList.add('hidden');
             try {
-                await signInWithPopup(auth, googleProvider);
-                // Se der certo, o onAuthStateChanged vai redirecionar
+                const result = await signInWithPopup(auth, googleProvider);
+                if (result.user) {
+                     window.location.href = '/areadousuario.html';
+                }
             } catch (error) {
                 errorMessageDiv.textContent = getFriendlyErrorMessage(error.code);
                 errorMessageDiv.classList.remove('hidden');
             }
         });
 
-        // Lógica para o botão de alternar entre Login e Registro
         toggleModeButton.addEventListener('click', () => {
             isRegistering = !isRegistering;
             errorMessageDiv.classList.add('hidden');
-
             if (isRegistering) {
                 formTitle.textContent = 'Crie sua Conta';
                 formSubtitle.textContent = 'Para começar a planejar seu sonho.';
@@ -189,7 +204,6 @@
                 toggleModeButton.textContent = 'Registre-se';
             }
         });
-
     </script>
 
 </body>
