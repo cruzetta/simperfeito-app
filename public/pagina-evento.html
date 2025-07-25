@@ -28,7 +28,9 @@
         #event-page-preview .font-special { font-family: var(--font-special); }
         #event-page-preview .text-primary { color: var(--color-primary); }
         #event-page-preview .bg-primary-light { background-color: var(--color-background); }
-        
+        #event-page-preview .border-primary { border-color: var(--color-primary); }
+        #event-page-preview .section-graphic { display: none; }
+
         /* Template: Clássico */
         #event-page-preview.template-classic {
             --font-display: 'Playfair Display', serif;
@@ -60,6 +62,19 @@
             --color-text-main: #881337; /* rose-900 */
         }
         #event-page-preview.template-romantic #header-section { border-bottom: 4px solid var(--color-primary); }
+
+        /* NOVO Template: Elegância */
+        #event-page-preview.template-elegancia {
+            --font-display: 'Dancing Script', cursive;
+            --font-body: 'Playfair Display', serif;
+            --color-primary: #374151; /* gray-700 */
+            --color-background: #F9FAFB; /* gray-50 */
+            --color-text-main: #1F2937; /* gray-800 */
+            --color-text-light: #4B5563; /* gray-600 */
+        }
+        #event-page-preview.template-elegancia .section-graphic { display: block; margin: 0 auto 1rem; color: var(--color-primary); }
+        #event-page-preview.template-elegancia #couple-names-preview { font-family: var(--font-display); }
+        #event-page-preview.template-elegancia .section-title { font-family: var(--font-body); font-weight: 600; }
 
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -147,30 +162,23 @@
                      <button class="edit-btn" data-modal="story-modal" title="Editar Título e História">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
                     </button>
+                    <div class="section-graphic w-16 h-8">
+                        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><path d="M50,50 C40,40 30,30 10,30 C0,30 0,20 10,20 C30,20 40,30 50,30 C60,30 70,20 90,20 C100,20 100,30 90,30 C70,30 60,40 50,50 Z" fill="none" stroke="currentColor" stroke-width="2"></path></svg>
+                    </div>
                     <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">Nossa História</h2>
                     <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">
                         Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!
                     </p>
                 </section>
 
-                <!-- Seção da Galeria -->
-                <section id="gallery-section" class="editable-section p-8 md:p-16">
-                     <button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos">
-                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                    </button>
-                    <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-8">Nossos Momentos</h2>
-                    <div id="gallery-preview-container" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
-                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
-                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+3" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
-                    </div>
-                </section>
-
-                 <!-- Seção de Detalhes do Evento -->
-                <section id="details-section" class="editable-section p-8 md:p-16 bg-primary-light">
+                <!-- Seção de Detalhes do Evento -->
+                <section id="details-section" class="editable-section p-8 md:p-16">
                      <button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
                     </button>
+                    <div class="section-graphic w-16 h-8">
+                        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><path d="M50,50 C40,40 30,30 10,30 C0,30 0,20 10,20 C30,20 40,30 50,30 C60,30 70,20 90,20 C100,20 100,30 90,30 C70,30 60,40 50,50 Z" fill="none" stroke="currentColor" stroke-width="2"></path></svg>
+                    </div>
                     <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
                         <!-- Cerimônia -->
@@ -192,6 +200,39 @@
                     </div>
                 </section>
 
+                <!-- Seção da Galeria -->
+                <section id="gallery-section" class="editable-section p-8 md:p-16 bg-primary-light">
+                     <button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos">
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                    </button>
+                     <div class="section-graphic w-16 h-8">
+                        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><path d="M50,50 C40,40 30,30 10,30 C0,30 0,20 10,20 C30,20 40,30 50,30 C60,30 70,20 90,20 C100,20 100,30 90,30 C70,30 60,40 50,50 Z" fill="none" stroke="currentColor" stroke-width="2"></path></svg>
+                    </div>
+                    <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-8">Nossos Momentos</h2>
+                    <div id="gallery-preview-container" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
+                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
+                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+3" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
+                    </div>
+                </section>
+
+                <!-- NOVA Seção de RSVP -->
+                <section id="rsvp-section" class="editable-section p-8 md:p-16 text-center">
+                    <button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença">
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                    </button>
+                    <div class="section-graphic w-16 h-8">
+                        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><path d="M50,50 C40,40 30,30 10,30 C0,30 0,20 10,20 C30,20 40,30 50,30 C60,30 70,20 90,20 C100,20 100,30 90,30 C70,30 60,40 50,50 Z" fill="none" stroke="currentColor" stroke-width="2"></path></svg>
+                    </div>
+                    <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">Confirme sua Presença</h2>
+                    <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">
+                        Sua presença é o nosso maior presente! Por favor, confirme até o dia DD/MM/AAAA.
+                    </p>
+                    <a id="rsvp-button-preview" href="#" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">
+                        Confirmar Presença
+                    </a>
+                </section>
+
             </div>
         </main>
     </div>
@@ -203,30 +244,34 @@
             <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Escolha um Template</h3>
                 <p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p>
-                <div id="template-selection-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                     <!-- Template Clássico -->
                     <div class="template-card" data-template="classic">
-                        <img src="https://placehold.co/400x300/F8F7F5/831843?text=Cl%C3%A1ssico" alt="Template Clássico" class="w-full h-40 object-cover">
-                        <div class="p-4">
-                            <h4 class="font-bold text-lg">Clássico</h4>
-                            <p class="text-sm text-gray-500">Elegante e atemporal, com fontes serifadas.</p>
+                        <div class="p-4 border-b text-center" style="background-color: #F8F7F5;">
+                            <h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4>
                         </div>
+                        <div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div>
                     </div>
                     <!-- Template Moderno -->
                     <div class="template-card" data-template="modern">
-                        <img src="https://placehold.co/400x300/F9FAFB/111827?text=Moderno" alt="Template Moderno" class="w-full h-40 object-cover">
-                        <div class="p-4">
-                            <h4 class="font-bold text-lg">Moderno</h4>
-                            <p class="text-sm text-gray-500">Minimalista e limpo, com fontes sem serifa.</p>
+                        <div class="p-4 border-b text-center" style="background-color: #F9FAFB;">
+                            <h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4>
                         </div>
+                        <div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div>
                     </div>
                     <!-- Template Romântico -->
                     <div class="template-card" data-template="romantic">
-                        <img src="https://placehold.co/400x300/FFF1F2/DB2777?text=Rom%C3%A2ntico" alt="Template Romântico" class="w-full h-40 object-cover">
-                        <div class="p-4">
-                            <h4 class="font-bold text-lg">Romântico</h4>
-                            <p class="text-sm text-gray-500">Delicado, com fontes cursivas e cores suaves.</p>
+                         <div class="p-4 border-b text-center" style="background-color: #FFF1F2;">
+                            <h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4>
                         </div>
+                        <div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div>
+                    </div>
+                    <!-- Template Elegância -->
+                    <div class="template-card" data-template="elegancia">
+                         <div class="p-4 border-b text-center" style="background-color: #F9FAFB;">
+                            <h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4>
+                        </div>
+                        <div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div>
                     </div>
                 </div>
                  <div class="flex justify-end gap-2 mt-8">
@@ -235,7 +280,7 @@
             </div>
         </div>
 
-        <!-- Modal do Cabeçalho -->
+        <!-- Outros modais (cabeçalho, história, etc.) -->
         <div id="header-modal" class="modal">
             <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Editar Cabeçalho</h3>
@@ -259,8 +304,6 @@
                 </form>
             </div>
         </div>
-
-        <!-- Modal da História -->
         <div id="story-modal" class="modal">
             <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Editar História</h3>
@@ -280,15 +323,11 @@
                 </form>
             </div>
         </div>
-        
-        <!-- Modal da Galeria -->
         <div id="gallery-modal" class="modal">
             <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos</h3>
                 <form id="gallery-form">
-                    <div id="gallery-inputs-container" class="space-y-4 mb-4">
-                        <!-- Inputs da galeria serão adicionados aqui -->
-                    </div>
+                    <div id="gallery-inputs-container" class="space-y-4 mb-4"></div>
                     <button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
@@ -297,55 +336,25 @@
                 </form>
             </div>
         </div>
-
-        <!-- Modal de Detalhes do Evento -->
         <div id="details-modal" class="modal">
              <div class="modal-content">
                 <h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3>
                 <form id="details-form" class="space-y-6">
-                    <!-- Detalhes da Cerimônia -->
-                    <fieldset class="border p-4 rounded-md">
-                        <legend class="text-lg font-semibold px-2">Cerimónia</legend>
+                    <fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Cerimónia</legend>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label>
-                                <input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md">
-                            </div>
-                             <div>
-                                <label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label>
-                                <input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00">
-                            </div>
+                            <div><label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                            <div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div>
                         </div>
-                        <div class="mt-4">
-                            <label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-                            <input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mt-4">
-                            <label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label>
-                            <input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
+                        <div class="mt-4"><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div class="mt-4"><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md"></div>
                     </fieldset>
-                    <!-- Detalhes da Recepção -->
-                     <fieldset class="border p-4 rounded-md">
-                        <legend class="text-lg font-semibold px-2">Recepção</legend>
+                    <fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Recepção</legend>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label>
-                                <input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md">
-                            </div>
-                             <div>
-                                <label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
-                                <input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia">
-                            </div>
+                            <div><label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                            <div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div>
                         </div>
-                        <div class="mt-4">
-                            <label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-                            <input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mt-4">
-                            <label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label>
-                            <input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
+                        <div class="mt-4"><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div class="mt-4"><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md"></div>
                     </fieldset>
                     <div class="flex justify-end gap-2 mt-6">
                         <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
@@ -354,7 +363,34 @@
                 </form>
             </div>
         </div>
-
+        <!-- NOVO Modal de RSVP -->
+        <div id="rsvp-modal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-xl font-bold mb-4">Editar Confirmação de Presença</h3>
+                <form id="rsvp-form" class="space-y-4">
+                    <div>
+                        <label for="rsvp-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label>
+                        <input type="text" id="rsvp-title-input" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="rsvp-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto de Apoio</label>
+                        <textarea id="rsvp-text-input" rows="4" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                    </div>
+                    <div>
+                        <label for="rsvp-button-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto do Botão</label>
+                        <input type="text" id="rsvp-button-text-input" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="rsvp-button-link-input" class="block text-sm font-medium text-gray-700 mb-1">Link do Botão (para seu formulário de RSVP)</label>
+                        <input type="url" id="rsvp-button-link-input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://seu-link-de-rsvp.com">
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
+                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -375,15 +411,15 @@
         let pageData = {}; // Objeto local para armazenar os dados da página
 
         const defaultData = {
-            template: 'classic',
+            template: 'elegancia',
             header: {
-                coupleNames: ["Nome do Aniversariante"],
+                coupleNames: ["Noiva & Noivo"],
                 eventDate: "Data do Evento",
                 imageUrl: "https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui"
             },
             story: {
-                title: "Minha História",
-                text: "Clique no botão de edição para contar a sua história, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!"
+                title: "Nossa História",
+                text: "Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!"
             },
             gallery: {
                 photos: [
@@ -393,8 +429,14 @@
                 ]
             },
             details: {
-                ceremony: { name: "Local da Festa", address: "Endereço do Local, 123", time: "Sábado, 25 de Outubro de 2025, às 19:00", mapUrl: "#" },
-                reception: { name: "Recepção (opcional)", address: "Endereço do Local, 456", time: "Logo após a cerimónia", mapUrl: "#" }
+                ceremony: { name: "Local da Cerimônia", address: "Endereço do Local, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" },
+                reception: { name: "Local da Recepção", address: "Endereço do Local, 456", time: "Logo após a cerimónia", mapUrl: "#" }
+            },
+            rsvp: {
+                title: "Confirme sua Presença",
+                text: "Sua presença é o nosso maior presente! Por favor, confirme até o dia DD/MM/AAAA.",
+                buttonText: "Confirmar Presença",
+                buttonLink: "#"
             }
         };
 
@@ -419,7 +461,7 @@
         function initializePage() {
             loadingState.classList.add('hidden');
             pageContent.classList.remove('hidden');
-            applyTemplate(pageData.template || 'classic');
+            applyTemplate(pageData.template || 'elegancia');
             renderAllPreviews();
             setupEventListeners();
         }
@@ -432,7 +474,6 @@
 
         async function loadPageData() {
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-            // CORREÇÃO: A linha abaixo estava com um erro de digitação (usava docSnap antes de ser definido).
             const docSnap = await getDoc(pageDataRef);
 
             if (!docSnap.exists()) {
@@ -444,6 +485,7 @@
                 });
             } else {
                 const loadedData = docSnap.data();
+                // Merge loaded data with defaults to ensure all properties exist
                 pageData = {
                     ...JSON.parse(JSON.stringify(defaultData)),
                     ...loadedData,
@@ -451,6 +493,7 @@
                     story: { ...defaultData.story, ...(loadedData.story || {}) },
                     gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) },
                     details: { ...defaultData.details, ...(loadedData.details || {}) },
+                    rsvp: { ...defaultData.rsvp, ...(loadedData.rsvp || {}) }
                 };
                  if (!Array.isArray(pageData.gallery.photos) || pageData.gallery.photos.length === 0) {
                     pageData.gallery.photos = defaultData.gallery.photos;
@@ -460,11 +503,10 @@
 
         // --- LÓGICA DE TEMPLATES ---
         function applyTemplate(templateId) {
-            eventPagePreview.classList.remove('template-classic', 'template-modern', 'template-romantic');
+            eventPagePreview.classList.remove('template-classic', 'template-modern', 'template-romantic', 'template-elegancia');
             eventPagePreview.classList.add(`template-${templateId}`);
             pageData.template = templateId;
 
-            // Atualiza o card ativo no modal
             document.querySelectorAll('.template-card').forEach(card => {
                 card.classList.toggle('active', card.dataset.template === templateId);
             });
@@ -474,14 +516,14 @@
         function renderAllPreviews() {
             renderHeaderPreview();
             renderStoryPreview();
-            renderGalleryPreview();
             renderDetailsPreview();
+            renderGalleryPreview();
+            renderRsvpPreview();
         }
 
         function renderHeaderPreview() {
             const { coupleNames, eventDate, imageUrl } = pageData.header;
-            const namesText = Array.isArray(coupleNames) ? coupleNames.join(' & ') : defaultData.header.coupleNames.join(' & ');
-            document.getElementById('couple-names-preview').textContent = namesText;
+            document.getElementById('couple-names-preview').textContent = Array.isArray(coupleNames) ? coupleNames.join(' & ') : '';
             document.getElementById('event-date-preview').textContent = eventDate;
             const imgPreview = document.getElementById('header-image-preview');
             imgPreview.src = imageUrl || defaultData.header.imageUrl;
@@ -493,48 +535,43 @@
             document.getElementById('story-title-preview').textContent = title;
             document.getElementById('story-text-preview').textContent = text;
         }
-        
-        function renderGalleryPreview() {
-            const container = document.getElementById('gallery-preview-container');
-            container.innerHTML = '';
-            const photos = pageData.gallery.photos;
-
-            photos.forEach(photo => {
-                const img = document.createElement('img');
-                img.src = photo.url;
-                img.alt = photo.caption || 'Foto da galeria';
-                img.className = 'rounded-lg shadow-md object-cover w-full h-full aspect-square';
-                img.onerror = () => { img.src = 'https://placehold.co/400x400/FCE7F3/DB2777?text=Imagem+Inv%C3%A1lida'; };
-                container.appendChild(img);
-            });
-        }
 
         function renderDetailsPreview() {
             const { ceremony, reception } = pageData.details;
             const ceremonyDiv = document.getElementById('ceremony-details-preview');
             const receptionDiv = document.getElementById('reception-details-preview');
 
-            ceremonyDiv.innerHTML = `
-                <h3 class="font-display text-2xl text-primary">Cerimónia</h3>
-                <p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${ceremony.name || ''}</p>
-                <p style="color: var(--color-text-light);">${ceremony.address || ''}</p>
-                <p class="mt-1" style="color: var(--color-text-light);">${ceremony.time || ''}</p>
-                <a href="${ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>
-            `;
-            receptionDiv.innerHTML = `
-                <h3 class="font-display text-2xl text-primary">Recepção</h3>
-                <p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${reception.name || ''}</p>
-                <p style="color: var(--color-text-light);">${reception.address || ''}</p>
-                <p class="mt-1" style="color: var(--color-text-light);">${reception.time || ''}</p>
-                <a href="${reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>
-            `;
+            ceremonyDiv.innerHTML = `<h3 class="font-display text-2xl text-primary">Cerimónia</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${ceremony.name || ''}</p><p style="color: var(--color-text-light);">${ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${ceremony.time || ''}</p><a href="${ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>`;
+            receptionDiv.innerHTML = `<h3 class="font-display text-2xl text-primary">Recepção</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${reception.name || ''}</p><p style="color: var(--color-text-light);">${reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${reception.time || ''}</p><a href="${reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>`;
+        }
+        
+        function renderGalleryPreview() {
+            const container = document.getElementById('gallery-preview-container');
+            container.innerHTML = '';
+            const photos = pageData.gallery.photos || [];
+            photos.forEach(photo => {
+                const img = document.createElement('img');
+                img.src = photo.url;
+                img.alt = 'Foto da galeria';
+                img.className = 'rounded-lg shadow-md object-cover w-full h-full aspect-square';
+                img.onerror = () => { img.src = 'https://placehold.co/400x400/FCE7F3/DB2777?text=Imagem+Inv%C3%A1lida'; };
+                container.appendChild(img);
+            });
+        }
+
+        function renderRsvpPreview() {
+            const { title, text, buttonText, buttonLink } = pageData.rsvp;
+            document.getElementById('rsvp-title-preview').textContent = title;
+            document.getElementById('rsvp-text-preview').textContent = text;
+            const button = document.getElementById('rsvp-button-preview');
+            button.textContent = buttonText;
+            button.href = buttonLink || '#';
         }
 
         // --- LÓGICA DOS MODAIS ---
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
-                // Preencher formulário antes de abrir
                 switch (modalId) {
                     case 'header-modal':
                         document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
@@ -559,6 +596,13 @@
                         document.getElementById('reception-address').value = reception.address;
                         document.getElementById('reception-map').value = reception.mapUrl;
                         break;
+                    case 'rsvp-modal':
+                        const { rsvp } = pageData;
+                        document.getElementById('rsvp-title-input').value = rsvp.title;
+                        document.getElementById('rsvp-text-input').value = rsvp.text;
+                        document.getElementById('rsvp-button-text-input').value = rsvp.buttonText;
+                        document.getElementById('rsvp-button-link-input').value = rsvp.buttonLink;
+                        break;
                 }
                 modal.classList.add('is-open');
             }
@@ -569,34 +613,18 @@
         }
 
         function setupEventListeners() {
-            // Abrir modais
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', () => openModal(btn.dataset.modal));
-            });
+            document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.modal)));
             document.getElementById('open-template-modal').addEventListener('click', () => openModal('template-modal'));
-
-            // Fechar modais
-            document.querySelectorAll('.modal-close-btn').forEach(btn => {
-                btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
-            });
-
-            // Seleção de template
-            document.querySelectorAll('.template-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    applyTemplate(card.dataset.template);
-                });
-            });
-
-            // Salvar modais
+            document.querySelectorAll('.modal-close-btn').forEach(btn => btn.addEventListener('click', () => closeModal(btn.closest('.modal'))));
+            document.querySelectorAll('.template-card').forEach(card => card.addEventListener('click', () => applyTemplate(card.dataset.template)));
+            
             document.getElementById('header-form').addEventListener('submit', handleHeaderSave);
             document.getElementById('story-form').addEventListener('submit', handleStorySave);
             document.getElementById('gallery-form').addEventListener('submit', handleGallerySave);
             document.getElementById('details-form').addEventListener('submit', handleDetailsSave);
+            document.getElementById('rsvp-form').addEventListener('submit', handleRsvpSave);
 
-            // Botão principal de salvar
             saveButton.addEventListener('click', handleFullSave);
-            
-            // Lógica da galeria
             document.getElementById('add-photo-btn').addEventListener('click', () => addPhotoField());
         }
 
@@ -621,50 +649,40 @@
         function handleGallerySave(e) {
             e.preventDefault();
             const inputs = document.querySelectorAll('.gallery-photo-input');
-            const newPhotos = [];
-            inputs.forEach(input => {
-                const url = input.value.trim();
-                if (url) {
-                    newPhotos.push({ url });
-                }
-            });
-            pageData.gallery.photos = newPhotos;
+            pageData.gallery.photos = Array.from(inputs).map(input => ({ url: input.value.trim() })).filter(p => p.url);
             renderGalleryPreview();
             closeModal(e.target.closest('.modal'));
         }
 
         function handleDetailsSave(e) {
             e.preventDefault();
-            pageData.details.ceremony.name = document.getElementById('ceremony-name').value;
-            pageData.details.ceremony.time = document.getElementById('ceremony-time').value;
-            pageData.details.ceremony.address = document.getElementById('ceremony-address').value;
-            pageData.details.ceremony.mapUrl = document.getElementById('ceremony-map').value;
-            pageData.details.reception.name = document.getElementById('reception-name').value;
-            pageData.details.reception.time = document.getElementById('reception-time').value;
-            pageData.details.reception.address = document.getElementById('reception-address').value;
-            pageData.details.reception.mapUrl = document.getElementById('reception-map').value;
+            pageData.details.ceremony = { name: document.getElementById('ceremony-name').value, time: document.getElementById('ceremony-time').value, address: document.getElementById('ceremony-address').value, mapUrl: document.getElementById('ceremony-map').value };
+            pageData.details.reception = { name: document.getElementById('reception-name').value, time: document.getElementById('reception-time').value, address: document.getElementById('reception-address').value, mapUrl: document.getElementById('reception-map').value };
             renderDetailsPreview();
             closeModal(e.target.closest('.modal'));
         }
 
-        // Lógica da Galeria no Modal
+        function handleRsvpSave(e) {
+            e.preventDefault();
+            pageData.rsvp.title = document.getElementById('rsvp-title-input').value;
+            pageData.rsvp.text = document.getElementById('rsvp-text-input').value;
+            pageData.rsvp.buttonText = document.getElementById('rsvp-button-text-input').value;
+            pageData.rsvp.buttonLink = document.getElementById('rsvp-button-link-input').value;
+            renderRsvpPreview();
+            closeModal(e.target.closest('.modal'));
+        }
+
         function populateGalleryForm() {
             const container = document.getElementById('gallery-inputs-container');
             container.innerHTML = '';
-            const photos = Array.isArray(pageData.gallery.photos) ? pageData.gallery.photos : [];
-            photos.forEach(photo => {
-                addPhotoField(photo.url);
-            });
+            (pageData.gallery.photos || []).forEach(photo => addPhotoField(photo.url));
         }
 
         function addPhotoField(url = '') {
             const container = document.getElementById('gallery-inputs-container');
             const div = document.createElement('div');
             div.className = 'flex items-center gap-2';
-            div.innerHTML = `
-                <input type="url" class="gallery-photo-input flex-grow p-2 border border-gray-300 rounded-md" value="${url}" placeholder="https://exemplo.com/foto.jpg">
-                <button type="button" class="remove-photo-btn text-red-500 hover:text-red-700 p-1 rounded-full"><svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button>
-            `;
+            div.innerHTML = `<input type="url" class="gallery-photo-input flex-grow p-2 border border-gray-300 rounded-md" value="${url}" placeholder="https://exemplo.com/foto.jpg"><button type="button" class="remove-photo-btn text-red-500 hover:text-red-700 p-1 rounded-full"><svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button>`;
             div.querySelector('.remove-photo-btn').addEventListener('click', () => div.remove());
             container.appendChild(div);
         }
@@ -673,17 +691,12 @@
         async function handleFullSave() {
             saveButton.disabled = true;
             saveButton.innerHTML = 'A salvar...';
-
             try {
                 const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
                 await setDoc(pageDataRef, { ...pageData, updatedAt: new Date() });
-                
                 successMessage.classList.remove('hidden');
                 window.scrollTo(0, 0);
-                setTimeout(() => {
-                    successMessage.classList.add('hidden');
-                }, 3000);
-
+                setTimeout(() => successMessage.classList.add('hidden'), 3000);
             } catch (error) {
                 console.error("Erro ao salvar dados da página: ", error);
                 alert("Ocorreu um erro ao salvar. Tente novamente.");
