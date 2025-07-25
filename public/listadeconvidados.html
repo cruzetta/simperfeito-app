@@ -24,9 +24,14 @@
         .status-badge {
             cursor: pointer;
             transition: all 0.2s ease-in-out;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .status-badge:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -53,10 +58,11 @@
                 <!-- Resumo Geral -->
                 <div class="bg-white p-6 rounded-lg shadow-sm border col-span-1 lg:col-span-2">
                     <h3 class="text-base font-semibold text-gray-600 mb-4">Resumo Geral</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center">
                         <div><p class="text-3xl font-bold text-pink-600" id="total-guests">0</p><p class="text-sm text-gray-500">Convidados</p></div>
                         <div><p class="text-3xl font-bold text-gray-800" id="total-families">0</p><p class="text-sm text-gray-500">Famílias</p></div>
                         <div><p class="text-3xl font-bold text-blue-600" id="total-adults">0</p><p class="text-sm text-gray-500">Adultos</p></div>
+                        <div><p class="text-3xl font-bold text-yellow-600" id="total-teens">0</p><p class="text-sm text-gray-500">Adolescentes</p></div>
                         <div><p class="text-3xl font-bold text-green-600" id="total-children">0</p><p class="text-sm text-gray-500">Crianças</p></div>
                     </div>
                 </div>
@@ -75,12 +81,15 @@
             </div>
 
             <!-- Controles da Lista -->
-            <div class="bg-white p-4 rounded-lg shadow-sm border mb-8">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="w-full sm:w-auto">
-                        <input type="text" id="search-input" placeholder="Buscar por nome..." class="w-full sm:w-80 p-2 border border-gray-300 rounded-md">
+            <div class="bg-white p-4 rounded-lg shadow-sm border mb-8 space-y-4">
+                <div>
+                    <input type="text" id="search-input" placeholder="Buscar por nome..." class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div id="status-filters" class="flex flex-wrap gap-2 justify-center"></div>
+                    <div class="flex-grow border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-4">
+                        <div id="relationship-filters" class="flex flex-wrap gap-2 justify-center sm:justify-start"></div>
                     </div>
-                    <div id="relationship-filters" class="flex flex-wrap gap-2 justify-center"></div>
                 </div>
             </div>
 
@@ -134,6 +143,7 @@
         const familyListContainer = document.getElementById('family-list-container');
         const noFamiliesMessage = document.getElementById('no-families-message');
         const relationshipFiltersContainer = document.getElementById('relationship-filters');
+        const statusFiltersContainer = document.getElementById('status-filters'); // NOVO
         const searchInput = document.getElementById('search-input');
         
         // Elementos do Modal de Adicionar/Editar
@@ -153,7 +163,8 @@
         const totalGuestsEl = document.getElementById('total-guests');
         const totalFamiliesEl = document.getElementById('total-families');
         const totalAdultsEl = document.getElementById('total-adults');
-        const totalChildrenEl = document.getElementById('total-children'); // Somando adolescentes e crianças
+        const totalTeensEl = document.getElementById('total-teens');
+        const totalChildrenEl = document.getElementById('total-children');
         const totalConfirmedEl = document.getElementById('total-confirmed');
         const totalPendingEl = document.getElementById('total-pending');
         const totalDeclinedEl = document.getElementById('total-declined');
@@ -166,7 +177,8 @@
         let allFamilies = [];
         let eventConfig = null;
         let confirmCallback = null;
-        let currentFilter = 'todos';
+        let currentRelationshipFilter = 'todos';
+        let currentStatusFilter = 'todos'; // NOVO
 
         const eventDefinitions = {
             casamento: { label: 'Casamento', relations: ['Família da Noiva', 'Família do Noivo', 'Amigos da Noiva', 'Amigos do Noivo', 'Amigos do Casal'] },
@@ -194,7 +206,6 @@
                 eventConfig = configSnap.data();
                 initializePage();
             } else {
-                // Lógica do modal de seleção de evento (simplificada)
                 document.getElementById('event-type-modal').innerHTML = `
                     <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 modal-fade-in">
                         <h3 class="text-2xl font-bold text-gray-800 font-display mb-2">Bem-vindo(a)!</h3>
@@ -234,7 +245,8 @@
         
         function setupDynamicUI() {
             relationshipContainer.innerHTML = createRelationshipSelector(eventConfig.relations);
-            createFilterButtons();
+            createRelationshipFilterButtons();
+            createStatusFilterButtons(); // NOVO
         }
 
         // --- LÓGICA DO MODAL DE ADICIONAR/EDITAR ---
@@ -243,7 +255,7 @@
             modalTitle.textContent = 'Adicionar Nova Família';
             familyIdInput.value = '';
             membersContainer.innerHTML = '';
-            addMemberField(membersContainer); // Adiciona o primeiro campo de membro
+            addMemberField(membersContainer);
             formErrorMessage.classList.add('hidden');
             familyModal.classList.remove('hidden');
         };
@@ -277,7 +289,8 @@
             const relationship = document.getElementById('relationship-select').value;
             const members = Array.from(membersContainer.querySelectorAll('.member-field')).map(field => ({
                 name: field.querySelector('input[type="text"]').value.trim(),
-                type: field.querySelector('select').value
+                type: field.querySelector('select').value,
+                status: 'pendente'
             })).filter(member => member.name);
 
             if (!familyName || members.length === 0) {
@@ -289,11 +302,16 @@
             const familyData = { name: familyName, relationship, members };
 
             try {
-                if (familyId) { // Editando
+                if (familyId) {
                     const docRef = doc(db, 'users', currentUser.uid, 'families', familyId);
+                    const oldFamily = allFamilies.find(f => f.id === familyId);
+                    const updatedMembers = members.map(newMember => {
+                        const oldMember = oldFamily.members.find(m => m.name === newMember.name);
+                        return oldMember ? { ...newMember, status: oldMember.status } : newMember;
+                    });
+                    familyData.members = updatedMembers;
                     await updateDoc(docRef, familyData);
-                } else { // Criando
-                    familyData.status = 'pendente'; // Status padrão para novas famílias
+                } else {
                     familyData.createdAt = new Date();
                     await addDoc(collection(db, 'users', currentUser.uid, 'families'), familyData);
                 }
@@ -344,8 +362,15 @@
                 );
             }
 
-            if (currentFilter !== 'todos') {
-                filteredFamilies = filteredFamilies.filter(f => f.relationship === currentFilter);
+            if (currentRelationshipFilter !== 'todos') {
+                filteredFamilies = filteredFamilies.filter(f => f.relationship === currentRelationshipFilter);
+            }
+            
+            // NOVO: Filtro por status
+            if (currentStatusFilter !== 'todos') {
+                filteredFamilies = filteredFamilies.filter(family => 
+                    family.members.some(member => member.status === currentStatusFilter)
+                );
             }
 
             familyListContainer.innerHTML = '';
@@ -363,20 +388,27 @@
             const card = document.createElement('div');
             card.className = 'bg-white p-5 rounded-lg shadow-sm border flex flex-col fade-in';
             
-            const membersHtml = family.members.map(member => {
-                let badgeClass = '';
-                if (member.type === 'adulto') badgeClass = 'bg-blue-100 text-blue-800';
-                else if (member.type === 'adolescente') badgeClass = 'bg-yellow-100 text-yellow-800';
-                else badgeClass = 'bg-green-100 text-green-800';
-                return `<li class="flex justify-between items-center py-2 border-b last:border-b-0"><span class="text-gray-700">${member.name}</span><span class="text-xs font-medium px-2 py-1 rounded-full ${badgeClass}">${member.type}</span></li>`;
-            }).join('');
+            const membersHtml = family.members.map((member, index) => {
+                let typeBadgeClass = '';
+                if (member.type === 'adulto') typeBadgeClass = 'bg-blue-100 text-blue-800';
+                else if (member.type === 'adolescente') typeBadgeClass = 'bg-yellow-100 text-yellow-800';
+                else typeBadgeClass = 'bg-green-100 text-green-800';
 
-            let statusInfo = {
-                'pendente': { text: 'Pendente', class: 'bg-yellow-400 hover:bg-yellow-500', next: 'confirmado' },
-                'confirmado': { text: 'Confirmado', class: 'bg-green-500 hover:bg-green-600', next: 'recusado' },
-                'recusado': { text: 'Recusado', class: 'bg-red-500 hover:bg-red-600', next: 'pendente' }
-            };
-            const currentStatus = statusInfo[family.status] || statusInfo['pendente'];
+                const statusInfo = {
+                    'pendente': { icon: '?', class: 'bg-yellow-400 hover:bg-yellow-500', next: 'confirmado', title: 'Pendente' },
+                    'confirmado': { icon: '✓', class: 'bg-green-500 hover:bg-green-600', next: 'recusado', title: 'Confirmado' },
+                    'recusado': { icon: '✕', class: 'bg-red-500 hover:bg-red-600', next: 'pendente', title: 'Recusado' }
+                };
+                const currentStatus = statusInfo[member.status] || statusInfo['pendente'];
+
+                return `<li class="flex justify-between items-center py-2 border-b last:border-b-0">
+                            <div class="flex items-center gap-2">
+                                <button title="${currentStatus.title}" data-family-id="${family.id}" data-member-index="${index}" data-next-status="${currentStatus.next}" class="member-status-badge status-badge text-white text-sm font-bold rounded-full ${currentStatus.class}">${currentStatus.icon}</button>
+                                <span class="text-gray-700">${member.name}</span>
+                            </div>
+                            <span class="text-xs font-medium px-2 py-1 rounded-full ${typeBadgeClass}">${member.type}</span>
+                        </li>`;
+            }).join('');
 
             card.innerHTML = `
                 <div class="flex-grow">
@@ -386,16 +418,13 @@
                             <span class="text-xs font-semibold px-2 py-1 rounded-full bg-pink-100 text-pink-800">${family.relationship}</span>
                         </div>
                         <div class="flex items-center space-x-1">
-                            <button data-family-id="${family.id}" class="edit-family-button text-gray-400 hover:text-blue-600 p-1"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                            <button data-family-id="${family.id}" class="delete-family-button text-gray-400 hover:text-red-600 p-1"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>
+                            <button data-family-id="${family.id}" class="edit-family-button text-gray-400 hover:text-blue-600 p-1"><svg class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                            <button data-family-id="${family.id}" class="delete-family-button text-gray-400 hover:text-red-600 p-1"><svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>
                         </div>
                     </div>
                     <ul class="mb-4">${membersHtml}</ul>
                 </div>
-                <div class="flex justify-between items-center text-xs text-gray-500 pt-3 border-t">
-                    <span>Total: ${family.members.length} membro(s)</span>
-                    <button data-family-id="${family.id}" data-next-status="${currentStatus.next}" class="status-badge text-white text-xs font-bold py-1 px-3 rounded-full ${currentStatus.class}">${currentStatus.text}</button>
-                </div>`;
+                <div class="text-xs text-gray-400 pt-2 border-t text-right">Total: ${family.members.length} membro(s)</div>`;
             return card;
         };
 
@@ -404,12 +433,12 @@
             
             totals.families = families.length;
             families.forEach(f => {
-                totals.guests += f.members.length;
-                if (f.status === 'confirmado') totals.confirmed += f.members.length;
-                else if (f.status === 'recusado') totals.declined += f.members.length;
-                else totals.pending += f.members.length;
-
                 f.members.forEach(m => {
+                    totals.guests++;
+                    if (m.status === 'confirmado') totals.confirmed++;
+                    else if (m.status === 'recusado') totals.declined++;
+                    else totals.pending++;
+
                     if (m.type === 'adulto') totals.adults++;
                     else if (m.type === 'adolescente') totals.teens++;
                     else totals.children++;
@@ -419,7 +448,8 @@
             totalGuestsEl.textContent = totals.guests;
             totalFamiliesEl.textContent = totals.families;
             totalAdultsEl.textContent = totals.adults;
-            totalChildrenEl.textContent = totals.teens + totals.children; // Agrupado
+            totalTeensEl.textContent = totals.teens;
+            totalChildrenEl.textContent = totals.children;
             totalConfirmedEl.textContent = totals.confirmed;
             totalPendingEl.textContent = totals.pending;
             totalDeclinedEl.textContent = totals.declined;
@@ -468,10 +498,10 @@
         // --- EVENT LISTENERS ---
         searchInput.addEventListener('input', renderPageContent);
 
-        familyListContainer.addEventListener('click', (e) => {
+        familyListContainer.addEventListener('click', async (e) => {
             const editBtn = e.target.closest('.edit-family-button');
             const deleteBtn = e.target.closest('.delete-family-button');
-            const statusBtn = e.target.closest('.status-badge');
+            const statusBtn = e.target.closest('.member-status-badge');
 
             if (editBtn) {
                 const family = allFamilies.find(f => f.id === editBtn.dataset.familyId);
@@ -479,16 +509,25 @@
             }
             if (deleteBtn) {
                 const familyId = deleteBtn.dataset.familyId;
-                showConfirmModal('Tem a certeza que quer apagar esta família?', async () => {
+                showConfirmModal('Tem a certeza que quer apagar esta família e todos os seus membros?', async () => {
                     try { await deleteDoc(doc(db, 'users', currentUser.uid, 'families', familyId)); } 
                     catch (error) { console.error("Erro ao apagar família: ", error); }
                 });
             }
             if (statusBtn) {
                 const familyId = statusBtn.dataset.familyId;
+                const memberIndex = parseInt(statusBtn.dataset.memberIndex, 10);
                 const nextStatus = statusBtn.dataset.nextStatus;
+                const familyToUpdate = allFamilies.find(f => f.id === familyId);
+                if (!familyToUpdate) return;
+                const updatedMembers = JSON.parse(JSON.stringify(familyToUpdate.members));
+                updatedMembers[memberIndex].status = nextStatus;
                 const docRef = doc(db, 'users', currentUser.uid, 'families', familyId);
-                updateDoc(docRef, { status: nextStatus });
+                try {
+                    await updateDoc(docRef, { members: updatedMembers });
+                } catch (error) {
+                    console.error("Erro ao atualizar status do membro:", error);
+                }
             }
         });
 
@@ -511,23 +550,48 @@
             });
         };
 
-        function createFilterButtons() {
+        function createRelationshipFilterButtons() {
             relationshipFiltersContainer.innerHTML = '';
             const relations = ['Todos', ...eventConfig.relations];
             relations.forEach(relation => {
                 const button = document.createElement('button');
                 button.textContent = relation;
                 const filterValue = relation === 'Todos' ? 'todos' : relation;
-                button.className = `px-3 py-1 border rounded-full text-sm font-medium transition-colors hover:bg-gray-200 ${currentFilter === filterValue ? 'filter-button-active' : ''}`;
+                button.className = `px-3 py-1 border rounded-full text-sm font-medium transition-colors hover:bg-gray-200 ${currentRelationshipFilter === filterValue ? 'filter-button-active' : ''}`;
                 
                 button.addEventListener('click', () => {
-                    currentFilter = filterValue;
+                    currentRelationshipFilter = filterValue;
                     document.querySelectorAll('#relationship-filters button').forEach(btn => btn.classList.remove('filter-button-active'));
                     button.classList.add('filter-button-active');
                     renderPageContent();
                 });
                 relationshipFiltersContainer.appendChild(button);
             });
+        }
+        
+        // NOVO: Função para criar botões de filtro de status
+        function createStatusFilterButtons() {
+            statusFiltersContainer.innerHTML = '';
+            const statuses = {
+                todos: 'Todos',
+                confirmado: 'Confirmados',
+                pendente: 'Pendentes',
+                recusado: 'Recusados'
+            };
+
+            for (const [value, text] of Object.entries(statuses)) {
+                const button = document.createElement('button');
+                button.textContent = text;
+                button.className = `px-3 py-1 border rounded-full text-sm font-medium transition-colors hover:bg-gray-200 ${currentStatusFilter === value ? 'filter-button-active' : ''}`;
+                
+                button.addEventListener('click', () => {
+                    currentStatusFilter = value;
+                    document.querySelectorAll('#status-filters button').forEach(btn => btn.classList.remove('filter-button-active'));
+                    button.classList.add('filter-button-active');
+                    renderPageContent();
+                });
+                statusFiltersContainer.appendChild(button);
+            }
         }
 
         function createRelationshipSelector(relations, id = 'relationship-select') {
