@@ -45,13 +45,19 @@ const db = getFirestore(app);
 // Função para traduzir os erros do Firebase para mensagens mais fáceis de entender
 const getFriendlyErrorMessage = (code) => {
     console.log("Firebase Auth Error Code:", code); // Adicionado para depuração
+
+    // Trata o erro específico de domínio não autorizado
+    if (code.includes('auth/requests-from-referer')) {
+        return 'Este site (domínio) não está autorizado para realizar operações de login. Verifique as configurações no painel do Firebase.';
+    }
+
     switch (code) {
         case 'auth/invalid-email':
             return 'O formato do e-mail é inválido.';
         case 'auth/user-not-found':
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
-            return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.'; // Corrigido erro de digitação
+            return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.';
         case 'auth/email-already-in-use':
             return 'Este e-mail já está em uso.';
         case 'auth/weak-password':
@@ -64,8 +70,8 @@ const getFriendlyErrorMessage = (code) => {
             return 'O login com Google não está habilitado. Por favor, contacte o suporte.';
         case 'auth/too-many-requests':
             return 'O acesso a esta conta foi temporariamente desativado devido a muitas tentativas de login. Tente novamente mais tarde.';
-        case 'auth/network-request-failed': // Caso adicionado
-            return 'Erro de rede. Verifique a sua conexão com a internet e as configurações de CORS.';
+        case 'auth/network-request-failed':
+            return 'Erro de rede. Verifique a sua conexão com a internet.';
         default:
             console.error("Código de erro não tratado:", code);
             return 'Ocorreu um erro desconhecido. Verifique sua conexão ou a configuração do Firebase.';
