@@ -17,8 +17,20 @@ import {
     addDoc,
     onSnapshot,
     query,
-    where
+    where,
+    doc, 
+    getDoc,
+    setDoc,
+    deleteDoc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+// IMPORTAÇÕES DO STORAGE (ARMAZENAMENTO DE ARQUIVOS)
+import { 
+    getStorage, 
+    ref, 
+    uploadBytes, 
+    getDownloadURL 
+} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
 
 
 // A configuração do seu projeto Firebase
@@ -26,7 +38,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY",
   authDomain: "simperfeito.com", // <-- ALTERAÇÃO IMPORTANTE AQUI
   projectId: "simperfeito",
-  storageBucket: "simperfeito.firebasestorage.app",
+  storageBucket: "simperfeito.appspot.com", // <-- CORREÇÃO IMPORTANTE AQUI
   messagingSenderId: "276559476496",
   appId: "1:276559476496:web:c811781762486bb5001795",
   measurementId: "G-CB5X7JY7Y6"
@@ -40,6 +52,8 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 // INICIALIZA O FIRESTORE (BASE DE DADOS)
 const db = getFirestore(app);
+// INICIALIZA O STORAGE (ARMAZENAMENTO DE ARQUIVOS)
+const storage = getStorage(app);
 
 
 // Função para traduzir os erros do Firebase para mensagens mais fáceis de entender
@@ -95,5 +109,15 @@ export {
     addDoc,
     onSnapshot,
     query,
-    where
+    where,
+    doc,
+    getDoc,
+    setDoc,
+    deleteDoc,
+    updateDoc,
+    // Funções do Storage (Armazenamento)
+    storage,
+    ref,
+    uploadBytes,
+    getDownloadURL
 };
