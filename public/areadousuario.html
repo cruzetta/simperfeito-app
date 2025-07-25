@@ -35,13 +35,17 @@
                 <div class="flex flex-col justify-between flex-grow">
                     <nav id="sidebar-nav" class="flex-grow px-4 pt-4 overflow-y-auto">
                         <p class="text-gray-700 mx-4 my-2 text-sm">Olá, <strong id="user-display-name"></strong>!</p>
+                        
+                        <a href="pagina-evento.html" class="sidebar-link w-full text-left flex items-center px-4 py-2 mt-2 text-gray-600 rounded-md hover:bg-gray-100">
+                           <span id="event-page-link-text" class="mx-4 font-medium">Página do Evento</span>
+                        </a>
                         <a href="listadeconvidados.html" class="sidebar-link w-full text-left flex items-center px-4 py-2 mt-2 text-gray-600 rounded-md hover:bg-gray-100">
                            <span class="mx-4 font-medium">Lista de Convidados</span>
                         </a>
                         <a href="listadepresentes.html" class="sidebar-link w-full text-left flex items-center px-4 py-2 mt-2 text-gray-600 rounded-md hover:bg-gray-100">
                            <span class="mx-4 font-medium">Lista de Presentes</span>
                         </a>
-                        <!-- Adicione outros links aqui -->
+
                     </nav>
                     <div class="p-4 border-t">
                          <button id="logout-button" class="w-full bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600">Sair</button>
@@ -58,7 +62,8 @@
 
     <!-- Scripts -->
     <script type="module">
-        import { auth, onAuthStateChanged, signOut } from './auth.js';
+        import { auth, onAuthStateChanged, signOut, db } from './auth.js';
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         const loadingState = document.getElementById('loading-state');
         const dashboardContent = document.getElementById('dashboard-content');
@@ -67,12 +72,39 @@
         const sidebarNav = document.getElementById('sidebar-nav');
         const sidebarLinks = document.querySelectorAll('.sidebar-link');
         const contentFrame = document.querySelector('iframe[name="content-frame"]');
+        const eventPageLinkText = document.getElementById('event-page-link-text');
 
         // Função para carregar conteúdo no iframe com cache-busting
         function loadFrameContent(url) {
-            // Adiciona um timestamp à URL para evitar o cache do navegador
             const cacheBustUrl = `${url}?v=${new Date().getTime()}`;
             contentFrame.src = cacheBustUrl;
+        }
+
+        // Função para definir o texto do link da página do evento
+        async function setEventPageLinkText(userId) {
+            const configRef = doc(db, 'users', userId, 'config', 'event');
+            try {
+                const docSnap = await getDoc(configRef);
+                if (docSnap.exists()) {
+                    const eventType = docSnap.data().type;
+                    switch (eventType) {
+                        case 'casamento':
+                            eventPageLinkText.textContent = 'Página dos Noivos';
+                            break;
+                        case 'aniversario_infantil':
+                            eventPageLinkText.textContent = 'Página do Aniversariante';
+                            break;
+                        case 'formatura':
+                            eventPageLinkText.textContent = 'Página do Formando';
+                            break;
+                        default:
+                            eventPageLinkText.textContent = 'Página do Evento';
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao buscar configuração do evento:", error);
+                eventPageLinkText.textContent = 'Página do Evento'; // Fallback
+            }
         }
 
         // Lógica de Autenticação
@@ -82,12 +114,15 @@
                 const displayName = user.displayName || user.email.split('@')[0];
                 userDisplayName.textContent = displayName;
                 
+                // Define o texto do link dinâmico
+                setEventPageLinkText(user.uid);
+                
                 // Esconde o loading e mostra o painel
                 loadingState.classList.add('hidden');
                 dashboardContent.classList.remove('hidden');
 
                 // Carrega a página inicial no iframe e define o link ativo
-                const initialPage = "listadeconvidados.html";
+                const initialPage = "pagina-evento.html";
                 loadFrameContent(initialPage);
                 updateActiveLink(document.querySelector(`a[href="${initialPage}"]`));
 
@@ -121,16 +156,14 @@
         sidebarNav.addEventListener('click', (e) => {
             const clickedLink = e.target.closest('a.sidebar-link');
             if (clickedLink) {
-                e.preventDefault(); // Previne a navegação padrão do link
+                e.preventDefault(); 
                 const targetUrl = clickedLink.getAttribute('href');
-                loadFrameContent(targetUrl); // Usa nossa função para carregar o conteúdo
+                loadFrameContent(targetUrl);
                 updateActiveLink(clickedLink);
             }
         });
 
-        // Opcional: Atualizar o link ativo se a navegação ocorrer de outra forma
         contentFrame.addEventListener('load', () => {
-            // Remove o parâmetro de cache antes de comparar
             const currentSrc = contentFrame.contentWindow.location.href.split('?')[0];
             const correspondingLink = document.querySelector(`.sidebar-link[href*="${currentSrc.split('/').pop()}"]`);
             updateActiveLink(correspondingLink);
