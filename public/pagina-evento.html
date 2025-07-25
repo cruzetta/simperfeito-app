@@ -91,32 +91,45 @@
             background: white;
         }
 
-        /* Estilos da Pré-visualização e Templates */
+        /* --- ESTILOS DOS TEMPLATES --- */
         #event-page-preview {
-            --font-display: 'Playfair Display', serif;
-            --font-body: 'Cormorant Garamond', serif;
-            transition: background-color 0.5s ease;
+            transition: background-color 0.4s ease;
         }
+        .section-preview {
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        .section-preview h2, .section-preview h3, .section-preview a, .section-graphic {
+            transition: color 0.4s ease;
+        }
+        .section-preview a.rsvp-button {
+             transition: background-color 0.4s ease;
+        }
+
+        /* Template: Classic */
+        .template-classic { --font-display: 'Playfair Display', serif; --font-body: 'Cormorant Garamond', serif; --c-bg: #F8F7F5; --c-primary: #831843; --c-text: #37322F; }
+        .template-classic.dark { --c-bg: #1F2937; --c-primary: #F472B6; --c-text: #D1D5DB; }
+        
+        /* Template: Modern */
+        .template-modern { --font-display: 'Inter', sans-serif; --font-body: 'Inter', sans-serif; --c-bg: #F9FAFB; --c-primary: #111827; --c-text: #374151; }
+        .template-modern.dark { --c-bg: #111827; --c-primary: #F3F4F6; --c-text: #9CA3AF; }
+
+        /* Template: Romantic */
+        .template-romantic { --font-display: 'Dancing Script', cursive; --font-body: 'Cormorant Garamond', serif; --c-bg: #FFF1F2; --c-primary: #DB2777; --c-text: #881337; }
+        .template-romantic.dark { --c-bg: #4c1d3d; --c-primary: #FBCFE8; --c-text: #FCE7F3; }
+        
+        /* Template: Elegancia */
+        .template-elegancia { --font-display: 'Dancing Script', cursive; --font-body: 'Playfair Display', serif; --c-bg: #F9FAFB; --c-primary: #374151; --c-text: #1F2937; }
+        .template-elegancia.dark { --c-bg: #18181b; --c-primary: #d4d4d8; --c-text: #a1a1aa; }
+
+        /* Aplicação das variáveis */
+        #event-page-preview { background-color: var(--c-bg); }
         #event-page-preview .font-display { font-family: var(--font-display); }
         #event-page-preview .font-body { font-family: var(--font-body); }
-        .section-graphic { display: block; margin: 0 auto 1rem; width: 4rem; height: 2.5rem;}
+        #event-page-preview .section-preview { background-color: var(--c-bg); color: var(--c-text); }
+        #event-page-preview .section-preview h2, #event-page-preview .section-preview h3, #event-page-preview .section-graphic { color: var(--c-primary); }
+        #event-page-preview .section-preview a { color: var(--c-primary); }
+        #event-page-preview .section-preview a.rsvp-button { background-color: var(--c-primary); color: var(--c-bg); }
 
-        /* Estilos de Dark Mode */
-        #event-page-preview.dark {
-            background-color: #111827; /* Fundo principal escuro */
-        }
-        #event-page-preview.dark .section-preview {
-             /* Cores padrão para seções no modo escuro, podem ser sobrescritas pelo usuário */
-            background-color: #1F2937 !important;
-            color: #D1D5DB !important;
-        }
-        #event-page-preview.dark .section-preview h2,
-        #event-page-preview.dark .section-preview h3 {
-            color: #F9A8D4 !important; /* Cor de destaque para títulos */
-        }
-        #event-page-preview.dark .section-preview a {
-            color: #FBCFE8 !important;
-        }
 
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -131,9 +144,9 @@
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 50rem; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s; }
         .modal.is-open .modal-content { transform: scale(1); }
 
-        .icon-card { cursor: pointer; border: 2px solid #E5E7EB; border-radius: 0.5rem; overflow: hidden; transition: all 0.2s ease-in-out; }
-        .icon-card:hover { border-color: #DB2777; transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        .icon-card.active { border-color: #DB2777; border-width: 3px; background-color: #FDF2F8; }
+        .template-card, .icon-card { cursor: pointer; border: 2px solid #E5E7EB; border-radius: 0.5rem; overflow: hidden; transition: all 0.2s ease-in-out; }
+        .template-card:hover, .icon-card:hover { border-color: #DB2777; transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .template-card.active, .icon-card.active { border-color: #DB2777; border-width: 3px; }
         .icon-card svg { width: 2.5rem; height: 2.5rem; margin: auto; color: #4B5563; }
         .icon-card.active svg { color: #DB2777; }
         
@@ -157,9 +170,9 @@
             <span id="header-title" class="text-xl font-bold text-gray-800 font-display">Editor da Página</span>
             <div class="flex items-center gap-4">
                  <a id="view-public-page" href="#" target="_blank" class="text-sm text-pink-600 hover:underline font-semibold">Ver Página Pública</a>
-                 <button id="open-appearance-modal" class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
+                 <button id="open-template-modal" class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
-                    Personalizar
+                    Templates
                 </button>
                 <button id="open-icon-modal" class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
@@ -173,7 +186,7 @@
         </header>
 
         <main class="p-4 sm:p-6 md:p-8 bg-gray-200">
-            <div id="event-page-preview" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+            <div id="event-page-preview" class="max-w-4xl mx-auto shadow-lg rounded-lg overflow-hidden">
                 
                 <section id="header-section" class="editable-section relative text-center bg-gray-700 h-[60vh]">
                     <button class="edit-btn" data-modal="header-modal" title="Editar Cabeçalho e Fotos"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
@@ -215,9 +228,11 @@
     </div>
 
     <div id="modal-container">
-        <!-- MODAL DE APARÊNCIA (NOVO) -->
-        <div id="appearance-modal" class="modal"><div class="modal-content">
-            <h3 class="text-xl font-bold mb-6">Personalizar Aparência</h3>
+        <!-- MODAL DE TEMPLATES (NOVO E SIMPLIFICADO) -->
+        <div id="template-modal" class="modal"><div class="modal-content">
+            <h3 class="text-xl font-bold mb-2">Aparência da Página</h3>
+            <p class="text-gray-600 mb-6">Escolha um template e um tema para sua página.</p>
+            
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border mb-6">
                 <span class="font-medium text-gray-700">Modo Noturno</span>
                 <div class="relative inline-block w-10 mr-2 align-middle select-none">
@@ -225,32 +240,14 @@
                     <label for="theme-mode-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors"></label>
                 </div>
             </div>
-            <div class="space-y-4">
-                <div class="border p-4 rounded-md">
-                    <h4 class="font-semibold mb-3 text-gray-800">Seção: Nossa História</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label for="story-bg-color" class="block text-sm mb-1">Fundo</label><input type="color" id="story-bg-color" class="w-full h-10 p-1 border rounded-md"></div>
-                        <div><label for="story-title-color" class="block text-sm mb-1">Título</label><input type="color" id="story-title-color" class="w-full h-10 p-1 border rounded-md"></div>
-                        <div><label for="story-text-color" class="block text-sm mb-1">Texto</label><input type="color" id="story-text-color" class="w-full h-10 p-1 border rounded-md"></div>
-                    </div>
-                </div>
-                <div class="border p-4 rounded-md">
-                    <h4 class="font-semibold mb-3 text-gray-800">Seção: Detalhes do Evento</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label for="details-bg-color" class="block text-sm mb-1">Fundo</label><input type="color" id="details-bg-color" class="w-full h-10 p-1 border rounded-md"></div>
-                        <div><label for="details-title-color" class="block text-sm mb-1">Títulos</label><input type="color" id="details-title-color" class="w-full h-10 p-1 border rounded-md"></div>
-                        <div><label for="details-text-color" class="block text-sm mb-1">Texto</label><input type="color" id="details-text-color" class="w-full h-10 p-1 border rounded-md"></div>
-                    </div>
-                </div>
-                 <div class="border p-4 rounded-md">
-                    <h4 class="font-semibold mb-3 text-gray-800">Seção: Confirmação de Presença</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div><label for="rsvp-bg-color" class="block text-sm mb-1">Fundo</label><input type="color" id="rsvp-bg-color" class="w-full h-10 p-1 border rounded-md"></div>
-                        <div><label for="rsvp-title-color" class="block text-sm mb-1">Título</label><input type="color" id="rsvp-title-color" class="w-full h-10 p-1 border rounded-md"></div>
-                        <div><label for="rsvp-text-color" class="block text-sm mb-1">Texto</label><input type="color" id="rsvp-text-color" class="w-full h-10 p-1 border rounded-md"></div>
-                    </div>
-                </div>
+
+            <div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="template-card" data-template="classic"><div class="p-4 border-b text-center" style="background-color: #F8F7F5;"><h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div>
+                <div class="template-card" data-template="modern"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div>
+                <div class="template-card" data-template="romantic"><div class="p-4 border-b text-center" style="background-color: #FFF1F2;"><h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div>
+                <div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div>
             </div>
+
             <div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-pink-500 text-white rounded-md">Fechar</button></div>
         </div></div>
 
@@ -295,13 +292,8 @@
         let headerSwiper = null;
 
         const defaultData = {
-            template: 'classic', // Mantido para fontes e layout base
+            template: 'classic',
             themeMode: 'light', // 'light' ou 'dark'
-            sectionStyles: {
-                story: { background: '#f8f7f5', title: '#831843', text: '#37322F' },
-                details: { background: '#ffffff', title: '#831843', text: '#4b5563' },
-                rsvp: { background: '#f8f7f5', title: '#831843', text: '#37322F' }
-            },
             icon: iconLibrary.find(i => i.id === 'flower-2').svg,
             header: { 
                 coupleNames: ["Noiva & Noivo"], 
@@ -333,17 +325,14 @@
             const docSnap = await getDoc(pageDataRef);
             if (docSnap.exists()) {
                 const loadedData = docSnap.data();
-                // Merge profundo para garantir que todas as chaves existam
+                // Merge profundo para garantir que todas as chaves existam e remover as antigas
                 pageData = {
                     ...JSON.parse(JSON.stringify(defaultData)),
                     ...loadedData,
                     header: { ...defaultData.header, ...(loadedData.header || {}), titleStyle: { ...defaultData.header.titleStyle, ...(loadedData.header?.titleStyle || {}) }, dateStyle: { ...defaultData.header.dateStyle, ...(loadedData.header?.dateStyle || {}) } },
                     gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) },
-                    sectionStyles: { ...defaultData.sectionStyles, ...(loadedData.sectionStyles || {}),
-                        story: {...defaultData.sectionStyles.story, ...(loadedData.sectionStyles?.story || {})},
-                        details: {...defaultData.sectionStyles.details, ...(loadedData.sectionStyles?.details || {})},
-                        rsvp: {...defaultData.sectionStyles.rsvp, ...(loadedData.sectionStyles?.rsvp || {})},
-                    }
+                    // Remover a chave antiga se existir
+                    sectionStyles: undefined 
                 };
             } else {
                 pageData = JSON.parse(JSON.stringify(defaultData));
@@ -357,7 +346,7 @@
             renderAllPreviews();
             setupEventListeners();
             populateIconModal();
-            setupAppearanceModal();
+            setupTemplateModal();
         }
         
         // --- LÓGICA DO EDITOR DE TEXTO FLUTUANTE ---
@@ -503,10 +492,14 @@
 
         // --- RENDERIZAÇÃO E PRÉ-VISUALIZAÇÃO ---
         function renderAllPreviews() {
-            const { header, story, details, gallery, rsvp, icon, themeMode, sectionStyles } = pageData;
+            const { header, story, details, gallery, rsvp, icon, themeMode, template } = pageData;
             
-            // Apply Theme
-            eventPagePreview.classList.toggle('dark', themeMode === 'dark');
+            // Apply Theme and Template
+            eventPagePreview.className = 'max-w-4xl mx-auto shadow-lg rounded-lg overflow-hidden'; // Reset classes
+            eventPagePreview.classList.add(`template-${template}`);
+            if (themeMode === 'dark') {
+                eventPagePreview.classList.add('dark');
+            }
 
             // Render Header/Carousel
             const allPhotos = [header.imageUrl, ...(gallery.photos || []).map(p => p.url)];
@@ -536,28 +529,15 @@
             Object.assign(dateEl.style, header.dateStyle);
             setupDraggableText();
 
-            // Render Sections with custom styles
+            // Render Sections
             const storySection = document.getElementById('story-section');
-            storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic">${icon || ''}</div> <h2 id="story-title-preview" class="font-display text-3xl md:text-4xl">${story.title}</h2> <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed">${story.text}</p>`;
-            storySection.style.backgroundColor = sectionStyles.story.background;
-            storySection.querySelector('h2').style.color = sectionStyles.story.title;
-            storySection.querySelector('p').style.color = sectionStyles.story.text;
-            storySection.querySelector('.section-graphic').style.color = sectionStyles.story.title;
+            storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic">${icon || ''}</div> <h2 class="font-display text-3xl md:text-4xl">${story.title}</h2> <p class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed">${story.text}</p>`;
 
             const detailsSection = document.getElementById('details-section');
-            detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic">${icon || ''}</div> <h2 class="font-display text-3xl md:text-4xl text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"> <div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl">Cerimónia</h3><p class="mt-2 font-semibold text-lg">${details.ceremony.name || ''}</p><p>${details.ceremony.address || ''}</p><p class="mt-1">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold hover:underline">Ver no mapa</a></div> <div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl">Recepção</h3><p class="mt-2 font-semibold text-lg">${details.reception.name || ''}</p><p>${details.reception.address || ''}</p><p class="mt-1">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold hover:underline">Ver no mapa</a></div> </div>`;
-            detailsSection.style.backgroundColor = sectionStyles.details.background;
-            detailsSection.querySelectorAll('h2, h3').forEach(el => el.style.color = sectionStyles.details.title);
-            detailsSection.querySelectorAll('p, a').forEach(el => el.style.color = sectionStyles.details.text);
-            detailsSection.querySelector('.section-graphic').style.color = sectionStyles.details.title;
+            detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic">${icon || ''}</div> <h2 class="font-display text-3xl md:text-4xl text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"> <div class="text-center"><h3 class="font-display text-2xl">Cerimónia</h3><p class="mt-2 font-semibold text-lg">${details.ceremony.name || ''}</p><p>${details.ceremony.address || ''}</p><p class="mt-1">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold hover:underline">Ver no mapa</a></div> <div class="text-center"><h3 class="font-display text-2xl">Recepção</h3><p class="mt-2 font-semibold text-lg">${details.reception.name || ''}</p><p>${details.reception.address || ''}</p><p class="mt-1">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold hover:underline">Ver no mapa</a></div> </div>`;
 
             const rsvpSection = document.getElementById('rsvp-section');
-            rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic">${icon || ''}</div> <h2 id="rsvp-title-preview" class="font-display text-3xl md:text-4xl">${rsvp.title}</h2> <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed">${rsvp.text}</p> <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity">${rsvp.buttonText}</a>`;
-            rsvpSection.style.backgroundColor = sectionStyles.rsvp.background;
-            rsvpSection.querySelector('h2').style.color = sectionStyles.rsvp.title;
-            rsvpSection.querySelector('p').style.color = sectionStyles.rsvp.text;
-            rsvpSection.querySelector('a').style.backgroundColor = sectionStyles.rsvp.title; // Botão usa a cor do título
-            rsvpSection.querySelector('.section-graphic').style.color = sectionStyles.rsvp.title;
+            rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic">${icon || ''}</div> <h2 class="font-display text-3xl md:text-4xl">${rsvp.title}</h2> <p class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed">${rsvp.text}</p> <a href="${rsvp.buttonLink || '#'}" target="_blank" class="rsvp-button inline-block mt-8 px-8 py-3 font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity">${rsvp.buttonText}</a>`;
         }
         
         function initializeHeaderCarousel() {
@@ -591,8 +571,8 @@
                 if (editBtn) openModal(editBtn.dataset.modal);
                 const closeModalBtn = e.target.closest('.modal-close-btn');
                 if (closeModalBtn) closeModal(closeModalBtn.closest('.modal'));
-                const openAppearanceBtn = e.target.closest('#open-appearance-modal');
-                if(openAppearanceBtn) openModal('appearance-modal');
+                const openTemplateBtn = e.target.closest('#open-template-modal');
+                if(openTemplateBtn) openModal('template-modal');
                 const openIconBtn = e.target.closest('#open-icon-modal');
                 if(openIconBtn) openModal('icon-modal');
             });
@@ -608,6 +588,8 @@
             saveButton.disabled = true;
             saveButton.innerHTML = 'A salvar...';
             try {
+                // Remove a chave 'sectionStyles' se ela existir por engano de versões antigas
+                delete pageData.sectionStyles;
                 await setDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), pageData);
                 showToast('Alterações salvas com sucesso!', false);
             } catch (error) {
@@ -642,7 +624,6 @@
                 document.getElementById('story-title-input').value = pageData.story.title;
                 document.getElementById('story-text-input').value = pageData.story.text;
             } else if (modalId === 'details-modal') {
-                // Preencher campos de detalhes
                 document.getElementById('ceremony-name').value = pageData.details.ceremony.name;
                 document.getElementById('ceremony-time').value = pageData.details.ceremony.time;
                 document.getElementById('ceremony-address').value = pageData.details.ceremony.address;
@@ -664,7 +645,7 @@
             if (modal) modal.classList.remove('is-open');
         }
 
-        function setupAppearanceModal() {
+        function setupTemplateModal() {
             const toggle = document.getElementById('theme-mode-toggle');
             toggle.checked = pageData.themeMode === 'dark';
             toggle.addEventListener('change', () => {
@@ -672,23 +653,15 @@
                 renderAllPreviews();
             });
 
-            const colorInputs = [
-                { id: 'story-bg-color', section: 'story', property: 'background' },
-                { id: 'story-title-color', section: 'story', property: 'title' },
-                { id: 'story-text-color', section: 'story', property: 'text' },
-                { id: 'details-bg-color', section: 'details', property: 'background' },
-                { id: 'details-title-color', section: 'details', property: 'title' },
-                { id: 'details-text-color', section: 'details', property: 'text' },
-                { id: 'rsvp-bg-color', section: 'rsvp', property: 'background' },
-                { id: 'rsvp-title-color', section: 'rsvp', property: 'title' },
-                { id: 'rsvp-text-color', section: 'rsvp', property: 'text' },
-            ];
-
-            colorInputs.forEach(inputInfo => {
-                const inputEl = document.getElementById(inputInfo.id);
-                inputEl.value = pageData.sectionStyles[inputInfo.section][inputInfo.property];
-                inputEl.addEventListener('input', () => {
-                    pageData.sectionStyles[inputInfo.section][inputInfo.property] = inputEl.value;
+            const templateCards = document.querySelectorAll('#template-selection-container .template-card');
+            templateCards.forEach(card => {
+                if (card.dataset.template === pageData.template) {
+                    card.classList.add('active');
+                }
+                card.addEventListener('click', () => {
+                    pageData.template = card.dataset.template;
+                    templateCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
                     renderAllPreviews();
                 });
             });
