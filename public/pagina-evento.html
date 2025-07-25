@@ -278,7 +278,46 @@
         </div></div>
 
         <div id="story-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar História</h3><form id="story-form" class="space-y-4"><div><label for="story-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="story-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="story-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da História</label><textarea id="story-text-input" rows="8" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
-        <div id="details-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3><form id="details-form" class="space-y-6"><fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Cerimónia</legend><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div></div><div class="mt-4"><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div><div class="mt-4"><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md"></div></fieldset><fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Recepção</legend><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div></div><div class="mt-4"><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div><div class="mt-4"><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md"></div></fieldset><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
+        
+        <!-- MODAL DE DETALHES ATUALIZADO -->
+        <div id="details-modal" class="modal"><div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3>
+            <form id="details-form" class="space-y-6">
+                <fieldset class="border p-4 rounded-md">
+                    <legend class="text-lg font-semibold px-2">Cerimónia</legend>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                            <div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div>
+                        </div>
+                        <div><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                    </div>
+                </fieldset>
+                
+                <fieldset class="border p-4 rounded-md">
+                    <legend class="text-lg font-semibold px-2">Recepção</legend>
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="same-location-checkbox" class="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500">
+                        <label for="same-location-checkbox" class="ml-2 block text-sm font-medium text-gray-900">A recepção será no mesmo local</label>
+                    </div>
+                    <div id="reception-fields-container" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                            <div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div>
+                        </div>
+                        <div><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                        <div><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md"></div>
+                    </div>
+                </fieldset>
+
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
+                    <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
+                </div>
+            </form>
+        </div></div>
+
         <div id="rsvp-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Confirmação de Presença</h3><form id="rsvp-form" class="space-y-4"><div><label for="rsvp-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="rsvp-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="rsvp-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto de Apoio</label><textarea id="rsvp-text-input" rows="4" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div><label for="rsvp-button-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto do Botão</label><input type="text" id="rsvp-button-text-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="rsvp-button-link-input" class="block text-sm font-medium text-gray-700 mb-1">Link do Botão (para seu formulário de RSVP)</label><input type="url" id="rsvp-button-link-input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://seu-link-de-rsvp.com"></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
     </div>
 
@@ -297,6 +336,7 @@
         const headerContentWrapper = document.getElementById('header-content-wrapper');
         const verticalGuide = document.getElementById('vertical-guide');
         const horizontalGuide = document.getElementById('horizontal-guide');
+        const viewPublicPageLink = document.getElementById('view-public-page');
 
         // --- DADOS E ESTADO ---
         let currentUser;
@@ -319,7 +359,11 @@
                 autoplay: false,
                 duration: 5 
             },
-            details: { ceremony: { name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" }, reception: { name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "#" } },
+            details: { 
+                sameLocation: false, // NOVO CAMPO
+                ceremony: { name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" }, 
+                reception: { name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "#" } 
+            },
             rsvp: { title: "Confirme sua Presença", text: "Sua presença é o nosso maior presente!", buttonText: "Confirmar Presença", buttonLink: "#" }
         };
 
@@ -327,6 +371,8 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                // Define o link para a página pública
+                viewPublicPageLink.href = `/convite.html?user=${currentUser.uid}`;
                 await loadPageData();
                 initializePage();
             } else {
@@ -339,11 +385,15 @@
             const docSnap = await getDoc(pageDataRef);
             if (docSnap.exists()) {
                 const loadedData = docSnap.data();
+                // Merge profundo para garantir que todos os campos padrão existam
                 pageData = {
                     ...JSON.parse(JSON.stringify(defaultData)),
                     ...loadedData,
                     header: { ...defaultData.header, ...(loadedData.header || {}), titleStyle: { ...defaultData.header.titleStyle, ...(loadedData.header?.titleStyle || {}) }, dateStyle: { ...defaultData.header.dateStyle, ...(loadedData.header?.dateStyle || {}) } },
-                    gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) }
+                    story: { ...defaultData.story, ...(loadedData.story || {}) },
+                    gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) },
+                    details: { ...defaultData.details, ...(loadedData.details || {}) },
+                    rsvp: { ...defaultData.rsvp, ...(loadedData.rsvp || {}) }
                 };
             } else {
                 pageData = JSON.parse(JSON.stringify(defaultData));
@@ -483,13 +533,12 @@
         function renderAllPreviews() {
             const { header, story, details, gallery, rsvp, icon, template } = pageData;
             
-            // Apply template class
             const preview = document.getElementById('event-page-preview');
             preview.className = 'max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden';
             preview.classList.add(`template-${template}`);
 
-            const allPhotos = [header.imageUrl, ...gallery.photos.map(p => p.url)];
-            const slidesHtml = allPhotos.map(url => `<div class="swiper-slide"><img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/></div>`).join('');
+            const allPhotos = [header.imageUrl, ...(gallery.photos || []).map(p => p.url)];
+            const slidesHtml = allPhotos.filter(Boolean).map(url => `<div class="swiper-slide"><img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/></div>`).join('');
             headerContentWrapper.innerHTML = `
                 <div class="swiper header-swiper">
                     <div class="swiper-wrapper">${slidesHtml}</div>
@@ -550,18 +599,15 @@
             centerVBtn.addEventListener('click', () => centerElement('vertical'));
             recenterBtn.addEventListener('click', () => centerElement('both'));
             
-            // *** CORREÇÃO: Adicionar listeners para os botões de template e ícone ***
             document.getElementById('open-template-modal').addEventListener('click', () => openModal('template-modal'));
             document.getElementById('open-icon-modal').addEventListener('click', () => openModal('icon-modal'));
 
-            // *** CORREÇÃO: Adicionar listener para a seleção de template ***
             document.getElementById('template-selection-container').addEventListener('click', (e) => {
                 const card = e.target.closest('.template-card');
                 if (!card) return;
                 const templateId = card.dataset.template;
                 pageData.template = templateId;
-                renderAllPreviews(); // Re-renderiza para aplicar a classe e os estilos
-                // Atualiza a classe 'active' no modal
+                renderAllPreviews();
                 document.querySelectorAll('#template-selection-container .template-card').forEach(c => c.classList.remove('active'));
                 card.classList.add('active');
             });
@@ -573,7 +619,11 @@
                 if (closeModalBtn) closeModal(closeModalBtn.closest('.modal'));
             });
 
+            // Adicionar manipuladores de submissão de formulário
             document.getElementById('header-form').addEventListener('submit', handleHeaderFormSubmit);
+            document.getElementById('story-form').addEventListener('submit', handleStoryFormSubmit);
+            document.getElementById('details-form').addEventListener('submit', handleDetailsFormSubmit);
+            document.getElementById('rsvp-form').addEventListener('submit', handleRsvpFormSubmit);
             document.getElementById('add-photo-btn').addEventListener('click', () => createGalleryUploader());
         }
         
@@ -581,7 +631,7 @@
             saveButton.disabled = true;
             saveButton.innerHTML = 'A salvar...';
             try {
-                await setDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), pageData);
+                await setDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), pageData, { merge: true });
                 showToast('Alterações salvas com sucesso!', false);
             } catch (error) {
                 console.error("Erro ao salvar dados da página: ", error);
@@ -597,32 +647,46 @@
             const modal = document.getElementById(modalId);
             if (!modal) return;
 
+            // Preencher formulários com dados atuais
             if (modalId === 'header-modal') {
                 document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
                 document.getElementById('event-date-input').value = pageData.header.eventDate;
                 setupImageUploader('header-image-uploader', pageData.header.imageUrl);
-                
                 const autoplayCheck = document.getElementById('gallery-autoplay');
                 const durationInput = document.getElementById('gallery-duration');
                 const durationContainer = document.getElementById('autoplay-duration-container');
-                
                 autoplayCheck.checked = pageData.gallery.autoplay;
                 durationInput.value = pageData.gallery.duration;
                 durationContainer.style.display = pageData.gallery.autoplay ? 'flex' : 'none';
-
-                autoplayCheck.onchange = () => {
-                    durationContainer.style.display = autoplayCheck.checked ? 'flex' : 'none';
-                };
-
+                autoplayCheck.onchange = () => { durationContainer.style.display = autoplayCheck.checked ? 'flex' : 'none'; };
                 const galleryContainer = document.getElementById('gallery-inputs-container');
                 galleryContainer.innerHTML = '';
-                pageData.gallery.photos.forEach((photo, index) => {
-                    createGalleryUploader(photo.url, index);
-                });
-            }
-            
-            // *** CORREÇÃO: Destacar o template ativo ao abrir o modal ***
-            if (modalId === 'template-modal') {
+                pageData.gallery.photos.forEach((photo, index) => createGalleryUploader(photo.url, index));
+            } else if (modalId === 'story-modal') {
+                document.getElementById('story-title-input').value = pageData.story.title;
+                document.getElementById('story-text-input').value = pageData.story.text;
+            } else if (modalId === 'details-modal') {
+                const { ceremony, reception, sameLocation } = pageData.details;
+                document.getElementById('ceremony-name').value = ceremony.name;
+                document.getElementById('ceremony-time').value = ceremony.time;
+                document.getElementById('ceremony-address').value = ceremony.address;
+                document.getElementById('ceremony-map').value = ceremony.mapUrl;
+                document.getElementById('reception-name').value = reception.name;
+                document.getElementById('reception-time').value = reception.time;
+                document.getElementById('reception-address').value = reception.address;
+                document.getElementById('reception-map').value = reception.mapUrl;
+                
+                const sameLocationCheckbox = document.getElementById('same-location-checkbox');
+                sameLocationCheckbox.checked = sameLocation || false;
+                sameLocationCheckbox.removeEventListener('change', toggleReceptionFields); // Evita múltiplos listeners
+                sameLocationCheckbox.addEventListener('change', toggleReceptionFields);
+                toggleReceptionFields(); // Define o estado inicial
+            } else if (modalId === 'rsvp-modal') {
+                document.getElementById('rsvp-title-input').value = pageData.rsvp.title;
+                document.getElementById('rsvp-text-input').value = pageData.rsvp.text;
+                document.getElementById('rsvp-button-text-input').value = pageData.rsvp.buttonText;
+                document.getElementById('rsvp-button-link-input').value = pageData.rsvp.buttonLink;
+            } else if (modalId === 'template-modal') {
                 document.querySelectorAll('#template-selection-container .template-card').forEach(card => {
                     card.classList.toggle('active', card.dataset.template === pageData.template);
                 });
@@ -633,6 +697,12 @@
 
         function closeModal(modal) {
             if (modal) modal.classList.remove('is-open');
+        }
+
+        function toggleReceptionFields() {
+            const isChecked = document.getElementById('same-location-checkbox').checked;
+            const container = document.getElementById('reception-fields-container');
+            container.style.display = isChecked ? 'none' : 'block';
         }
 
         function populateIconModal() {
@@ -704,6 +774,60 @@
             });
 
             container.appendChild(div);
+        }
+        
+        function handleGenericFormSubmit(e, modalId, dataKey) {
+            e.preventDefault();
+            const form = e.target;
+            const inputs = form.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                const key = input.id.split('-')[1];
+                pageData[dataKey][key] = input.value;
+            });
+            renderAllPreviews();
+            closeModal(document.getElementById(modalId));
+        }
+        
+        function handleStoryFormSubmit(e) {
+            e.preventDefault();
+            pageData.story.title = document.getElementById('story-title-input').value;
+            pageData.story.text = document.getElementById('story-text-input').value;
+            renderAllPreviews();
+            closeModal(document.getElementById('story-modal'));
+        }
+
+        function handleDetailsFormSubmit(e) {
+            e.preventDefault();
+            const sameLocation = document.getElementById('same-location-checkbox').checked;
+            pageData.details = {
+                sameLocation: sameLocation,
+                ceremony: {
+                    name: document.getElementById('ceremony-name').value,
+                    time: document.getElementById('ceremony-time').value,
+                    address: document.getElementById('ceremony-address').value,
+                    mapUrl: document.getElementById('ceremony-map').value,
+                },
+                reception: {
+                    name: sameLocation ? '' : document.getElementById('reception-name').value,
+                    time: document.getElementById('reception-time').value,
+                    address: sameLocation ? '' : document.getElementById('reception-address').value,
+                    mapUrl: sameLocation ? '' : document.getElementById('reception-map').value,
+                }
+            };
+            renderAllPreviews();
+            closeModal(document.getElementById('details-modal'));
+        }
+
+        function handleRsvpFormSubmit(e) {
+            e.preventDefault();
+            pageData.rsvp = {
+                title: document.getElementById('rsvp-title-input').value,
+                text: document.getElementById('rsvp-text-input').value,
+                buttonText: document.getElementById('rsvp-button-text-input').value,
+                buttonLink: document.getElementById('rsvp-button-link-input').value,
+            };
+            renderAllPreviews();
+            closeModal(document.getElementById('rsvp-modal'));
         }
 
         async function handleHeaderFormSubmit(e) {
