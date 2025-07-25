@@ -323,7 +323,7 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                viewPublicPageLink.href = `/public-event.html?user=${user.uid}`; // Link para a página pública
+                viewPublicPageLink.href = `/public-event.html?user=${user.uid}`;
                 try {
                     await loadEventConfig();
                     await loadPageData();
@@ -358,66 +358,33 @@
 
             if (docSnap.exists()) {
                 const loadedData = docSnap.data();
-                if (!loadedData) return; // Sai se os dados do documento estiverem vazios
+                if (!loadedData) return;
 
                 // --- FUSÃO DE DADOS SEGURA E ROBUSTA ---
+                pageData.header = { ...defaultData.header, ...(loadedData.header || {}) };
+                if (!Array.isArray(pageData.header.coupleNames)) {
+                    pageData.header.coupleNames = [...defaultData.header.coupleNames];
+                }
+
+                if (typeof loadedData.story === 'object' && loadedData.story !== null) {
+                    pageData.story = { ...defaultData.story, ...loadedData.story };
+                } else if (typeof loadedData.story === 'string') {
+                    pageData.story.text = loadedData.story;
+                }
                 
-                // 1. Mesclar Cabeçalho
-                try {
-                    if (loadedData.header && typeof loadedData.header === 'object') {
-                        pageData.header = { ...pageData.header, ...loadedData.header };
-                    }
-                    if (!Array.isArray(pageData.header.coupleNames)) {
-                        pageData.header.coupleNames = JSON.parse(JSON.stringify(defaultData.header.coupleNames));
-                    }
-                } catch (e) {
-                    console.error("Não foi possível fundir os dados do cabeçalho:", e);
-                    pageData.header = JSON.parse(JSON.stringify(defaultData.header));
+                if (loadedData.title) pageData.story.title = loadedData.title;
+                if (loadedData.imageUrl) pageData.header.imageUrl = loadedData.imageUrl;
+
+                if (loadedData.gallery && Array.isArray(loadedData.gallery.photos)) {
+                    pageData.gallery.photos = loadedData.gallery.photos;
                 }
 
-                // 2. Mesclar História
-                try {
-                    if (loadedData.story) {
-                        if (typeof loadedData.story === 'object' && loadedData.story !== null) {
-                            pageData.story = { ...pageData.story, ...loadedData.story };
-                        } else if (typeof loadedData.story === 'string') {
-                            pageData.story.text = loadedData.story;
-                        }
-                    }
-                    if (loadedData.title) pageData.story.title = loadedData.title;
-                    if (loadedData.imageUrl) pageData.header.imageUrl = loadedData.imageUrl;
-                } catch(e) {
-                    console.error("Não foi possível fundir os dados da história:", e);
-                    pageData.story = JSON.parse(JSON.stringify(defaultData.story));
-                }
-
-                // 3. Mesclar Galeria
-                try {
-                    if (loadedData.gallery && typeof loadedData.gallery === 'object' && Array.isArray(loadedData.gallery.photos)) {
-                        pageData.gallery = { ...pageData.gallery, ...loadedData.gallery };
-                    }
-                } catch(e) {
-                    console.error("Não foi possível fundir os dados da galeria:", e);
-                    pageData.gallery = JSON.parse(JSON.stringify(defaultData.gallery));
-                }
-
-                // 4. Mesclar Detalhes
-                try {
-                    if (loadedData.details && typeof loadedData.details === 'object') {
-                        if (loadedData.details.ceremony && typeof loadedData.details.ceremony === 'object') {
-                            pageData.details.ceremony = { ...pageData.details.ceremony, ...loadedData.details.ceremony };
-                        }
-                        if (loadedData.details.reception && typeof loadedData.details.reception === 'object') {
-                            pageData.details.reception = { ...pageData.details.reception, ...loadedData.details.reception };
-                        }
-                    }
-                } catch(e) {
-                    console.error("Não foi possível fundir os dados dos detalhes:", e);
-                    pageData.details = JSON.parse(JSON.stringify(defaultData.details));
+                if (loadedData.details && typeof loadedData.details === 'object') {
+                    pageData.details.ceremony = { ...defaultData.details.ceremony, ...(loadedData.details.ceremony || {}) };
+                    pageData.details.reception = { ...defaultData.details.reception, ...(loadedData.details.reception || {}) };
                 }
             }
         }
-
 
         // --- LÓGICA DE RENDERIZAÇÃO ---
         function renderAllPreviews() {
