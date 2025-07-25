@@ -51,19 +51,21 @@ const getFriendlyErrorMessage = (code) => {
         case 'auth/user-not-found':
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
-            return 'E-mail ou senha incorretos. Verifique seus dados и tente novamente.';
+            return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.'; // Corrigido erro de digitação
         case 'auth/email-already-in-use':
             return 'Este e-mail já está em uso.';
         case 'auth/weak-password':
             return 'A senha precisa ter pelo menos 6 caracteres.';
         case 'auth/popup-closed-by-user':
             return 'A janela de login com Google foi fechada antes da conclusão.';
-        case 'auth/popup-blocked-by-browser': // Caso adicionado
+        case 'auth/popup-blocked-by-browser':
             return 'O pop-up de login foi bloqueado pelo navegador. Por favor, habilite os pop-ups para este site.';
-        case 'auth/operation-not-allowed': // Caso adicionado
+        case 'auth/operation-not-allowed':
             return 'O login com Google não está habilitado. Por favor, contacte o suporte.';
         case 'auth/too-many-requests':
             return 'O acesso a esta conta foi temporariamente desativado devido a muitas tentativas de login. Tente novamente mais tarde.';
+        case 'auth/network-request-failed': // Caso adicionado
+            return 'Erro de rede. Verifique a sua conexão com a internet e as configurações de CORS.';
         default:
             console.error("Código de erro não tratado:", code);
             return 'Ocorreu um erro desconhecido. Verifique sua conexão ou a configuração do Firebase.';
