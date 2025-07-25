@@ -9,7 +9,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .font-display { font-family: 'Playfair Display', serif; }
-        /* Estilo para o link ativo na sidebar */
         .sidebar-link-active {
             background-color: #FCE7F3; /* pink-100 */
             color: #DB2777; /* pink-600 */
@@ -19,9 +18,9 @@
 </head>
 <body class="bg-gray-100">
 
-    <!-- Tela de Carregamento Inicial -->
+    <!-- Tela de Carregamento Inicial (visível por defeito) -->
     <div id="loading-state" class="min-h-screen flex items-center justify-center">
-        <p class="text-xl text-gray-600">A carregar...</p>
+        <p class="text-xl text-gray-600">A carregar painel...</p>
     </div>
 
     <!-- Conteúdo principal do Dashboard (inicialmente oculto) -->
@@ -74,13 +73,11 @@
         const contentFrame = document.querySelector('iframe[name="content-frame"]');
         const eventPageLinkText = document.getElementById('event-page-link-text');
 
-        // Função para carregar conteúdo no iframe com cache-busting
         function loadFrameContent(url) {
             const cacheBustUrl = `${url}?v=${new Date().getTime()}`;
             contentFrame.src = cacheBustUrl;
         }
 
-        // Função para definir o texto do link da página do evento
         async function setEventPageLinkText(userId) {
             const configRef = doc(db, 'users', userId, 'config', 'event');
             try {
@@ -103,72 +100,71 @@
                 }
             } catch (error) {
                 console.error("Erro ao buscar configuração do evento:", error);
-                eventPageLinkText.textContent = 'Página do Evento'; // Fallback
+                eventPageLinkText.textContent = 'Página do Evento';
             }
         }
 
-        // Lógica de Autenticação
-        onAuthStateChanged(auth, (user) => {
-            // *** MUDANÇA PRINCIPAL AQUI ***
-            // Verifica se existe um utilizador E se ele NÃO é anónimo
-            if (user && !user.isAnonymous) {
-                // Utilizador real está logado
-                const displayName = user.displayName || user.email.split('@')[0];
-                userDisplayName.textContent = displayName;
-                
-                // Define o texto do link dinâmico
-                setEventPageLinkText(user.uid);
-                
-                // Esconde o loading e mostra o painel
-                loadingState.classList.add('hidden');
-                dashboardContent.classList.remove('hidden');
-
-                // Carrega a página inicial no iframe e define o link ativo
-                const initialPage = "pagina-evento.html";
-                loadFrameContent(initialPage);
-                updateActiveLink(document.querySelector(`a[href="${initialPage}"]`));
-
-            } else {
-                // Se o utilizador for nulo OU anónimo, redireciona para a página de login
-                window.location.href = '/login.html';
-            }
-        });
-
-        // Lógica de Logout
-        logoutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                window.location.href = '/index.html';
-            } catch (error) {
-                console.error("Erro ao fazer logout:", error);
-                alert("Ocorreu um erro ao sair. Tente novamente.");
-            }
-        });
-
-        // Lógica para marcar o link ativo na sidebar
         function updateActiveLink(activeLink) {
-             sidebarLinks.forEach(link => {
-                link.classList.remove('sidebar-link-active');
-            });
+             sidebarLinks.forEach(link => link.classList.remove('sidebar-link-active'));
             if(activeLink) {
                 activeLink.classList.add('sidebar-link-active');
             }
         }
+        
+        // *** MUDANÇA: Função para inicializar o painel ***
+        function initializeDashboard(user) {
+            const displayName = user.displayName || user.email.split('@')[0];
+            userDisplayName.textContent = displayName;
+            
+            setEventPageLinkText(user.uid);
+            
+            // Esconde o loading e mostra o painel
+            loadingState.classList.add('hidden');
+            dashboardContent.classList.remove('hidden');
 
-        sidebarNav.addEventListener('click', (e) => {
-            const clickedLink = e.target.closest('a.sidebar-link');
-            if (clickedLink) {
-                e.preventDefault(); 
-                const targetUrl = clickedLink.getAttribute('href');
-                loadFrameContent(targetUrl);
-                updateActiveLink(clickedLink);
+            const initialPage = "pagina-evento.html";
+            loadFrameContent(initialPage);
+            updateActiveLink(document.querySelector(`a[href="${initialPage}"]`));
+
+            // Configura os event listeners que só devem funcionar quando o painel está visível
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = '/index.html';
+                } catch (error) {
+                    console.error("Erro ao fazer logout:", error);
+                    alert("Ocorreu um erro ao sair. Tente novamente.");
+                }
+            });
+
+            sidebarNav.addEventListener('click', (e) => {
+                const clickedLink = e.target.closest('a.sidebar-link');
+                if (clickedLink) {
+                    e.preventDefault(); 
+                    const targetUrl = clickedLink.getAttribute('href');
+                    loadFrameContent(targetUrl);
+                    updateActiveLink(clickedLink);
+                }
+            });
+
+            contentFrame.addEventListener('load', () => {
+                const currentSrc = contentFrame.contentWindow.location.href.split('?')[0];
+                const correspondingLink = document.querySelector(`.sidebar-link[href*="${currentSrc.split('/').pop()}"]`);
+                updateActiveLink(correspondingLink);
+            });
+        }
+
+        // *** MUDANÇA: Lógica de autenticação reforçada ***
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe(); // Garante que a verificação só acontece uma vez
+
+            if (user && !user.isAnonymous) {
+                // Se for um utilizador real, mostra o painel
+                initializeDashboard(user);
+            } else {
+                // Se o utilizador for nulo ou anónimo, redireciona para o login
+                window.location.href = '/login.html';
             }
-        });
-
-        contentFrame.addEventListener('load', () => {
-            const currentSrc = contentFrame.contentWindow.location.href.split('?')[0];
-            const correspondingLink = document.querySelector(`.sidebar-link[href*="${currentSrc.split('/').pop()}"]`);
-            updateActiveLink(correspondingLink);
         });
 
     </script>
