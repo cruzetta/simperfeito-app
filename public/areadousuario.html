@@ -109,8 +109,10 @@
 
         // Lógica de Autenticação
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Usuário está logado
+            // *** MUDANÇA PRINCIPAL AQUI ***
+            // Verifica se existe um utilizador E se ele NÃO é anónimo
+            if (user && !user.isAnonymous) {
+                // Utilizador real está logado
                 const displayName = user.displayName || user.email.split('@')[0];
                 userDisplayName.textContent = displayName;
                 
@@ -127,7 +129,7 @@
                 updateActiveLink(document.querySelector(`a[href="${initialPage}"]`));
 
             } else {
-                // Usuário não está logado, redireciona para a página de login
+                // Se o utilizador for nulo OU anónimo, redireciona para a página de login
                 window.location.href = '/login.html';
             }
         });
