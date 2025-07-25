@@ -411,11 +411,9 @@
             renderAllPreviews();
         }
 
-        // *** FUNÇÃO DE RENDERIZAÇÃO CORRIGIDA ***
         function renderAllPreviews() {
             const { header, story, details, gallery, rsvp, icon } = pageData;
             
-            // Renderiza o cabeçalho
             const titleEl = document.getElementById('couple-names-preview');
             const dateEl = document.getElementById('event-date-preview');
             titleEl.textContent = Array.isArray(header.coupleNames) ? header.coupleNames.join(' & ') : '';
@@ -424,7 +422,6 @@
             Object.assign(titleEl.style, header.titleStyle);
             Object.assign(dateEl.style, header.dateStyle);
 
-            // *** CORREÇÃO: Adiciona a renderização das outras secções ***
             const storySection = document.getElementById('story-section');
             storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
                                      <div class="section-graphic w-16 h-10">${icon || ''}</div>
@@ -457,6 +454,10 @@
 
 
         function setupEventListeners() {
+            // *** CORREÇÃO AQUI ***
+            document.getElementById('open-template-modal').addEventListener('click', () => openModal('template-modal'));
+            document.getElementById('open-icon-modal').addEventListener('click', () => openModal('icon-modal'));
+            
             saveButton.addEventListener('click', handleFullSave);
             
             fontFamilySelect.addEventListener('change', updateSelectedTextStyle);
@@ -465,8 +466,35 @@
             centerHBtn.addEventListener('click', () => centerElement('horizontal'));
             centerVBtn.addEventListener('click', () => centerElement('vertical'));
             recenterBtn.addEventListener('click', () => centerElement('both'));
+            
+            // Adiciona os event listeners para os botões de edição de cada secção
+            document.body.addEventListener('click', function(e) {
+                const editBtn = e.target.closest('.edit-btn');
+                if (editBtn) {
+                    openModal(editBtn.dataset.modal);
+                }
+                const closeModalBtn = e.target.closest('.modal-close-btn');
+                if (closeModalBtn) {
+                    closeModal(closeModalBtn.closest('.modal'));
+                }
+            });
+        }
+        
+        // As funções openModal, closeModal, handleFullSave, etc. permanecem as mesmas
+        // Adicionei aqui apenas as que precisavam de referência para a correção
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('is-open');
+            }
         }
 
+        function closeModal(modal) {
+            if (modal) {
+                modal.classList.remove('is-open');
+            }
+        }
+        
         async function handleFullSave() {
             saveButton.disabled = true;
             saveButton.innerHTML = 'A salvar...';
