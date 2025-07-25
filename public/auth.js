@@ -24,7 +24,7 @@ import {
 // A configuração do seu projeto Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY",
-  authDomain: "simperfeito.firebaseapp.com",
+  authDomain: "simperfeito.com", // <-- ALTERAÇÃO IMPORTANTE AQUI
   projectId: "simperfeito",
   storageBucket: "simperfeito.firebasestorage.app",
   messagingSenderId: "276559476496",
@@ -51,7 +51,7 @@ const getFriendlyErrorMessage = (code) => {
         case 'auth/user-not-found':
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
-            return 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.';
+            return 'E-mail ou senha incorretos. Verifique seus dados и tente novamente.';
         case 'auth/email-already-in-use':
             return 'Este e-mail já está em uso.';
         case 'auth/weak-password':
