@@ -7,58 +7,94 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #F8F7F5; }
-        .font-display { font-family: 'Playfair Display', serif; }
-        .font-body { font-family: 'Cormorant Garamond', serif; }
-        .fade-in { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; } /* gray-100 */
+
+        /* --- Estilos Base dos Templates --- */
+        #event-page-preview {
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'Cormorant Garamond', serif;
+            --font-special: 'Dancing Script', cursive;
+            --color-primary: #DB2777; /* pink-600 */
+            --color-secondary: #F472B6; /* pink-400 */
+            --color-background: #FDF2F8; /* pink-50 */
+            --color-text-main: #1F2937; /* gray-800 */
+            --color-text-light: #4B5563; /* gray-600 */
+            transition: all 0.5s ease;
         }
+        #event-page-preview .font-display { font-family: var(--font-display); }
+        #event-page-preview .font-body { font-family: var(--font-body); }
+        #event-page-preview .font-special { font-family: var(--font-special); }
+        #event-page-preview .text-primary { color: var(--color-primary); }
+        #event-page-preview .bg-primary-light { background-color: var(--color-background); }
+        
+        /* Template: Clássico */
+        #event-page-preview.template-classic {
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'Cormorant Garamond', serif;
+            --color-primary: #831843; /* pink-800 */
+            --color-background: #F8F7F5;
+            --color-text-main: #37322F;
+        }
+
+        /* Template: Moderno */
+        #event-page-preview.template-modern {
+            --font-display: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --color-primary: #111827; /* gray-900 */
+            --color-background: #F9FAFB; /* gray-50 */
+            --color-text-main: #1F2937; /* gray-800 */
+        }
+        #event-page-preview.template-modern #header-section h1 { font-weight: 700; }
+        #event-page-preview.template-modern #story-section, 
+        #event-page-preview.template-modern #details-section { text-align: left; }
+        #event-page-preview.template-modern .section-title { text-align: left; }
+
+        /* Template: Romântico */
+        #event-page-preview.template-romantic {
+            --font-display: 'Dancing Script', cursive;
+            --font-body: 'Cormorant Garamond', serif;
+            --color-primary: #DB2777; /* pink-600 */
+            --color-background: #FFF1F2; /* rose-50 */
+            --color-text-main: #881337; /* rose-900 */
+        }
+        #event-page-preview.template-romantic #header-section { border-bottom: 4px solid var(--color-primary); }
+
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
         .editable-section { position: relative; border: 2px dashed transparent; transition: border-color 0.3s; }
         .editable-section:hover { border-color: #F472B6; } /* pink-400 */
         .edit-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: white;
-            color: #4B5563; /* gray-600 */
-            border-radius: 9999px;
-            padding: 0.5rem;
+            position: absolute; top: 1rem; right: 1rem;
+            background-color: white; color: #4B5563; /* gray-600 */
+            border-radius: 9999px; padding: 0.5rem;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: all 0.2s;
-            z-index: 10;
+            cursor: pointer; transition: all 0.2s; z-index: 10;
         }
         .edit-btn:hover { background-color: #EC4899; color: white; transform: scale(1.1); }
+        
         /* Estilos do Modal */
         .modal {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+            position: fixed; inset: 0; background-color: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
         }
         .modal.is-open { opacity: 1; visibility: visible; }
         .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            width: 90%;
-            max-width: 50rem; /* Aumentado para acomodar galerias */
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: scale(0.95);
-            transition: transform 0.3s;
+            background-color: white; padding: 2rem; border-radius: 0.75rem;
+            width: 90%; max-width: 50rem; max-height: 90vh;
+            overflow-y: auto; transform: scale(0.95); transition: transform 0.3s;
         }
         .modal.is-open .modal-content { transform: scale(1); }
+
+        .template-card {
+            cursor: pointer; border: 2px solid #E5E7EB; /* gray-200 */
+            border-radius: 0.5rem; overflow: hidden; transition: all 0.2s ease-in-out;
+        }
+        .template-card:hover { border-color: var(--color-primary); transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .template-card.active { border-color: var(--color-primary); border-width: 3px; }
     </style>
 </head>
 <body>
@@ -74,6 +110,10 @@
             <span id="header-title" class="text-xl font-bold text-gray-800 font-display">Editor da Página</span>
             <div class="flex items-center gap-4">
                  <a id="view-public-page" href="#" target="_blank" class="text-sm text-pink-600 hover:underline font-semibold">Ver Página Pública</a>
+                 <button id="open-template-modal" class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+                    Templates
+                </button>
                  <button id="save-button" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg>
                     Salvar Alterações
@@ -103,22 +143,22 @@
                 </section>
 
                 <!-- Seção da História -->
-                <section id="story-section" class="editable-section p-8 md:p-16 text-center">
+                <section id="story-section" class="editable-section p-8 md:p-16 text-center bg-primary-light">
                      <button class="edit-btn" data-modal="story-modal" title="Editar Título e História">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
                     </button>
-                    <h2 id="story-title-preview" class="font-display text-3xl md:text-4xl text-gray-800">Nossa História</h2>
-                    <p id="story-text-preview" class="font-body text-lg md:text-xl text-gray-600 mt-6 max-w-2xl mx-auto leading-relaxed">
+                    <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">Nossa História</h2>
+                    <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">
                         Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!
                     </p>
                 </section>
 
                 <!-- Seção da Galeria -->
-                <section id="gallery-section" class="editable-section bg-pink-50 p-8 md:p-16">
+                <section id="gallery-section" class="editable-section p-8 md:p-16">
                      <button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
                     </button>
-                    <h2 class="font-display text-3xl md:text-4xl text-gray-800 text-center mb-8">Nossos Momentos</h2>
+                    <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-8">Nossos Momentos</h2>
                     <div id="gallery-preview-container" class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
                         <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
@@ -127,27 +167,27 @@
                 </section>
 
                  <!-- Seção de Detalhes do Evento -->
-                <section id="details-section" class="editable-section p-8 md:p-16">
+                <section id="details-section" class="editable-section p-8 md:p-16 bg-primary-light">
                      <button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento">
                         <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
                     </button>
-                    <h2 class="font-display text-3xl md:text-4xl text-gray-800 text-center mb-12">Detalhes do Evento</h2>
+                    <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
                         <!-- Cerimônia -->
                         <div id="ceremony-details-preview" class="text-center">
-                            <h3 class="font-display text-2xl text-pink-600">Cerimónia</h3>
-                            <p class="mt-2 font-semibold text-lg text-gray-700">Nome do Local</p>
-                            <p class="text-gray-600">Endereço do Local, 123</p>
-                            <p class="text-gray-600 mt-1">Sábado, 25 de Outubro de 2025, às 16:00</p>
-                            <a href="#" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold" target="_blank">Ver no mapa</a>
+                            <h3 class="font-display text-2xl text-primary">Cerimónia</h3>
+                            <p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">Nome do Local</p>
+                            <p style="color: var(--color-text-light);">Endereço do Local, 123</p>
+                            <p class="mt-1" style="color: var(--color-text-light);">Sábado, 25 de Outubro de 2025, às 16:00</p>
+                            <a href="#" class="mt-2 inline-block font-semibold text-primary hover:underline" target="_blank">Ver no mapa</a>
                         </div>
                         <!-- Recepção -->
                         <div id="reception-details-preview" class="text-center">
-                            <h3 class="font-display text-2xl text-pink-600">Recepção</h3>
-                            <p class="mt-2 font-semibold text-lg text-gray-700">Nome do Local</p>
-                            <p class="text-gray-600">Endereço do Local, 456</p>
-                            <p class="text-gray-600 mt-1">Logo após a cerimónia</p>
-                            <a href="#" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold" target="_blank">Ver no mapa</a>
+                            <h3 class="font-display text-2xl text-primary">Recepção</h3>
+                            <p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">Nome do Local</p>
+                            <p style="color: var(--color-text-light);">Endereço do Local, 456</p>
+                            <p class="mt-1" style="color: var(--color-text-light);">Logo após a cerimónia</p>
+                            <a href="#" class="mt-2 inline-block font-semibold text-primary hover:underline" target="_blank">Ver no mapa</a>
                         </div>
                     </div>
                 </section>
@@ -158,6 +198,43 @@
 
     <!-- Modais de Edição -->
     <div id="modal-container">
+        <!-- Modal de Templates -->
+        <div id="template-modal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-xl font-bold mb-4">Escolha um Template</h3>
+                <p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p>
+                <div id="template-selection-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Template Clássico -->
+                    <div class="template-card" data-template="classic">
+                        <img src="https://placehold.co/400x300/F8F7F5/831843?text=Cl%C3%A1ssico" alt="Template Clássico" class="w-full h-40 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-lg">Clássico</h4>
+                            <p class="text-sm text-gray-500">Elegante e atemporal, com fontes serifadas.</p>
+                        </div>
+                    </div>
+                    <!-- Template Moderno -->
+                    <div class="template-card" data-template="modern">
+                        <img src="https://placehold.co/400x300/F9FAFB/111827?text=Moderno" alt="Template Moderno" class="w-full h-40 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-lg">Moderno</h4>
+                            <p class="text-sm text-gray-500">Minimalista e limpo, com fontes sem serifa.</p>
+                        </div>
+                    </div>
+                    <!-- Template Romântico -->
+                    <div class="template-card" data-template="romantic">
+                        <img src="https://placehold.co/400x300/FFF1F2/DB2777?text=Rom%C3%A2ntico" alt="Template Romântico" class="w-full h-40 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-lg">Romântico</h4>
+                            <p class="text-sm text-gray-500">Delicado, com fontes cursivas e cores suaves.</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="flex justify-end gap-2 mt-8">
+                    <button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal do Cabeçalho -->
         <div id="header-modal" class="modal">
             <div class="modal-content">
@@ -291,12 +368,14 @@
         const saveButton = document.getElementById('save-button');
         const successMessage = document.getElementById('success-message');
         const viewPublicPageLink = document.getElementById('view-public-page');
+        const eventPagePreview = document.getElementById('event-page-preview');
 
         let currentUser;
         let eventConfig;
         let pageData = {}; // Objeto local para armazenar os dados da página
 
         const defaultData = {
+            template: 'classic',
             header: {
                 coupleNames: ["Nome do Aniversariante"],
                 eventDate: "Data do Evento",
@@ -340,6 +419,7 @@
         function initializePage() {
             loadingState.classList.add('hidden');
             pageContent.classList.remove('hidden');
+            applyTemplate(pageData.template || 'classic');
             renderAllPreviews();
             setupEventListeners();
         }
@@ -350,62 +430,44 @@
             eventConfig = configSnap.exists() ? configSnap.data() : { type: 'outro' };
         }
 
-        // --- CORREÇÃO APLICADA AQUI ---
         async function loadPageData() {
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-            const docSnap = await getDoc(pageDataRef);
+            const docSnap = await getDoc(docSnap.ref);
 
             if (!docSnap.exists()) {
-                // Se o documento não existe, cria um novo com os dados padrão
                 console.log("Nenhum dado da página encontrado. A criar documento padrão.");
                 pageData = JSON.parse(JSON.stringify(defaultData));
-                try {
-                    await setDoc(pageDataRef, pageData);
-                    console.log("Documento padrão criado com sucesso.");
-                } catch (e) {
+                await setDoc(pageDataRef, pageData).catch(e => {
                     console.error("Erro ao criar documento padrão:", e);
-                    // Se a criação falhar, ainda podemos prosseguir com os dados padrão locais,
-                    // mas lançamos um erro para que o bloco catch principal possa lidar com isso.
                     throw new Error("Não foi possível criar os dados iniciais da página na base de dados.");
-                }
+                });
             } else {
-                // Se o documento existe, carrega e funde com os padrões para segurança
                 const loadedData = docSnap.data();
-                pageData = JSON.parse(JSON.stringify(defaultData)); // Começa com os padrões
-
-                if (loadedData) {
-                    // Funde os dados do cabeçalho
-                    pageData.header = { ...defaultData.header, ...(loadedData.header || {}) };
-                    if (!Array.isArray(pageData.header.coupleNames) || pageData.header.coupleNames.length === 0) {
-                        pageData.header.coupleNames = [...defaultData.header.coupleNames];
-                    }
-
-                    // Funde os dados da história
-                    if (typeof loadedData.story === 'object' && loadedData.story !== null) {
-                        pageData.story = { ...defaultData.story, ...loadedData.story };
-                    } else if (typeof loadedData.story === 'string') {
-                        pageData.story.text = loadedData.story;
-                    }
-                    
-                    if (loadedData.title) pageData.story.title = loadedData.title;
-                    if (loadedData.imageUrl) pageData.header.imageUrl = loadedData.imageUrl;
-
-                    // Funde os dados da galeria, garantindo que cada foto seja um objeto válido
-                    if (loadedData.gallery && Array.isArray(loadedData.gallery.photos)) {
-                        pageData.gallery.photos = loadedData.gallery.photos.filter(
-                            p => p && typeof p === 'object' && typeof p.url === 'string' && p.url.trim() !== ''
-                        );
-                    }
-
-                    // Funde os dados dos detalhes
-                    if (loadedData.details && typeof loadedData.details === 'object') {
-                        pageData.details.ceremony = { ...defaultData.details.ceremony, ...(loadedData.details.ceremony || {}) };
-                        pageData.details.reception = { ...defaultData.details.reception, ...(loadedData.details.reception || {}) };
-                    }
+                pageData = {
+                    ...JSON.parse(JSON.stringify(defaultData)),
+                    ...loadedData,
+                    header: { ...defaultData.header, ...(loadedData.header || {}) },
+                    story: { ...defaultData.story, ...(loadedData.story || {}) },
+                    gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) },
+                    details: { ...defaultData.details, ...(loadedData.details || {}) },
+                };
+                 if (!Array.isArray(pageData.gallery.photos) || pageData.gallery.photos.length === 0) {
+                    pageData.gallery.photos = defaultData.gallery.photos;
                 }
             }
         }
 
+        // --- LÓGICA DE TEMPLATES ---
+        function applyTemplate(templateId) {
+            eventPagePreview.classList.remove('template-classic', 'template-modern', 'template-romantic');
+            eventPagePreview.classList.add(`template-${templateId}`);
+            pageData.template = templateId;
+
+            // Atualiza o card ativo no modal
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.template === templateId);
+            });
+        }
 
         // --- LÓGICA DE RENDERIZAÇÃO ---
         function renderAllPreviews() {
@@ -434,9 +496,7 @@
         function renderGalleryPreview() {
             const container = document.getElementById('gallery-preview-container');
             container.innerHTML = '';
-            const photos = Array.isArray(pageData.gallery.photos) && pageData.gallery.photos.length > 0
-                ? pageData.gallery.photos
-                : defaultData.gallery.photos;
+            const photos = pageData.gallery.photos;
 
             photos.forEach(photo => {
                 const img = document.createElement('img');
@@ -454,18 +514,18 @@
             const receptionDiv = document.getElementById('reception-details-preview');
 
             ceremonyDiv.innerHTML = `
-                <h3 class="font-display text-2xl text-pink-600">Cerimónia</h3>
-                <p class="mt-2 font-semibold text-lg text-gray-700">${ceremony.name || ''}</p>
-                <p class="text-gray-600">${ceremony.address || ''}</p>
-                <p class="text-gray-600 mt-1">${ceremony.time || ''}</p>
-                <a href="${ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold">Ver no mapa</a>
+                <h3 class="font-display text-2xl text-primary">Cerimónia</h3>
+                <p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${ceremony.name || ''}</p>
+                <p style="color: var(--color-text-light);">${ceremony.address || ''}</p>
+                <p class="mt-1" style="color: var(--color-text-light);">${ceremony.time || ''}</p>
+                <a href="${ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>
             `;
             receptionDiv.innerHTML = `
-                <h3 class="font-display text-2xl text-pink-600">Recepção</h3>
-                <p class="mt-2 font-semibold text-lg text-gray-700">${reception.name || ''}</p>
-                <p class="text-gray-600">${reception.address || ''}</p>
-                <p class="text-gray-600 mt-1">${reception.time || ''}</p>
-                <a href="${reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold">Ver no mapa</a>
+                <h3 class="font-display text-2xl text-primary">Recepção</h3>
+                <p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${reception.name || ''}</p>
+                <p style="color: var(--color-text-light);">${reception.address || ''}</p>
+                <p class="mt-1" style="color: var(--color-text-light);">${reception.time || ''}</p>
+                <a href="${reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>
             `;
         }
 
@@ -512,10 +572,18 @@
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', () => openModal(btn.dataset.modal));
             });
+            document.getElementById('open-template-modal').addEventListener('click', () => openModal('template-modal'));
 
             // Fechar modais
             document.querySelectorAll('.modal-close-btn').forEach(btn => {
                 btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
+            });
+
+            // Seleção de template
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    applyTemplate(card.dataset.template);
+                });
             });
 
             // Salvar modais
