@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:wght@400;600;700&family=Dancing+Script:wght@700&family=Montserrat:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS do Swiper.js para o Carrossel -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
 
@@ -58,6 +62,33 @@
         }
         #vertical-guide { width: 1px; height: 100%; top: 0; }
         #horizontal-guide { height: 1px; width: 100%; left: 0; }
+
+        /* Estilos do Carrossel (Swiper) */
+        .gallery-swiper {
+            width: 100%;
+            height: 500px; /* Altura ajustável do carrossel */
+        }
+        .gallery-swiper .swiper-slide {
+            text-align: center;
+            font-size: 18px;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .gallery-swiper .swiper-slide img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .gallery-swiper .swiper-button-next, .gallery-swiper .swiper-button-prev {
+            color: var(--color-primary, #DB2777);
+        }
+        .gallery-swiper .swiper-pagination-bullet-active {
+            background: var(--color-primary, #DB2777);
+        }
+
 
         /* Outros estilos */
         #event-page-preview {
@@ -171,7 +202,7 @@
                     <!-- O conteúdo será renderizado aqui pelo JS -->
                 </section>
                 <section id="gallery-section" class="editable-section p-8 md:p-16 bg-primary-light">
-                    <!-- O conteúdo será renderizado aqui pelo JS -->
+                    <!-- O conteúdo do carrossel será renderizado aqui -->
                 </section>
                 <section id="rsvp-section" class="editable-section p-8 md:p-16 text-center">
                     <!-- O conteúdo será renderizado aqui pelo JS -->
@@ -203,11 +234,43 @@
         <div id="icon-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Ícone para o seu Evento</h3><p class="text-gray-600 mb-6">Este ícone aparecerá como um detalhe gráfico nas seções da sua página.</p><div id="icon-selection-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4"></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-pink-500 text-white rounded-md">Confirmar</button></div></div></div>
         <div id="template-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Template</h3><p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p><div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"><div class="template-card" data-template="classic"><div class="p-4 border-b text-center" style="background-color: #F8F7F5;"><h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div><div class="template-card" data-template="modern"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div><div class="template-card" data-template="romantic"><div class="p-4 border-b text-center" style="background-color: #FFF1F2;"><h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div><div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button></div></div></div>
         <div id="header-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Cabeçalho</h3><form id="header-form" class="space-y-4"><div><label for="couple-names-input" class="block text-sm font-medium text-gray-700 mb-1">Nomes (separados por vírgula)</label><input type="text" id="couple-names-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="event-date-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da Data</label><input type="text" id="event-date-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Foto Principal</label><div id="header-image-uploader" class="image-uploader"></div></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
-        <div id="gallery-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos</h3><form id="gallery-form"><div id="gallery-inputs-container" class="space-y-6 mb-4"></div><button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
+        
+        <!-- MODAL DA GALERIA ATUALIZADO -->
+        <div id="gallery-modal" class="modal"><div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos / Carrossel</h3>
+            <form id="gallery-form">
+                <div class="mb-6">
+                    <h4 class="text-md font-semibold text-gray-700 mb-2">Configurações do Carrossel</h4>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                        <label for="gallery-autoplay" class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="gallery-autoplay" class="h-4 w-4 rounded text-pink-600 focus:ring-pink-500">
+                            <span>Ativar reprodução automática</span>
+                        </label>
+                        <div id="autoplay-duration-container" class="hidden items-center gap-2">
+                            <input type="number" id="gallery-duration" class="w-20 p-1 border border-gray-300 rounded-md" min="1" step="1">
+                            <label for="gallery-duration" class="text-sm text-gray-600">segundos</label>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-md font-semibold text-gray-700 mb-2">Fotos Adicionais</h4>
+                    <div id="gallery-inputs-container" class="space-y-4 mb-4 max-h-60 overflow-y-auto pr-2"></div>
+                    <button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button>
+                </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
+                    <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
+                </div>
+            </form>
+        </div></div>
+
         <div id="story-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar História</h3><form id="story-form" class="space-y-4"><div><label for="story-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="story-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="story-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da História</label><textarea id="story-text-input" rows="8" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
         <div id="details-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3><form id="details-form" class="space-y-6"><fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Cerimónia</legend><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div></div><div class="mt-4"><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div><div class="mt-4"><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md"></div></fieldset><fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Recepção</legend><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div></div><div class="mt-4"><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div><div class="mt-4"><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md"></div></fieldset><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
         <div id="rsvp-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Confirmação de Presença</h3><form id="rsvp-form" class="space-y-4"><div><label for="rsvp-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="rsvp-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="rsvp-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto de Apoio</label><textarea id="rsvp-text-input" rows="4" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div><label for="rsvp-button-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto do Botão</label><input type="text" id="rsvp-button-text-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="rsvp-button-link-input" class="block text-sm font-medium text-gray-700 mb-1">Link do Botão (para seu formulário de RSVP)</label><input type="url" id="rsvp-button-link-input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://seu-link-de-rsvp.com"></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
     </div>
+
+    <!-- JS do Swiper.js para o Carrossel -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
     <script type="module">
         import { auth, onAuthStateChanged, db, storage, ref, uploadBytes, getDownloadURL } from './auth.js';
@@ -225,6 +288,8 @@
         // --- DADOS E ESTADO ---
         let currentUser;
         let pageData = {};
+        let gallerySwiper = null; // Variável para guardar a instância do carrossel
+
         const defaultData = {
             template: 'elegancia',
             icon: iconLibrary.find(i => i.id === 'flower-2').svg,
@@ -236,7 +301,12 @@
                 dateStyle: { fontFamily: "'Inter', sans-serif", fontSize: "20px", color: "#FFFFFF", top: "65%", left: "50%", transform: "translate(-50%, -50%)" }
             },
             story: { title: "Nossa História", text: "Clique no botão de edição para contar a sua história de amor..." },
-            gallery: { photos: [{ url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" }] },
+            // ESTRUTURA DA GALERIA ATUALIZADA
+            gallery: { 
+                photos: [{ url: "https://placehold.co/800x600/FCE7F3/DB2777?text=Foto+Adicional" }],
+                autoplay: false,
+                duration: 5 
+            },
             details: { ceremony: { name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" }, reception: { name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "#" } },
             rsvp: { title: "Confirme sua Presença", text: "Sua presença é o nosso maior presente!", buttonText: "Confirmar Presença", buttonLink: "#" }
         };
@@ -260,12 +330,8 @@
                 pageData = {
                     ...JSON.parse(JSON.stringify(defaultData)),
                     ...loadedData,
-                    header: {
-                        ...defaultData.header,
-                        ...(loadedData.header || {}),
-                        titleStyle: { ...defaultData.header.titleStyle, ...(loadedData.header?.titleStyle || {}) },
-                        dateStyle: { ...defaultData.header.dateStyle, ...(loadedData.header?.dateStyle || {}) }
-                    }
+                    header: { ...defaultData.header, ...(loadedData.header || {}), titleStyle: { ...defaultData.header.titleStyle, ...(loadedData.header?.titleStyle || {}) }, dateStyle: { ...defaultData.header.dateStyle, ...(loadedData.header?.dateStyle || {}) } },
+                    gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) } // Garante que a galeria seja mesclada
                 };
             } else {
                 pageData = JSON.parse(JSON.stringify(defaultData));
@@ -425,6 +491,7 @@
         function renderAllPreviews() {
             const { header, story, details, gallery, rsvp, icon } = pageData;
             
+            // Renderiza o cabeçalho
             const titleEl = document.getElementById('couple-names-preview');
             const dateEl = document.getElementById('event-date-preview');
             titleEl.textContent = Array.isArray(header.coupleNames) ? header.coupleNames.join(' & ') : '';
@@ -433,41 +500,66 @@
             Object.assign(titleEl.style, header.titleStyle);
             Object.assign(dateEl.style, header.dateStyle);
 
+            // Renderiza outras seções
             const storySection = document.getElementById('story-section');
-            storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                                     <div class="section-graphic w-16 h-10">${icon || ''}</div>
-                                     <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${story.title}</h2>
-                                     <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${story.text}</p>`;
-
+            storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${story.title}</h2> <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${story.text}</p>`;
             const detailsSection = document.getElementById('details-section');
-            detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                                       <div class="section-graphic w-16 h-10">${icon || ''}</div>
-                                       <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2>
-                                       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-                                           <div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">Cerimónia</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.ceremony.name || ''}</p><p style="color: var(--color-text-light);">${details.ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div>
-                                           <div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">Recepção</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.reception.name || ''}</p><p style="color: var(--color-text-light);">${details.reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div>
-                                       </div>`;
+            detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"> <div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">Cerimónia</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.ceremony.name || ''}</p><p style="color: var(--color-text-light);">${details.ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> <div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">Recepção</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.reception.name || ''}</p><p style="color: var(--color-text-light);">${details.reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> </div>`;
             
+            // **NOVA LÓGICA PARA RENDERIZAR O CARROSSEL**
             const gallerySection = document.getElementById('gallery-section');
-            const galleryPhotosHtml = (gallery.photos || []).map(photo => `<img src="${photo.url}" class="rounded-lg shadow-md object-cover w-full h-full aspect-square" onerror="this.src='https://placehold.co/400x400/FCE7F3/DB2777?text=Inválida'">`).join('');
-            gallerySection.innerHTML = `<button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                                        <div class="section-graphic w-16 h-10">${icon || ''}</div>
-                                        <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-8">Nossos Momentos</h2>
-                                        <div id="gallery-preview-container" class="grid grid-cols-2 md:grid-cols-3 gap-4">${galleryPhotosHtml}</div>`;
+            const allPhotos = [header.imageUrl, ...gallery.photos.map(p => p.url)];
+            const slidesHtml = allPhotos.map(url => `
+                <div class="swiper-slide">
+                    <img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/>
+                </div>
+            `).join('');
+
+            gallerySection.innerHTML = `
+                <button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                <div class="section-graphic w-16 h-10">${icon || ''}</div>
+                <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-8">Nossos Momentos</h2>
+                <div class="swiper gallery-swiper rounded-lg overflow-hidden">
+                    <div class="swiper-wrapper">${slidesHtml}</div>
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>`;
+            
+            initializeGalleryCarousel(); // Inicializa o Swiper.js
 
             const rsvpSection = document.getElementById('rsvp-section');
-            rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                                     <div class="section-graphic w-16 h-10">${icon || ''}</div>
-                                     <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${rsvp.title}</h2>
-                                     <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${rsvp.text}</p>
-                                     <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">${rsvp.buttonText}</a>`;
+            rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${rsvp.title}</h2> <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${rsvp.text}</p> <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">${rsvp.buttonText}</a>`;
+        }
+        
+        // **NOVA FUNÇÃO PARA INICIALIZAR O CARROSSEL**
+        function initializeGalleryCarousel() {
+            if (gallerySwiper) {
+                gallerySwiper.destroy(true, true);
+            }
+            const swiperOptions = {
+                loop: true,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+            };
+            if (pageData.gallery.autoplay) {
+                swiperOptions.autoplay = {
+                    delay: pageData.gallery.duration * 1000,
+                    disableOnInteraction: false,
+                };
+            }
+            gallerySwiper = new Swiper('.gallery-swiper', swiperOptions);
         }
 
         // --- EVENTOS E MANIPULADORES ---
         function setupEventListeners() {
             saveButton.addEventListener('click', handleFullSave);
-            
-            // Listeners do Editor de Texto
             fontFamilySelect.addEventListener('change', updateSelectedTextStyle);
             fontSizeInput.addEventListener('input', updateSelectedTextStyle);
             fontColorInput.addEventListener('input', updateSelectedTextStyle);
@@ -475,18 +567,15 @@
             centerVBtn.addEventListener('click', () => centerElement('vertical'));
             recenterBtn.addEventListener('click', () => centerElement('both'));
             
-            // Listeners de Modal (Abertura/Fechamento)
             document.body.addEventListener('click', function(e) {
                 const editBtn = e.target.closest('.edit-btn');
                 if (editBtn) openModal(editBtn.dataset.modal);
-                
                 const closeModalBtn = e.target.closest('.modal-close-btn');
                 if (closeModalBtn) closeModal(closeModalBtn.closest('.modal'));
             });
 
-            // Listeners de Formulários dos Modais
             document.getElementById('header-form').addEventListener('submit', handleHeaderFormSubmit);
-            // Adicionar outros listeners de formulário aqui (story-form, etc.) quando forem implementados
+            document.getElementById('gallery-form').addEventListener('submit', handleGalleryFormSubmit);
         }
         
         async function handleFullSave() {
@@ -509,13 +598,23 @@
             const modal = document.getElementById(modalId);
             if (!modal) return;
 
-            // Preenche o formulário com os dados atuais antes de abrir
             if (modalId === 'header-modal') {
                 document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
                 document.getElementById('event-date-input').value = pageData.header.eventDate;
                 setupImageUploader('header-image-uploader', pageData.header.imageUrl);
+            } else if (modalId === 'gallery-modal') {
+                const autoplayCheck = document.getElementById('gallery-autoplay');
+                const durationInput = document.getElementById('gallery-duration');
+                const durationContainer = document.getElementById('autoplay-duration-container');
+                
+                autoplayCheck.checked = pageData.gallery.autoplay;
+                durationInput.value = pageData.gallery.duration;
+                durationContainer.style.display = pageData.gallery.autoplay ? 'flex' : 'none';
+
+                autoplayCheck.onchange = () => {
+                    durationContainer.style.display = autoplayCheck.checked ? 'flex' : 'none';
+                };
             }
-            // Adicionar outros `if` para outros modais aqui
             
             modal.classList.add('is-open');
         }
@@ -543,101 +642,66 @@
             });
         }
         
-        // --- UPLOAD DE IMAGEM ---
+        // --- UPLOAD DE IMAGEM E SUBMISSÃO DE FORMULÁRIOS ---
         function setupImageUploader(containerId, currentUrl) {
             const container = document.getElementById(containerId);
-            container.innerHTML = `
-                <img id="uploader-preview" src="${currentUrl}" class="w-full h-48 object-contain rounded-md mb-2 bg-gray-100 border" onerror="this.onerror=null;this.src='${defaultData.header.imageUrl}';">
-                <div class="flex items-center justify-between gap-2">
-                    <label for="header-image-input" class="flex-grow text-center px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 rounded-md cursor-pointer hover:bg-gray-50">
-                        Trocar Imagem
-                    </label>
-                    <input type="file" id="header-image-input" class="hidden" accept="image/jpeg, image/png, image/webp">
-                    <button type="button" id="remove-image-btn" class="px-4 py-2 bg-red-100 border border-red-200 text-sm font-medium text-red-700 rounded-md hover:bg-red-200">Remover</button>
-                </div>
-            `;
-
+            container.innerHTML = `<img id="uploader-preview" src="${currentUrl}" class="w-full h-48 object-contain rounded-md mb-2 bg-gray-100 border" onerror="this.onerror=null;this.src='${defaultData.header.imageUrl}';"> <div class="flex items-center justify-between gap-2"> <label for="header-image-input" class="flex-grow text-center px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 rounded-md cursor-pointer hover:bg-gray-50"> Trocar Imagem </label> <input type="file" id="header-image-input" class="hidden" accept="image/jpeg, image/png, image/webp"> <button type="button" id="remove-image-btn" class="px-4 py-2 bg-red-100 border border-red-200 text-sm font-medium text-red-700 rounded-md hover:bg-red-200">Remover</button> </div>`;
             const fileInput = document.getElementById('header-image-input');
             const preview = document.getElementById('uploader-preview');
             const removeBtn = document.getElementById('remove-image-btn');
-
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files && e.target.files[0]) {
-                    const file = e.target.files[0];
-                    preview.src = URL.createObjectURL(file);
-                }
-            });
-
-            removeBtn.addEventListener('click', () => {
-                fileInput.value = ''; // Limpa o seletor de arquivo
-                preview.src = defaultData.header.imageUrl;
-                // Marca a imagem para ser removida no salvamento do formulário
-                preview.dataset.shouldRemove = "true"; 
-            });
+            fileInput.addEventListener('change', (e) => { if (e.target.files && e.target.files[0]) { preview.src = URL.createObjectURL(e.target.files[0]); } });
+            removeBtn.addEventListener('click', () => { fileInput.value = ''; preview.src = defaultData.header.imageUrl; preview.dataset.shouldRemove = "true"; });
         }
 
         async function handleHeaderFormSubmit(e) {
             e.preventDefault();
             const saveBtn = e.target.querySelector('.modal-save-btn');
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'A salvar...';
-
+            saveBtn.disabled = true; saveBtn.textContent = 'A salvar...';
             try {
-                // Atualiza os campos de texto
                 pageData.header.coupleNames = document.getElementById('couple-names-input').value.split(',').map(n => n.trim());
                 pageData.header.eventDate = document.getElementById('event-date-input').value;
-
                 const fileInput = document.getElementById('header-image-input');
                 const preview = document.getElementById('uploader-preview');
-
-                // Verifica se uma nova imagem foi selecionada
                 if (fileInput && fileInput.files[0]) {
                     const file = fileInput.files[0];
                     const imageRef = ref(storage, `users/${currentUser.uid}/eventPage/header_image`);
                     await uploadBytes(imageRef, file);
-                    const downloadURL = await getDownloadURL(imageRef);
-                    pageData.header.imageUrl = downloadURL;
-                } 
-                // Verifica se o botão de remover foi clicado
-                else if (preview.dataset.shouldRemove === "true") {
+                    pageData.header.imageUrl = await getDownloadURL(imageRef);
+                } else if (preview.dataset.shouldRemove === "true") {
                     pageData.header.imageUrl = defaultData.header.imageUrl;
                 }
-
                 renderAllPreviews();
                 closeModal(document.getElementById('header-modal'));
+            } catch (error) { console.error("Erro ao atualizar cabeçalho:", error); showToast("Erro ao carregar a nova imagem.", true);
+            } finally { saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; const preview = document.getElementById('uploader-preview'); if(preview) preview.dataset.shouldRemove = "false"; }
+        }
+        
+        // **NOVA FUNÇÃO PARA O FORMULÁRIO DA GALERIA**
+        async function handleGalleryFormSubmit(e) {
+            e.preventDefault();
+            const saveBtn = e.target.querySelector('.modal-save-btn');
+            saveBtn.disabled = true; saveBtn.textContent = 'A salvar...';
+            try {
+                // Salva as configurações do carrossel
+                pageData.gallery.autoplay = document.getElementById('gallery-autoplay').checked;
+                pageData.gallery.duration = parseInt(document.getElementById('gallery-duration').value, 10) || 5;
 
+                // Aqui você adicionaria a lógica para salvar as URLs das fotos adicionais, se necessário
+                // Por enquanto, vamos apenas salvar as configurações do carrossel
+                
+                renderAllPreviews();
+                closeModal(document.getElementById('gallery-modal'));
             } catch (error) {
-                console.error("Erro ao atualizar cabeçalho:", error);
-                showToast("Erro ao carregar a nova imagem.", true);
+                console.error("Erro ao salvar galeria:", error);
+                showToast("Erro ao salvar as configurações da galeria.", true);
             } finally {
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Salvar';
-                const preview = document.getElementById('uploader-preview');
-                if(preview) preview.dataset.shouldRemove = "false";
+                saveBtn.disabled = false; saveBtn.textContent = 'Salvar';
             }
         }
 
         // --- FUNÇÕES AUXILIARES ---
-        function rgbToHex(rgb) {
-            if (!rgb || !rgb.startsWith('rgb')) return '#FFFFFF';
-            let [r, g, b] = rgb.match(/\d+/g).map(Number);
-            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
-        }
-        
-        function showToast(message, isError = true) {
-            const toast = document.getElementById('toast-notification');
-            const toastMessage = document.getElementById('toast-message');
-            toastMessage.textContent = message;
-            toast.className = `fixed top-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-transform transform-gpu`;
-            toast.classList.add(isError ? 'bg-red-500' : 'bg-green-500');
-            toast.classList.remove('hidden', 'translate-x-full');
-            toast.classList.add('translate-x-0');
-
-            setTimeout(() => {
-                toast.classList.remove('translate-x-0');
-                toast.classList.add('translate-x-full');
-            }, 4000);
-        }
+        function rgbToHex(rgb) { if (!rgb || !rgb.startsWith('rgb')) return '#FFFFFF'; let [r, g, b] = rgb.match(/\d+/g).map(Number); return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase(); }
+        function showToast(message, isError = true) { const toast = document.getElementById('toast-notification'); const toastMessage = document.getElementById('toast-message'); toastMessage.textContent = message; toast.className = `fixed top-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-transform transform-gpu`; toast.classList.add(isError ? 'bg-red-500' : 'bg-green-500'); toast.classList.remove('hidden', 'translate-x-full'); toast.classList.add('translate-x-0'); setTimeout(() => { toast.classList.remove('translate-x-0'); toast.classList.add('translate-x-full'); }, 4000); }
 
     </script>
 </body>
