@@ -121,7 +121,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        // *** MUDANÇA 1: Importar as funções necessárias para a autenticação em memória ***
+        import { initializeAuth, signInAnonymously, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         // Configuração do Firebase
@@ -135,12 +136,15 @@
           measurementId: "G-CB5X7JY7Y6"
         };
 
-        // *** MUDANÇA CRÍTICA: INICIALIZAÇÃO ISOLADA PARA CONVIDADOS ***
-        // Isto cria uma instância separada do Firebase para esta página, prevenindo conflitos de login.
-        // O nome único com timestamp garante que cada aba de convite seja independente.
+        // Inicialização isolada para convidados
         const guestAppName = `guest-app-${Date.now()}`;
         const guestApp = initializeApp(firebaseConfig, guestAppName);
-        const auth = getAuth(guestApp);
+        
+        // *** MUDANÇA 2: Inicializar a autenticação com persistência em memória ***
+        // Isto garante que a sessão anónima não é guardada no disco e não interfere com outras sessões.
+        const auth = initializeAuth(guestApp, {
+            persistence: inMemoryPersistence
+        });
         const db = getFirestore(guestApp);
 
         // Elementos da UI
