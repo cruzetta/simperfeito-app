@@ -437,8 +437,8 @@
 
     <!-- Scripts -->
     <script type="module">
-        import { auth, onAuthStateChanged, db, storage, ref, uploadBytes, getDownloadURL, updateDoc } from './auth.js';
-        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { auth, onAuthStateChanged, db, storage, ref, uploadBytes, getDownloadURL } from './auth.js';
+        import { doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         // --- ELEMENTOS GLOBAIS ---
         const loadingState = document.getElementById('loading-state');
@@ -513,7 +513,7 @@
                     header: { ...defaultData.header, ...(loadedData.header || {}) },
                     story: { ...defaultData.story, ...(loadedData.story || {}) },
                     gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) },
-                    details: { ...defaultData.details, ...(loadedData.details || {}) }, // CORREÇÃO DO ERRO DE DIGITAÇÃO
+                    details: { ...defaultData.details, ...(loadedData.details || {}) },
                     rsvp: { ...defaultData.rsvp, ...(loadedData.rsvp || {}) }
                 };
                  if (!Array.isArray(pageData.gallery.photos) || pageData.gallery.photos.length === 0) {
@@ -594,6 +594,7 @@
 
         async function uploadImageAndGetURL(file) {
             if (!file) return null;
+            // CORREÇÃO: O caminho agora corresponde às regras do Storage.
             const storageRef = ref(storage, `users/${currentUser.uid}/eventImages/${Date.now()}-${file.name}`);
             await uploadBytes(storageRef, file);
             return await getDownloadURL(storageRef);
