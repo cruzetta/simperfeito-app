@@ -111,14 +111,12 @@
             }
         }
         
-        // *** MUDANÇA: Função para inicializar o painel ***
         function initializeDashboard(user) {
             const displayName = user.displayName || user.email.split('@')[0];
             userDisplayName.textContent = displayName;
             
             setEventPageLinkText(user.uid);
             
-            // Esconde o loading e mostra o painel
             loadingState.classList.add('hidden');
             dashboardContent.classList.remove('hidden');
 
@@ -126,14 +124,12 @@
             loadFrameContent(initialPage);
             updateActiveLink(document.querySelector(`a[href="${initialPage}"]`));
 
-            // Configura os event listeners que só devem funcionar quando o painel está visível
             logoutButton.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
-                    window.location.href = '/index.html';
+                    // O listener onAuthStateChanged tratará do redirecionamento
                 } catch (error) {
                     console.error("Erro ao fazer logout:", error);
-                    alert("Ocorreu um erro ao sair. Tente novamente.");
                 }
             });
 
@@ -154,15 +150,25 @@
             });
         }
 
-        // *** MUDANÇA: Lógica de autenticação reforçada ***
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe(); // Garante que a verificação só acontece uma vez
-
-            if (user && !user.isAnonymous) {
-                // Se for um utilizador real, mostra o painel
-                initializeDashboard(user);
+        // *** LÓGICA DE AUTENTICAÇÃO FINAL ***
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Existe um utilizador. Vamos verificar que tipo é.
+                if (user.isAnonymous) {
+                    // É um utilizador anónimo. Não deve estar aqui.
+                    // Terminamos a sessão dele e redirecionamos para o login.
+                    signOut(auth).then(() => {
+                        window.location.href = '/login.html';
+                    }).catch(() => {
+                        // Se o signOut falhar, ainda assim redirecionamos
+                        window.location.href = '/login.html';
+                    });
+                } else {
+                    // É um utilizador real. Mostramos o painel.
+                    initializeDashboard(user);
+                }
             } else {
-                // Se o utilizador for nulo ou anónimo, redireciona para o login
+                // Não há nenhum utilizador logado. Redirecionamos para o login.
                 window.location.href = '/login.html';
             }
         });
