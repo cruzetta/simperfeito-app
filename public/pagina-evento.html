@@ -324,9 +324,14 @@
             if (user) {
                 currentUser = user;
                 viewPublicPageLink.href = `/public-event.html?user=${user.uid}`; // Link para a página pública
-                await loadEventConfig();
-                await loadPageData();
-                initializePage();
+                try {
+                    await loadEventConfig();
+                    await loadPageData();
+                    initializePage();
+                } catch (error) {
+                    console.error("Erro na inicialização da página:", error);
+                    loadingState.innerHTML = '<p class="text-lg text-red-500">Ocorreu um erro ao carregar os dados. Tente recarregar a página.</p>';
+                }
             } else {
                 loadingState.innerHTML = '<p class="text-lg text-red-500">Erro de autenticação. Por favor, recarregue o painel.</p>';
             }
@@ -349,17 +354,47 @@
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
             const docSnap = await getDoc(pageDataRef);
             if (docSnap.exists()) {
-                pageData = { ...defaultData, ...docSnap.data() };
-                 // Garantir que as subestruturas existam
-                pageData.header = { ...defaultData.header, ...pageData.header };
-                pageData.story = { ...defaultData.story, ...pageData.story };
-                pageData.gallery = { ...defaultData.gallery, ...pageData.gallery };
-                pageData.details = { ...defaultData.details, ...pageData.details };
-                pageData.details.ceremony = { ...defaultData.details.ceremony, ...pageData.details.ceremony };
-                pageData.details.reception = { ...defaultData.details.reception, ...pageData.details.reception };
+                const loadedData = docSnap.data();
+                
+                // Começa com uma cópia profunda dos dados padrão
+                pageData = JSON.parse(JSON.stringify(defaultData));
+
+                // Mescla cada seção de forma segura
+                if (loadedData.header) {
+                    pageData.header = { ...pageData.header, ...loadedData.header };
+                }
+                if (loadedData.story) {
+                    // Lida com o formato antigo (string) vs o novo (objeto)
+                    if (typeof loadedData.story === 'object') {
+                         pageData.story = { ...pageData.story, ...loadedData.story };
+                    } else {
+                        // Migração da primeira versão
+                        pageData.story.text = loadedData.story;
+                    }
+                }
+                if (loadedData.gallery) {
+                    pageData.gallery = { ...pageData.gallery, ...loadedData.gallery };
+                }
+                if (loadedData.details) {
+                    if(loadedData.details.ceremony) {
+                        pageData.details.ceremony = { ...pageData.details.ceremony, ...loadedData.details.ceremony };
+                    }
+                    if(loadedData.details.reception) {
+                        pageData.details.reception = { ...pageData.details.reception, ...loadedData.details.reception };
+                    }
+                }
+
+                // Migração da estrutura plana inicial
+                if (loadedData.title && !loadedData.story) {
+                    pageData.story.title = loadedData.title;
+                }
+                if (loadedData.imageUrl && !loadedData.header) {
+                    pageData.header.imageUrl = loadedData.imageUrl;
+                }
 
             } else {
-                pageData = JSON.parse(JSON.stringify(defaultData)); // Deep copy
+                // Nenhum dado existe, usa os padrões
+                pageData = JSON.parse(JSON.stringify(defaultData));
             }
         }
 
@@ -389,7 +424,9 @@
         function renderGalleryPreview() {
             const container = document.getElementById('gallery-preview-container');
             container.innerHTML = '';
-            pageData.gallery.photos.forEach(photo => {
+            // Garante que photos seja um array
+            const photos = Array.isArray(pageData.gallery.photos) ? pageData.gallery.photos : [];
+            photos.forEach(photo => {
                 const img = document.createElement('img');
                 img.src = photo.url;
                 img.alt = photo.caption || 'Foto da galeria';
@@ -406,17 +443,17 @@
 
             ceremonyDiv.innerHTML = `
                 <h3 class="font-display text-2xl text-pink-600">Cerimónia</h3>
-                <p class="mt-2 font-semibold text-lg text-gray-700">${ceremony.name}</p>
-                <p class="text-gray-600">${ceremony.address}</p>
-                <p class="text-gray-600 mt-1">${ceremony.time}</p>
-                <a href="${ceremony.mapUrl}" target="_blank" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold">Ver no mapa</a>
+                <p class="mt-2 font-semibold text-lg text-gray-700">${ceremony.name || ''}</p>
+                <p class="text-gray-600">${ceremony.address || ''}</p>
+                <p class="text-gray-600 mt-1">${ceremony.time || ''}</p>
+                <a href="${ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold">Ver no mapa</a>
             `;
             receptionDiv.innerHTML = `
                 <h3 class="font-display text-2xl text-pink-600">Recepção</h3>
-                <p class="mt-2 font-semibold text-lg text-gray-700">${reception.name}</p>
-                <p class="text-gray-600">${reception.address}</p>
-                <p class="text-gray-600 mt-1">${reception.time}</p>
-                <a href="${reception.mapUrl}" target="_blank" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold">Ver no mapa</a>
+                <p class="mt-2 font-semibold text-lg text-gray-700">${reception.name || ''}</p>
+                <p class="text-gray-600">${reception.address || ''}</p>
+                <p class="text-gray-600 mt-1">${reception.time || ''}</p>
+                <a href="${reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold">Ver no mapa</a>
             `;
         }
 
@@ -533,7 +570,8 @@
         function populateGalleryForm() {
             const container = document.getElementById('gallery-inputs-container');
             container.innerHTML = '';
-            pageData.gallery.photos.forEach(photo => {
+            const photos = Array.isArray(pageData.gallery.photos) ? pageData.gallery.photos : [];
+            photos.forEach(photo => {
                 addPhotoField(photo.url);
             });
         }
