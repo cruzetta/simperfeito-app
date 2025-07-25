@@ -298,13 +298,13 @@
 
         const defaultData = {
             header: {
-                coupleNames: ["Nome do Noivo", "Nome da Noiva"],
+                coupleNames: ["Nome do Aniversariante"],
                 eventDate: "Data do Evento",
                 imageUrl: "https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui"
             },
             story: {
-                title: "Nossa História",
-                text: "Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!"
+                title: "Minha História",
+                text: "Clique no botão de edição para contar a sua história, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!"
             },
             gallery: {
                 photos: [
@@ -314,8 +314,8 @@
                 ]
             },
             details: {
-                ceremony: { name: "Nome do Local", address: "Endereço do Local, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" },
-                reception: { name: "Nome do Local", address: "Endereço do Local, 456", time: "Logo após a cerimónia", mapUrl: "#" }
+                ceremony: { name: "Local da Festa", address: "Endereço do Local, 123", time: "Sábado, 25 de Outubro de 2025, às 19:00", mapUrl: "#" },
+                reception: { name: "Recepção (opcional)", address: "Endereço do Local, 456", time: "Logo após a cerimónia", mapUrl: "#" }
             }
         };
 
@@ -330,7 +330,7 @@
                     initializePage();
                 } catch (error) {
                     console.error("Erro fatal na inicialização da página:", error);
-                    loadingState.innerHTML = '<p class="text-lg text-red-500">Ocorreu um erro ao carregar os dados. Tente recarregar a página.</p>';
+                    loadingState.innerHTML = `<p class="text-lg text-red-500">Ocorreu um erro ao carregar os dados. Tente recarregar a página.</p>`;
                 }
             } else {
                 loadingState.innerHTML = '<p class="text-lg text-red-500">Erro de autenticação. Por favor, recarregue o painel.</p>';
@@ -355,41 +355,49 @@
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
             const docSnap = await getDoc(pageDataRef);
 
-            // Começa com uma cópia profunda da estrutura de dados padrão.
-            pageData = JSON.parse(JSON.stringify(defaultData));
-
-            if (docSnap.exists()) {
+            if (!docSnap.exists()) {
+                // Se o documento não existe, cria um novo com os dados padrão
+                console.log("Nenhum dado da página encontrado. A criar documento padrão.");
+                pageData = JSON.parse(JSON.stringify(defaultData));
+                try {
+                    await setDoc(pageDataRef, pageData);
+                    console.log("Documento padrão criado com sucesso.");
+                } catch (e) {
+                    console.error("Erro ao criar documento padrão:", e);
+                    // Se a criação falhar, ainda podemos prosseguir com os dados padrão locais,
+                    // mas lançamos um erro para que o bloco catch principal possa lidar com isso.
+                    throw new Error("Não foi possível criar os dados iniciais da página na base de dados.");
+                }
+            } else {
+                // Se o documento existe, carrega e funde com os padrões para segurança
                 const loadedData = docSnap.data();
+                pageData = JSON.parse(JSON.stringify(defaultData)); // Começa com os padrões
 
-                // Verifica se loadedData é válido antes de continuar
                 if (loadedData) {
                     // Funde os dados do cabeçalho
                     pageData.header = { ...defaultData.header, ...(loadedData.header || {}) };
-                    // Garante que coupleNames seja sempre um array
                     if (!Array.isArray(pageData.header.coupleNames) || pageData.header.coupleNames.length === 0) {
                         pageData.header.coupleNames = [...defaultData.header.coupleNames];
                     }
 
-                    // Funde os dados da história (lida com o formato de string antigo e o novo formato de objeto)
+                    // Funde os dados da história
                     if (typeof loadedData.story === 'object' && loadedData.story !== null) {
                         pageData.story = { ...defaultData.story, ...loadedData.story };
                     } else if (typeof loadedData.story === 'string') {
-                        // Compatibilidade com versões anteriores para quando a história era apenas uma string
                         pageData.story.text = loadedData.story;
                     }
                     
-                    // Lida com propriedades de nível superior legadas
                     if (loadedData.title) pageData.story.title = loadedData.title;
                     if (loadedData.imageUrl) pageData.header.imageUrl = loadedData.imageUrl;
 
-                    // Funde os dados da galeria, garantindo que cada foto seja um objeto válido com um URL
+                    // Funde os dados da galeria, garantindo que cada foto seja um objeto válido
                     if (loadedData.gallery && Array.isArray(loadedData.gallery.photos)) {
                         pageData.gallery.photos = loadedData.gallery.photos.filter(
                             p => p && typeof p === 'object' && typeof p.url === 'string' && p.url.trim() !== ''
                         );
                     }
 
-                    // Funde os dados dos detalhes do evento
+                    // Funde os dados dos detalhes
                     if (loadedData.details && typeof loadedData.details === 'object') {
                         pageData.details.ceremony = { ...defaultData.details.ceremony, ...(loadedData.details.ceremony || {}) };
                         pageData.details.reception = { ...defaultData.details.reception, ...(loadedData.details.reception || {}) };
@@ -426,18 +434,10 @@
         function renderGalleryPreview() {
             const container = document.getElementById('gallery-preview-container');
             container.innerHTML = '';
-            const photos = Array.isArray(pageData.gallery.photos) ? pageData.gallery.photos : [];
-            if (photos.length === 0) {
-                // Adiciona placeholders se a galeria estiver vazia após a filtragem
-                defaultData.gallery.photos.forEach(photo => {
-                    const img = document.createElement('img');
-                    img.src = photo.url;
-                    img.alt = 'Foto da galeria';
-                    img.className = 'rounded-lg shadow-md object-cover w-full h-full aspect-square';
-                    container.appendChild(img);
-                });
-                return;
-            }
+            const photos = Array.isArray(pageData.gallery.photos) && pageData.gallery.photos.length > 0
+                ? pageData.gallery.photos
+                : defaultData.gallery.photos;
+
             photos.forEach(photo => {
                 const img = document.createElement('img');
                 img.src = photo.url;
