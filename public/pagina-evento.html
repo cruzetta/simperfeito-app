@@ -50,6 +50,7 @@
             border: 2px dashed transparent;
             transition: border-color 0.3s;
             border-radius: 8px;
+            z-index: 20; /* Garante que o texto fique sobre o carrossel */
         }
         .draggable-text:hover, .draggable-text.selected {
             border-color: rgba(236, 72, 153, 0.7); /* pink-500 com opacidade */
@@ -64,11 +65,11 @@
         #horizontal-guide { height: 1px; width: 100%; left: 0; }
 
         /* Estilos do Carrossel (Swiper) */
-        .gallery-swiper {
+        .header-swiper {
             width: 100%;
-            height: 500px; /* Altura ajustável do carrossel */
+            height: 100%; /* Ocupa toda a altura da seção */
         }
-        .gallery-swiper .swiper-slide {
+        .header-swiper .swiper-slide {
             text-align: center;
             font-size: 18px;
             background: #fff;
@@ -76,17 +77,18 @@
             justify-content: center;
             align-items: center;
         }
-        .gallery-swiper .swiper-slide img {
+        .header-swiper .swiper-slide img {
             display: block;
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .gallery-swiper .swiper-button-next, .gallery-swiper .swiper-button-prev {
-            color: var(--color-primary, #DB2777);
+        .header-swiper .swiper-button-next, .header-swiper .swiper-button-prev {
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
-        .gallery-swiper .swiper-pagination-bullet-active {
-            background: var(--color-primary, #DB2777);
+        .header-swiper .swiper-pagination-bullet-active {
+            background: white;
         }
 
 
@@ -131,7 +133,7 @@
         
         .editable-section { position: relative; border: 2px dashed transparent; transition: border-color 0.3s; }
         .editable-section:hover { border-color: #F472B6; }
-        .edit-btn { position: absolute; top: 1rem; right: 1rem; background-color: white; color: #4B5563; border-radius: 9999px; padding: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; z-index: 10; }
+        .edit-btn { position: absolute; top: 1rem; right: 1rem; background-color: white; color: #4B5563; border-radius: 9999px; padding: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; z-index: 30; }
         .edit-btn:hover { background-color: #EC4899; color: white; transform: scale(1.1); }
         
         .modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
@@ -182,10 +184,12 @@
         <main class="p-4 sm:p-6 md:p-8 bg-gray-200">
             <div id="event-page-preview" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
                 
-                <section id="header-section" class="editable-section relative text-center bg-gray-700">
-                    <button class="edit-btn" data-modal="header-modal" title="Editar Cabeçalho"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                    <div id="header-content-wrapper" class="relative w-full h-[60vh]">
-                        <img id="header-image-preview" src="https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui" class="w-full h-full object-cover">
+                <!-- SEÇÃO DO CABEÇALHO/CARROSSEL UNIFICADA -->
+                <section id="header-section" class="editable-section relative text-center bg-gray-700 h-[60vh]">
+                    <button class="edit-btn" data-modal="header-modal" title="Editar Cabeçalho e Fotos"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                    
+                    <div id="header-content-wrapper" class="relative w-full h-full">
+                        <!-- O carrossel será inserido aqui pelo JS -->
                         <div id="header-text-overlay" class="absolute inset-0">
                             <div id="vertical-guide" class="alignment-guide"></div>
                             <div id="horizontal-guide" class="alignment-guide"></div>
@@ -200,9 +204,6 @@
                 </section>
                 <section id="details-section" class="editable-section p-8 md:p-16">
                     <!-- O conteúdo será renderizado aqui pelo JS -->
-                </section>
-                <section id="gallery-section" class="editable-section p-8 md:p-16 bg-primary-light">
-                    <!-- O conteúdo do carrossel será renderizado aqui -->
                 </section>
                 <section id="rsvp-section" class="editable-section p-8 md:p-16 text-center">
                     <!-- O conteúdo será renderizado aqui pelo JS -->
@@ -233,13 +234,24 @@
     <div id="modal-container">
         <div id="icon-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Ícone para o seu Evento</h3><p class="text-gray-600 mb-6">Este ícone aparecerá como um detalhe gráfico nas seções da sua página.</p><div id="icon-selection-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4"></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-pink-500 text-white rounded-md">Confirmar</button></div></div></div>
         <div id="template-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Template</h3><p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p><div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"><div class="template-card" data-template="classic"><div class="p-4 border-b text-center" style="background-color: #F8F7F5;"><h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div><div class="template-card" data-template="modern"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div><div class="template-card" data-template="romantic"><div class="p-4 border-b text-center" style="background-color: #FFF1F2;"><h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div><div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button></div></div></div>
-        <div id="header-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Cabeçalho</h3><form id="header-form" class="space-y-4"><div><label for="couple-names-input" class="block text-sm font-medium text-gray-700 mb-1">Nomes (separados por vírgula)</label><input type="text" id="couple-names-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="event-date-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da Data</label><input type="text" id="event-date-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Foto Principal</label><div id="header-image-uploader" class="image-uploader"></div></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
         
-        <!-- MODAL DA GALERIA ATUALIZADO -->
-        <div id="gallery-modal" class="modal"><div class="modal-content">
-            <h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos / Carrossel</h3>
-            <form id="gallery-form">
-                <div class="mb-6">
+        <!-- MODAL DO CABEÇALHO ATUALIZADO PARA INCLUIR GALERIA -->
+        <div id="header-modal" class="modal"><div class="modal-content">
+            <h3 class="text-xl font-bold mb-6">Editar Cabeçalho e Carrossel</h3>
+            <form id="header-form" class="space-y-6">
+                <div>
+                    <label for="couple-names-input" class="block text-sm font-medium text-gray-700 mb-1">Nomes (separados por vírgula)</label>
+                    <input type="text" id="couple-names-input" class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="event-date-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da Data</label>
+                    <input type="text" id="event-date-input" class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Foto Principal (Primeiro slide do carrossel)</label>
+                    <div id="header-image-uploader" class="image-uploader"></div>
+                </div>
+                <div class="border-t pt-6">
                     <h4 class="text-md font-semibold text-gray-700 mb-2">Configurações do Carrossel</h4>
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                         <label for="gallery-autoplay" class="flex items-center gap-3 cursor-pointer">
@@ -252,11 +264,12 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <h4 class="text-md font-semibold text-gray-700 mb-2">Fotos Adicionais</h4>
+                <div class="border-t pt-6">
+                    <h4 class="text-md font-semibold text-gray-700 mb-2">Fotos Adicionais do Carrossel</h4>
                     <div id="gallery-inputs-container" class="space-y-4 mb-4 max-h-60 overflow-y-auto pr-2"></div>
                     <button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button>
                 </div>
+
                 <div class="flex justify-end gap-2 mt-6">
                     <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
                     <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
@@ -288,7 +301,7 @@
         // --- DADOS E ESTADO ---
         let currentUser;
         let pageData = {};
-        let gallerySwiper = null; // Variável para guardar a instância do carrossel
+        let headerSwiper = null; // Renomeado para maior clareza
 
         const defaultData = {
             template: 'elegancia',
@@ -301,7 +314,6 @@
                 dateStyle: { fontFamily: "'Inter', sans-serif", fontSize: "20px", color: "#FFFFFF", top: "65%", left: "50%", transform: "translate(-50%, -50%)" }
             },
             story: { title: "Nossa História", text: "Clique no botão de edição para contar a sua história de amor..." },
-            // ESTRUTURA DA GALERIA ATUALIZADA
             gallery: { 
                 photos: [{ url: "https://placehold.co/800x600/FCE7F3/DB2777?text=Foto+Adicional" }],
                 autoplay: false,
@@ -331,7 +343,7 @@
                     ...JSON.parse(JSON.stringify(defaultData)),
                     ...loadedData,
                     header: { ...defaultData.header, ...(loadedData.header || {}), titleStyle: { ...defaultData.header.titleStyle, ...(loadedData.header?.titleStyle || {}) }, dateStyle: { ...defaultData.header.dateStyle, ...(loadedData.header?.dateStyle || {}) } },
-                    gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) } // Garante que a galeria seja mesclada
+                    gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) }
                 };
             } else {
                 pageData = JSON.parse(JSON.stringify(defaultData));
@@ -362,14 +374,11 @@
             if (selectedTextElement) selectedTextElement.classList.remove('selected');
             selectedTextElement = element;
             selectedTextElement.classList.add('selected');
-
             const rect = element.getBoundingClientRect();
             const containerRect = headerContentWrapper.getBoundingClientRect();
-            
             toolbar.style.display = 'flex';
             toolbar.style.top = `${rect.top - containerRect.top - toolbar.offsetHeight - 10}px`;
             toolbar.style.left = `${rect.left - containerRect.left + (rect.width / 2) - (toolbar.offsetWidth / 2)}px`;
-
             fontFamilySelect.value = element.style.fontFamily;
             fontSizeInput.value = parseInt(element.style.fontSize, 10);
             fontColorInput.value = rgbToHex(element.style.color);
@@ -386,11 +395,9 @@
         function updateSelectedTextStyle() {
             if (!selectedTextElement) return;
             const styleKey = selectedTextElement.id === 'couple-names-preview' ? 'titleStyle' : 'dateStyle';
-            
             selectedTextElement.style.fontFamily = fontFamilySelect.value;
             selectedTextElement.style.fontSize = `${fontSizeInput.value}px`;
             selectedTextElement.style.color = fontColorInput.value;
-            
             pageData.header[styleKey].fontFamily = fontFamilySelect.value;
             pageData.header[styleKey].fontSize = `${fontSizeInput.value}px`;
             pageData.header[styleKey].color = fontColorInput.value;
@@ -399,10 +406,8 @@
         function setupDraggableText() {
             const draggables = document.querySelectorAll('.draggable-text');
             const snapThreshold = 5;
-
             draggables.forEach(el => {
                 let isDragging = false, offsetX, offsetY;
-
                 el.addEventListener('mousedown', (e) => {
                     isDragging = true;
                     offsetX = e.clientX - el.getBoundingClientRect().left;
@@ -410,19 +415,15 @@
                     showToolbarFor(el);
                     e.stopPropagation();
                 });
-
                 document.addEventListener('mousemove', (e) => {
                     if (!isDragging) return;
                     const containerRect = headerContentWrapper.getBoundingClientRect();
-                    
                     let newLeft = e.clientX - containerRect.left - offsetX;
                     let newTop = e.clientY - containerRect.top - offsetY;
-
                     const elCenterH = newLeft + el.offsetWidth / 2;
                     const elCenterV = newTop + el.offsetHeight / 2;
                     const containerCenterH = containerRect.width / 2;
                     const containerCenterV = containerRect.height / 2;
-
                     if (Math.abs(elCenterH - containerCenterH) < snapThreshold) {
                         newLeft = containerCenterH - el.offsetWidth / 2;
                         verticalGuide.style.left = `${containerCenterH}px`;
@@ -430,7 +431,6 @@
                     } else {
                         verticalGuide.style.display = 'none';
                     }
-
                     if (Math.abs(elCenterV - containerCenterV) < snapThreshold) {
                         newTop = containerCenterV - el.offsetHeight / 2;
                         horizontalGuide.style.top = `${containerCenterV}px`;
@@ -438,28 +438,23 @@
                     } else {
                         horizontalGuide.style.display = 'none';
                     }
-
                     newLeft = Math.max(0, Math.min(newLeft, containerRect.width - el.offsetWidth));
                     newTop = Math.max(0, Math.min(newTop, containerRect.height - el.offsetHeight));
-
                     el.style.left = `${newLeft}px`;
                     el.style.top = `${newTop}px`;
                     el.style.transform = 'none';
                 });
-
                 document.addEventListener('mouseup', () => {
                     if (!isDragging) return;
                     isDragging = false;
                     verticalGuide.style.display = 'none';
                     horizontalGuide.style.display = 'none';
-                    
                     const styleKey = el.id === 'couple-names-preview' ? 'titleStyle' : 'dateStyle';
                     pageData.header[styleKey].left = `${(el.offsetLeft / headerContentWrapper.offsetWidth) * 100}%`;
                     pageData.header[styleKey].top = `${(el.offsetTop / headerContentWrapper.offsetHeight) * 100}%`;
                     pageData.header[styleKey].transform = 'none';
                 });
             });
-            
             document.addEventListener('click', (e) => {
                 if (!toolbar.contains(e.target) && !e.target.classList.contains('draggable-text')) {
                     hideToolbar();
@@ -471,7 +466,6 @@
             if (!selectedTextElement) return;
             const styleKey = selectedTextElement.id === 'couple-names-preview' ? 'titleStyle' : 'dateStyle';
             const defaultPositions = defaultData.header[styleKey];
-            
             if (axis === 'horizontal') {
                 pageData.header[styleKey].left = '50%';
                 pageData.header[styleKey].transform = `translate(-50%, ${selectedTextElement.style.transform.split(',')[1] || '0%'})`;
@@ -483,7 +477,6 @@
                 pageData.header[styleKey].top = defaultPositions.top;
                 pageData.header[styleKey].transform = defaultPositions.transform;
             }
-            
             renderAllPreviews();
         }
 
@@ -491,62 +484,50 @@
         function renderAllPreviews() {
             const { header, story, details, gallery, rsvp, icon } = pageData;
             
-            // Renderiza o cabeçalho
+            // Renderiza o cabeçalho e o carrossel
+            const allPhotos = [header.imageUrl, ...gallery.photos.map(p => p.url)];
+            const slidesHtml = allPhotos.map(url => `<div class="swiper-slide"><img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/></div>`).join('');
+            headerContentWrapper.innerHTML = `
+                <div class="swiper header-swiper">
+                    <div class="swiper-wrapper">${slidesHtml}</div>
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+                <div id="header-text-overlay" class="absolute inset-0">
+                    <div id="vertical-guide" class="alignment-guide"></div>
+                    <div id="horizontal-guide" class="alignment-guide"></div>
+                    <h1 id="couple-names-preview" class="draggable-text text-white text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"></h1>
+                    <p id="event-date-preview" class="draggable-text text-white text-lg" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);"></p>
+                </div>`;
+            
+            initializeHeaderCarousel();
+            
             const titleEl = document.getElementById('couple-names-preview');
             const dateEl = document.getElementById('event-date-preview');
             titleEl.textContent = Array.isArray(header.coupleNames) ? header.coupleNames.join(' & ') : '';
             dateEl.textContent = header.eventDate;
-            document.getElementById('header-image-preview').src = header.imageUrl;
             Object.assign(titleEl.style, header.titleStyle);
             Object.assign(dateEl.style, header.dateStyle);
+            setupDraggableText(); // Re-associa os eventos de arrastar aos novos elementos de texto
 
             // Renderiza outras seções
             const storySection = document.getElementById('story-section');
             storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${story.title}</h2> <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${story.text}</p>`;
             const detailsSection = document.getElementById('details-section');
             detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"> <div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">Cerimónia</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.ceremony.name || ''}</p><p style="color: var(--color-text-light);">${details.ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> <div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">Recepção</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.reception.name || ''}</p><p style="color: var(--color-text-light);">${details.reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> </div>`;
-            
-            // **NOVA LÓGICA PARA RENDERIZAR O CARROSSEL**
-            const gallerySection = document.getElementById('gallery-section');
-            const allPhotos = [header.imageUrl, ...gallery.photos.map(p => p.url)];
-            const slidesHtml = allPhotos.map(url => `
-                <div class="swiper-slide">
-                    <img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/>
-                </div>
-            `).join('');
-
-            gallerySection.innerHTML = `
-                <button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                <div class="section-graphic w-16 h-10">${icon || ''}</div>
-                <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-8">Nossos Momentos</h2>
-                <div class="swiper gallery-swiper rounded-lg overflow-hidden">
-                    <div class="swiper-wrapper">${slidesHtml}</div>
-                    <div class="swiper-pagination"></div>
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
-                </div>`;
-            
-            initializeGalleryCarousel(); // Inicializa o Swiper.js
-
             const rsvpSection = document.getElementById('rsvp-section');
             rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${rsvp.title}</h2> <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${rsvp.text}</p> <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">${rsvp.buttonText}</a>`;
         }
         
-        // **NOVA FUNÇÃO PARA INICIALIZAR O CARROSSEL**
-        function initializeGalleryCarousel() {
-            if (gallerySwiper) {
-                gallerySwiper.destroy(true, true);
+        function initializeHeaderCarousel() {
+            if (headerSwiper) {
+                headerSwiper.destroy(true, true);
             }
             const swiperOptions = {
                 loop: true,
-                pagination: {
-                    el: '.swiper-pagination',
-                    clickable: true,
-                },
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
+                pagination: { el: '.swiper-pagination', clickable: true },
+                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
             };
             if (pageData.gallery.autoplay) {
                 swiperOptions.autoplay = {
@@ -554,7 +535,7 @@
                     disableOnInteraction: false,
                 };
             }
-            gallerySwiper = new Swiper('.gallery-swiper', swiperOptions);
+            headerSwiper = new Swiper('.header-swiper', swiperOptions);
         }
 
         // --- EVENTOS E MANIPULADORES ---
@@ -575,7 +556,6 @@
             });
 
             document.getElementById('header-form').addEventListener('submit', handleHeaderFormSubmit);
-            document.getElementById('gallery-form').addEventListener('submit', handleGalleryFormSubmit);
         }
         
         async function handleFullSave() {
@@ -602,7 +582,7 @@
                 document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
                 document.getElementById('event-date-input').value = pageData.header.eventDate;
                 setupImageUploader('header-image-uploader', pageData.header.imageUrl);
-            } else if (modalId === 'gallery-modal') {
+                
                 const autoplayCheck = document.getElementById('gallery-autoplay');
                 const durationInput = document.getElementById('gallery-duration');
                 const durationContainer = document.getElementById('autoplay-duration-container');
@@ -670,33 +650,14 @@
                 } else if (preview.dataset.shouldRemove === "true") {
                     pageData.header.imageUrl = defaultData.header.imageUrl;
                 }
+                
+                pageData.gallery.autoplay = document.getElementById('gallery-autoplay').checked;
+                pageData.gallery.duration = parseInt(document.getElementById('gallery-duration').value, 10) || 5;
+
                 renderAllPreviews();
                 closeModal(document.getElementById('header-modal'));
             } catch (error) { console.error("Erro ao atualizar cabeçalho:", error); showToast("Erro ao carregar a nova imagem.", true);
             } finally { saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; const preview = document.getElementById('uploader-preview'); if(preview) preview.dataset.shouldRemove = "false"; }
-        }
-        
-        // **NOVA FUNÇÃO PARA O FORMULÁRIO DA GALERIA**
-        async function handleGalleryFormSubmit(e) {
-            e.preventDefault();
-            const saveBtn = e.target.querySelector('.modal-save-btn');
-            saveBtn.disabled = true; saveBtn.textContent = 'A salvar...';
-            try {
-                // Salva as configurações do carrossel
-                pageData.gallery.autoplay = document.getElementById('gallery-autoplay').checked;
-                pageData.gallery.duration = parseInt(document.getElementById('gallery-duration').value, 10) || 5;
-
-                // Aqui você adicionaria a lógica para salvar as URLs das fotos adicionais, se necessário
-                // Por enquanto, vamos apenas salvar as configurações do carrossel
-                
-                renderAllPreviews();
-                closeModal(document.getElementById('gallery-modal'));
-            } catch (error) {
-                console.error("Erro ao salvar galeria:", error);
-                showToast("Erro ao salvar as configurações da galeria.", true);
-            } finally {
-                saveBtn.disabled = false; saveBtn.textContent = 'Salvar';
-            }
         }
 
         // --- FUNÇÕES AUXILIARES ---
