@@ -40,14 +40,17 @@
     <div id="loading-state" class="text-center"><p class="text-lg text-gray-600">A carregar convite...</p></div>
     <div id="error-state" class="hidden text-center bg-red-100 p-8 rounded-lg shadow-md"><h2 class="text-2xl font-bold text-red-700 font-display">Convite Inválido</h2><p class="text-gray-600 mt-2">O link deste convite parece estar quebrado.</p><p id="error-details" class="text-xs text-gray-500 mt-4"></p></div>
 
-    <div id="content-wrapper" class="hidden w-full max-w-5xl mx-auto bg-white shadow-xl rounded-lg">
+    <div id="content-wrapper" class="hidden w-full max-w-5xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
         
         <nav id="main-nav" class="sticky-nav bg-white/80 backdrop-blur-lg shadow-sm">
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex items-center justify-between h-16"><div class="flex items-center"><span id="nav-title" class="font-display text-xl text-primary"></span></div><div class="hidden md:block"><div class="ml-10 flex items-baseline space-x-4"><a href="#header-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Início</a><a href="#story-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">A História</a><a href="#details-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">O Evento</a><a href="#gift-list-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Presentes</a><a href="#rsvp-section" class="bg-pink-800 text-white hover:bg-pink-700 px-3 py-2 rounded-md text-sm font-medium">Confirmar Presença</a></div></div></div></div>
         </nav>
 
         <main>
-            <section id="header-section" class="relative text-center"></section>
+            <!-- *** CORREÇÃO AQUI: Altura do cabeçalho aumentada e object-cover mantido *** -->
+            <section id="header-section" class="relative text-center h-[60vh] bg-gray-700">
+                <!-- O conteúdo (img e div) será inserido via JS -->
+            </section>
             <section id="story-section" class="p-8 md:p-16 text-center bg-primary-light"></section>
             <section id="details-section" class="p-8 md:p-16 bg-white"></section>
             <section id="gift-list-section" class="hidden p-8 md:p-16 bg-primary-light"><div class="text-center mb-12"><h2 class="text-3xl md:text-4xl font-bold font-display text-primary">Lista de Presentes</h2><p class="font-body text-lg text-gray-600 mt-2">O seu carinho é o maior presente, mas se desejar presentear, aqui ficam algumas sugestões.</p></div><div id="gift-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div><div id="no-gifts-message" class="hidden text-center py-10 px-6 bg-white rounded-lg shadow-sm border"><p class="text-gray-600 font-body text-lg">Os anfitriões optaram por não criar uma lista de presentes online.</p></div></section>
@@ -55,8 +58,8 @@
                  <div class="section-graphic"></div>
                  <h2 class="text-3xl font-bold font-display text-primary">Olá, <span id="guest-family-name" class="text-pink-700"></span>!</h2>
                  <p class="text-lg text-gray-600 mt-2 font-body">Gostaríamos de contar com a sua presença. <br>Por favor, confirme se poderá comparecer.</p>
-                 <div id="rsvp-buttons" class="mt-8 flex flex-col sm:flex-row justify-center gap-4"><button id="confirm-button" class="w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-green-700">Sim, eu vou!</button><button id="decline-button" class="w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-red-700">Não poderei ir</button></div>
-                 <div id="rsvp-message" class="hidden mt-6 text-xl text-gray-700 font-semibold font-body"></div>
+                 <div id="rsvp-buttons" class="mt-8 flex flex-col sm:flex-row justify-center gap-4"><button id="confirm-button" class="w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105">Sim, eu vou!</button><button id="decline-button" class="w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-red-700 transition-transform transform hover:scale-105">Não poderei ir</button></div>
+                 <div id="rsvp-message" class="hidden mt-6 text-xl text-gray-700 font-semibold font-body p-4 bg-gray-100 rounded-lg"></div>
             </section>
         </main>
     </div>
@@ -66,7 +69,7 @@
         import { initializeAuth, signInAnonymously, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY", authDomain: "simperfeito.com", projectId: "simperfeito", storageBucket: "simperfeito.appspot.com", messagingSenderId: "276559476496", appId: "1:276559476496:web:c811781762486bb5001795" };
+        const firebaseConfig = { apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY", authDomain: "simperfeito.com", projectId: "simperfeito", storageBucket: "simperfeito.firebasestorage.app", messagingSenderId: "276559476496", appId: "1:276559476496:web:c811781762486bb5001795" };
         const guestApp = initializeApp(firebaseConfig, `guest-app-${Date.now()}`);
         const auth = initializeAuth(guestApp, { persistence: inMemoryPersistence });
         const db = getFirestore(guestApp);
@@ -140,7 +143,13 @@
         function renderHeader(header = {}) {
             const coupleNames = (header.coupleNames || []).join(' & ');
             navTitle.textContent = coupleNames;
-            headerSection.innerHTML = `<img src="${header.imageUrl}" class="w-full h-96 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui'"><div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4"><h1 class="font-display text-white text-4xl md:text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${coupleNames}</h1><p class="text-white text-lg mt-2 font-body" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${header.eventDate || ''}</p></div>`;
+            // *** CORREÇÃO AQUI: A imagem e o overlay são adicionados dinamicamente ***
+            headerSection.innerHTML = `
+                <img src="${header.imageUrl}" class="w-full h-full object-cover absolute top-0 left-0" onerror="this.onerror=null;this.src='https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui'">
+                <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4">
+                    <h1 class="font-display text-white text-4xl md:text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${coupleNames}</h1>
+                    <p class="text-white text-lg mt-2 font-body" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${header.eventDate || ''}</p>
+                </div>`;
         }
         
         function renderStory(story = {}, icon = '') {
