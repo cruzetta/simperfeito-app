@@ -6,6 +6,10 @@
     <title>Você foi convidado!</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- CSS do Swiper.js para o Carrossel -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
         .font-display { font-family: 'Playfair Display', serif; }
@@ -17,6 +21,39 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
         .sticky-nav { position: sticky; top: 0; z-index: 50; transition: background-color 0.3s, box-shadow 0.3s; }
+
+        /* Estilos do Carrossel (Swiper) */
+        .header-swiper {
+            width: 100%;
+            height: 100%;
+        }
+        .header-swiper .swiper-slide {
+            text-align: center;
+            font-size: 18px;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .header-swiper .swiper-slide img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .header-swiper .swiper-button-next, .header-swiper .swiper-button-prev {
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .header-swiper .swiper-pagination-bullet-active {
+            background: white;
+        }
+        .draggable-text { /* Nome mantido para compatibilidade de estilo */
+            position: absolute;
+            padding: 10px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
         /* Estilos dinâmicos do template */
         #content-wrapper {
@@ -40,7 +77,6 @@
     <div id="loading-state" class="text-center"><p class="text-lg text-gray-600">A carregar convite...</p></div>
     <div id="error-state" class="hidden text-center bg-red-100 p-8 rounded-lg shadow-md"><h2 class="text-2xl font-bold text-red-700 font-display">Convite Inválido</h2><p class="text-gray-600 mt-2">O link deste convite parece estar quebrado.</p><p id="error-details" class="text-xs text-gray-500 mt-4"></p></div>
 
-    <!-- *** CORREÇÃO AQUI: A largura máxima foi alterada de max-w-5xl para max-w-4xl para corresponder ao editor *** -->
     <div id="content-wrapper" class="hidden w-full max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
         
         <nav id="main-nav" class="sticky-nav bg-white/80 backdrop-blur-lg shadow-sm">
@@ -49,7 +85,7 @@
 
         <main>
             <section id="header-section" class="relative text-center h-[60vh] bg-gray-700">
-                <!-- O conteúdo (img e div) será inserido via JS -->
+                <!-- O carrossel e os textos serão inseridos aqui via JS -->
             </section>
             <section id="story-section" class="p-8 md:p-16 text-center bg-primary-light"></section>
             <section id="details-section" class="p-8 md:p-16 bg-white"></section>
@@ -63,6 +99,9 @@
             </section>
         </main>
     </div>
+
+    <!-- JS do Swiper.js para o Carrossel -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
@@ -91,6 +130,7 @@
         const navTitle = document.getElementById('nav-title');
 
         let creatorId, guestId;
+        let headerSwiper = null;
 
         window.onload = async () => {
             try {
@@ -106,7 +146,7 @@
                 if (!guestData) throw new Error("Dados do convidado não encontrados.");
 
                 applyTemplate(eventData.template);
-                renderHeader(eventData.header);
+                renderHeader(eventData.header, eventData.gallery); // Passa a galeria para o header
                 renderStory(eventData.story, eventData.icon);
                 renderDetails(eventData.details, eventData.icon);
                 await loadAndShowGiftList();
@@ -140,15 +180,56 @@
             }
         }
 
-        function renderHeader(header = {}) {
+        function renderHeader(header = {}, gallery = {}) {
             const coupleNames = (header.coupleNames || []).join(' & ');
             navTitle.textContent = coupleNames;
+
+            const allPhotos = [header.imageUrl, ...(gallery.photos || []).map(p => p.url)];
+            const slidesHtml = allPhotos.map(url => `
+                <div class="swiper-slide">
+                    <img src="${url}" onerror="this.src='https://placehold.co/1200x600/FCE7F3/DB2777?text=Inválida'"/>
+                </div>
+            `).join('');
+
             headerSection.innerHTML = `
-                <img src="${header.imageUrl}" class="w-full h-full object-cover absolute top-0 left-0" onerror="this.onerror=null;this.src='https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui'">
-                <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4">
-                    <h1 class="font-display text-white text-4xl md:text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${coupleNames}</h1>
-                    <p class="text-white text-lg mt-2 font-body" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${header.eventDate || ''}</p>
+                <div class="swiper header-swiper">
+                    <div class="swiper-wrapper">${slidesHtml}</div>
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+                <div class="absolute inset-0 bg-black/20"></div>
+                <div id="header-text-overlay" class="absolute inset-0">
+                    <h1 id="couple-names-preview" class="draggable-text"></h1>
+                    <p id="event-date-preview" class="draggable-text"></p>
                 </div>`;
+
+            const titleEl = document.getElementById('couple-names-preview');
+            const dateEl = document.getElementById('event-date-preview');
+            titleEl.textContent = coupleNames;
+            dateEl.textContent = header.eventDate || '';
+            Object.assign(titleEl.style, header.titleStyle);
+            Object.assign(dateEl.style, header.dateStyle);
+
+            initializeHeaderCarousel(gallery);
+        }
+
+        function initializeHeaderCarousel(gallery = {}) {
+            if (headerSwiper) {
+                headerSwiper.destroy(true, true);
+            }
+            const swiperOptions = {
+                loop: true,
+                pagination: { el: '.swiper-pagination', clickable: true },
+                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            };
+            if (gallery.autoplay) {
+                swiperOptions.autoplay = {
+                    delay: (gallery.duration || 5) * 1000,
+                    disableOnInteraction: false,
+                };
+            }
+            headerSwiper = new Swiper('.header-swiper', swiperOptions);
         }
         
         function renderStory(story = {}, icon = '') {
