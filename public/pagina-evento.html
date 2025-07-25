@@ -3,65 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página do Evento - Sim, Perfeito</title>
+    <title>Editor da Página do Evento - Sim, Perfeito</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #F8F7F5; }
         .font-display { font-family: 'Playfair Display', serif; }
+        .font-body { font-family: 'Cormorant Garamond', serif; }
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        #story-editor {
-            min-height: 200px;
+        .editable-section { position: relative; border: 2px dashed transparent; transition: border-color 0.3s; }
+        .editable-section:hover { border-color: #F472B6; } /* pink-400 */
+        .edit-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: white;
+            color: #4B5563; /* gray-600 */
+            border-radius: 9999px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
         }
+        .edit-btn:hover { background-color: #EC4899; color: white; transform: scale(1.1); }
+        /* Estilos do Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal.is-open { opacity: 1; visibility: visible; }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 50rem; /* Aumentado para acomodar galerias */
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal.is-open .modal-content { transform: scale(1); }
     </style>
 </head>
 <body>
 
     <!-- Tela de Carregamento -->
     <div id="loading-state" class="min-h-screen flex items-center justify-center">
-        <p class="text-lg text-gray-500">A carregar editor...</p>
+        <p class="text-lg text-gray-500">A carregar o editor da sua página...</p>
     </div>
 
     <!-- Conteúdo da Página -->
-    <div id="page-content" class="hidden fade-in">
-        <header class="flex items-center justify-between h-16 px-6 bg-white border-b sticky top-0 z-20">
-            <span id="header-title" class="text-xl font-bold text-gray-800 font-display">Página do Evento</span>
-            <button id="save-button" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg>
-                Salvar Alterações
-            </button>
+    <div id="page-content" class="hidden">
+        <header class="flex items-center justify-between h-16 px-6 bg-white border-b sticky top-0 z-40">
+            <span id="header-title" class="text-xl font-bold text-gray-800 font-display">Editor da Página</span>
+            <div class="flex items-center gap-4">
+                 <a id="view-public-page" href="#" target="_blank" class="text-sm text-pink-600 hover:underline font-semibold">Ver Página Pública</a>
+                 <button id="save-button" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg>
+                    Salvar Alterações
+                </button>
+            </div>
         </header>
 
-        <main class="p-4 sm:p-6 md:p-8">
+        <main class="p-4 sm:p-6 md:p-8 bg-gray-200">
             <div id="success-message" class="hidden bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6" role="alert">
                 <p class="font-bold">Sucesso!</p>
                 <p>As suas alterações foram salvas.</p>
             </div>
+            
+            <!-- A pré-visualização do site do evento é renderizada aqui -->
+            <div id="event-page-preview" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+                
+                <!-- Seção Header -->
+                <section id="header-section" class="editable-section relative text-center bg-gray-300">
+                    <button class="edit-btn" data-modal="header-modal" title="Editar Cabeçalho">
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                    </button>
+                    <img id="header-image-preview" src="https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui" class="w-full h-96 object-cover">
+                    <div class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4">
+                        <h1 id="couple-names-preview" class="font-display text-white text-4xl md:text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Nomes Aqui</h1>
+                        <p id="event-date-preview" class="text-white text-lg mt-2" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Data do Evento</p>
+                    </div>
+                </section>
 
-            <div class="bg-white p-6 sm:p-8 rounded-lg shadow-sm border">
-                <form id="event-page-form" class="space-y-6">
+                <!-- Seção da História -->
+                <section id="story-section" class="editable-section p-8 md:p-16 text-center">
+                     <button class="edit-btn" data-modal="story-modal" title="Editar Título e História">
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                    </button>
+                    <h2 id="story-title-preview" class="font-display text-3xl md:text-4xl text-gray-800">Nossa História</h2>
+                    <p id="story-text-preview" class="font-body text-lg md:text-xl text-gray-600 mt-6 max-w-2xl mx-auto leading-relaxed">
+                        Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!
+                    </p>
+                </section>
+
+                <!-- Seção da Galeria -->
+                <section id="gallery-section" class="editable-section bg-pink-50 p-8 md:p-16">
+                     <button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos">
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                    </button>
+                    <h2 class="font-display text-3xl md:text-4xl text-gray-800 text-center mb-8">Nossos Momentos</h2>
+                    <div id="gallery-preview-container" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
+                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
+                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+3" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
+                    </div>
+                </section>
+
+                 <!-- Seção de Detalhes do Evento -->
+                <section id="details-section" class="editable-section p-8 md:p-16">
+                     <button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento">
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                    </button>
+                    <h2 class="font-display text-3xl md:text-4xl text-gray-800 text-center mb-12">Detalhes do Evento</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+                        <!-- Cerimônia -->
+                        <div id="ceremony-details-preview" class="text-center">
+                            <h3 class="font-display text-2xl text-pink-600">Cerimónia</h3>
+                            <p class="mt-2 font-semibold text-lg text-gray-700">Nome do Local</p>
+                            <p class="text-gray-600">Endereço do Local, 123</p>
+                            <p class="text-gray-600 mt-1">Sábado, 25 de Outubro de 2025, às 16:00</p>
+                            <a href="#" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold" target="_blank">Ver no mapa</a>
+                        </div>
+                        <!-- Recepção -->
+                        <div id="reception-details-preview" class="text-center">
+                            <h3 class="font-display text-2xl text-pink-600">Recepção</h3>
+                            <p class="mt-2 font-semibold text-lg text-gray-700">Nome do Local</p>
+                            <p class="text-gray-600">Endereço do Local, 456</p>
+                            <p class="text-gray-600 mt-1">Logo após a cerimónia</p>
+                            <a href="#" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold" target="_blank">Ver no mapa</a>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modais de Edição -->
+    <div id="modal-container">
+        <!-- Modal do Cabeçalho -->
+        <div id="header-modal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-xl font-bold mb-4">Editar Cabeçalho</h3>
+                <form id="header-form" class="space-y-4">
                     <div>
-                        <label for="page-title" class="block text-sm font-medium text-gray-700 mb-1">Título da Página</label>
-                        <input type="text" id="page-title" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Nossa História de Amor">
+                        <label for="couple-names-input" class="block text-sm font-medium text-gray-700 mb-1">Nomes (separados por vírgula)</label>
+                        <input type="text" id="couple-names-input" class="w-full p-2 border border-gray-300 rounded-md">
                     </div>
                     <div>
-                        <label for="image-url" class="block text-sm font-medium text-gray-700 mb-1">URL da Foto Principal</label>
-                        <input type="url" id="image-url" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://exemplo.com/foto.jpg">
-                    </div>
-                    <div class="mt-4">
-                        <img id="image-preview" src="" alt="Pré-visualização da imagem" class="hidden w-full max-w-lg mx-auto rounded-lg shadow-md">
+                        <label for="event-date-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da Data</label>
+                        <input type="text" id="event-date-input" class="w-full p-2 border border-gray-300 rounded-md">
                     </div>
                     <div>
-                        <label for="story-editor" class="block text-sm font-medium text-gray-700 mb-1">Sua História / Mensagem</label>
-                        <textarea id="story-editor" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Conte a sua história, dê as boas-vindas aos convidados..."></textarea>
+                        <label for="header-image-input" class="block text-sm font-medium text-gray-700 mb-1">URL da Foto Principal</label>
+                        <input type="url" id="header-image-input" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
+                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
                     </div>
                 </form>
             </div>
-        </main>
+        </div>
+
+        <!-- Modal da História -->
+        <div id="story-modal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-xl font-bold mb-4">Editar História</h3>
+                <form id="story-form" class="space-y-4">
+                    <div>
+                        <label for="story-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label>
+                        <input type="text" id="story-title-input" class="w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="story-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da História</label>
+                        <textarea id="story-text-input" rows="8" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
+                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Modal da Galeria -->
+        <div id="gallery-modal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos</h3>
+                <form id="gallery-form">
+                    <div id="gallery-inputs-container" class="space-y-4 mb-4">
+                        <!-- Inputs da galeria serão adicionados aqui -->
+                    </div>
+                    <button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
+                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal de Detalhes do Evento -->
+        <div id="details-modal" class="modal">
+             <div class="modal-content">
+                <h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3>
+                <form id="details-form" class="space-y-6">
+                    <!-- Detalhes da Cerimônia -->
+                    <fieldset class="border p-4 rounded-md">
+                        <legend class="text-lg font-semibold px-2">Cerimónia</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label>
+                                <input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md">
+                            </div>
+                             <div>
+                                <label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label>
+                                <input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                            <input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="mt-4">
+                            <label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label>
+                            <input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </fieldset>
+                    <!-- Detalhes da Recepção -->
+                     <fieldset class="border p-4 rounded-md">
+                        <legend class="text-lg font-semibold px-2">Recepção</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label>
+                                <input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md">
+                            </div>
+                             <div>
+                                <label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
+                                <input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                            <input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="mt-4">
+                            <label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label>
+                            <input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </fieldset>
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
+                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 
     <!-- Scripts -->
@@ -69,27 +285,45 @@
         import { auth, onAuthStateChanged, db } from './auth.js';
         import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        // Elementos da UI
+        // --- ELEMENTOS GLOBAIS ---
         const loadingState = document.getElementById('loading-state');
         const pageContent = document.getElementById('page-content');
-        const headerTitle = document.getElementById('header-title');
         const saveButton = document.getElementById('save-button');
         const successMessage = document.getElementById('success-message');
-        
-        // Campos do Formulário
-        const form = document.getElementById('event-page-form');
-        const pageTitleInput = document.getElementById('page-title');
-        const imageUrlInput = document.getElementById('image-url');
-        const imagePreview = document.getElementById('image-preview');
-        const storyEditor = document.getElementById('story-editor');
+        const viewPublicPageLink = document.getElementById('view-public-page');
 
         let currentUser;
         let eventConfig;
+        let pageData = {}; // Objeto local para armazenar os dados da página
+
+        const defaultData = {
+            header: {
+                coupleNames: ["Nome do Noivo", "Nome da Noiva"],
+                eventDate: "Data do Evento",
+                imageUrl: "https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui"
+            },
+            story: {
+                title: "Nossa História",
+                text: "Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!"
+            },
+            gallery: {
+                photos: [
+                    { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" },
+                    { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" },
+                    { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+3" }
+                ]
+            },
+            details: {
+                ceremony: { name: "Nome do Local", address: "Endereço do Local, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "#" },
+                reception: { name: "Nome do Local", address: "Endereço do Local, 456", time: "Logo após a cerimónia", mapUrl: "#" }
+            }
+        };
 
         // --- INICIALIZAÇÃO ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
+                viewPublicPageLink.href = `/public-event.html?user=${user.uid}`; // Link para a página pública
                 await loadEventConfig();
                 await loadPageData();
                 initializePage();
@@ -101,80 +335,232 @@
         function initializePage() {
             loadingState.classList.add('hidden');
             pageContent.classList.remove('hidden');
+            renderAllPreviews();
             setupEventListeners();
-            updateHeaderTitle();
         }
 
         async function loadEventConfig() {
             const configRef = doc(db, 'users', currentUser.uid, 'config', 'event');
             const configSnap = await getDoc(configRef);
-            if (configSnap.exists()) {
-                eventConfig = configSnap.data();
-            } else {
-                // Fallback caso a configuração não exista
-                eventConfig = { type: 'outro' };
-            }
+            eventConfig = configSnap.exists() ? configSnap.data() : { type: 'outro' };
         }
 
         async function loadPageData() {
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
             const docSnap = await getDoc(pageDataRef);
             if (docSnap.exists()) {
-                const data = docSnap.data();
-                pageTitleInput.value = data.title || '';
-                imageUrlInput.value = data.imageUrl || '';
-                storyEditor.value = data.story || '';
-                updateImagePreview();
+                pageData = { ...defaultData, ...docSnap.data() };
+                 // Garantir que as subestruturas existam
+                pageData.header = { ...defaultData.header, ...pageData.header };
+                pageData.story = { ...defaultData.story, ...pageData.story };
+                pageData.gallery = { ...defaultData.gallery, ...pageData.gallery };
+                pageData.details = { ...defaultData.details, ...pageData.details };
+                pageData.details.ceremony = { ...defaultData.details.ceremony, ...pageData.details.ceremony };
+                pageData.details.reception = { ...defaultData.details.reception, ...pageData.details.reception };
+
+            } else {
+                pageData = JSON.parse(JSON.stringify(defaultData)); // Deep copy
             }
+        }
+
+        // --- LÓGICA DE RENDERIZAÇÃO ---
+        function renderAllPreviews() {
+            renderHeaderPreview();
+            renderStoryPreview();
+            renderGalleryPreview();
+            renderDetailsPreview();
+        }
+
+        function renderHeaderPreview() {
+            const { coupleNames, eventDate, imageUrl } = pageData.header;
+            document.getElementById('couple-names-preview').textContent = coupleNames.join(' & ');
+            document.getElementById('event-date-preview').textContent = eventDate;
+            const imgPreview = document.getElementById('header-image-preview');
+            imgPreview.src = imageUrl || defaultData.header.imageUrl;
+            imgPreview.onerror = () => { imgPreview.src = defaultData.header.imageUrl; };
+        }
+
+        function renderStoryPreview() {
+            const { title, text } = pageData.story;
+            document.getElementById('story-title-preview').textContent = title;
+            document.getElementById('story-text-preview').textContent = text;
+        }
+        
+        function renderGalleryPreview() {
+            const container = document.getElementById('gallery-preview-container');
+            container.innerHTML = '';
+            pageData.gallery.photos.forEach(photo => {
+                const img = document.createElement('img');
+                img.src = photo.url;
+                img.alt = photo.caption || 'Foto da galeria';
+                img.className = 'rounded-lg shadow-md object-cover w-full h-full aspect-square';
+                img.onerror = () => { img.src = 'https://placehold.co/400x400/FCE7F3/DB2777?text=Imagem+Inv%C3%A1lida'; };
+                container.appendChild(img);
+            });
+        }
+
+        function renderDetailsPreview() {
+            const { ceremony, reception } = pageData.details;
+            const ceremonyDiv = document.getElementById('ceremony-details-preview');
+            const receptionDiv = document.getElementById('reception-details-preview');
+
+            ceremonyDiv.innerHTML = `
+                <h3 class="font-display text-2xl text-pink-600">Cerimónia</h3>
+                <p class="mt-2 font-semibold text-lg text-gray-700">${ceremony.name}</p>
+                <p class="text-gray-600">${ceremony.address}</p>
+                <p class="text-gray-600 mt-1">${ceremony.time}</p>
+                <a href="${ceremony.mapUrl}" target="_blank" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold">Ver no mapa</a>
+            `;
+            receptionDiv.innerHTML = `
+                <h3 class="font-display text-2xl text-pink-600">Recepção</h3>
+                <p class="mt-2 font-semibold text-lg text-gray-700">${reception.name}</p>
+                <p class="text-gray-600">${reception.address}</p>
+                <p class="text-gray-600 mt-1">${reception.time}</p>
+                <a href="${reception.mapUrl}" target="_blank" class="mt-2 inline-block text-pink-500 hover:text-pink-700 font-semibold">Ver no mapa</a>
+            `;
+        }
+
+        // --- LÓGICA DOS MODAIS ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                // Preencher formulário antes de abrir
+                switch (modalId) {
+                    case 'header-modal':
+                        document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
+                        document.getElementById('event-date-input').value = pageData.header.eventDate;
+                        document.getElementById('header-image-input').value = pageData.header.imageUrl;
+                        break;
+                    case 'story-modal':
+                        document.getElementById('story-title-input').value = pageData.story.title;
+                        document.getElementById('story-text-input').value = pageData.story.text;
+                        break;
+                    case 'gallery-modal':
+                        populateGalleryForm();
+                        break;
+                    case 'details-modal':
+                        const { ceremony, reception } = pageData.details;
+                        document.getElementById('ceremony-name').value = ceremony.name;
+                        document.getElementById('ceremony-time').value = ceremony.time;
+                        document.getElementById('ceremony-address').value = ceremony.address;
+                        document.getElementById('ceremony-map').value = ceremony.mapUrl;
+                        document.getElementById('reception-name').value = reception.name;
+                        document.getElementById('reception-time').value = reception.time;
+                        document.getElementById('reception-address').value = reception.address;
+                        document.getElementById('reception-map').value = reception.mapUrl;
+                        break;
+                }
+                modal.classList.add('is-open');
+            }
+        }
+
+        function closeModal(modal) {
+            modal.classList.remove('is-open');
         }
 
         function setupEventListeners() {
-            saveButton.addEventListener('click', handleSave);
-            imageUrlInput.addEventListener('input', updateImagePreview);
+            // Abrir modais
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => openModal(btn.dataset.modal));
+            });
+
+            // Fechar modais
+            document.querySelectorAll('.modal-close-btn').forEach(btn => {
+                btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
+            });
+
+            // Salvar modais
+            document.getElementById('header-form').addEventListener('submit', handleHeaderSave);
+            document.getElementById('story-form').addEventListener('submit', handleStorySave);
+            document.getElementById('gallery-form').addEventListener('submit', handleGallerySave);
+            document.getElementById('details-form').addEventListener('submit', handleDetailsSave);
+
+            // Botão principal de salvar
+            saveButton.addEventListener('click', handleFullSave);
+            
+            // Lógica da galeria
+            document.getElementById('add-photo-btn').addEventListener('click', () => addPhotoField());
+        }
+
+        // --- LÓGICA DE SALVAMENTO DOS FORMULÁRIOS ---
+        function handleHeaderSave(e) {
+            e.preventDefault();
+            pageData.header.coupleNames = document.getElementById('couple-names-input').value.split(',').map(name => name.trim());
+            pageData.header.eventDate = document.getElementById('event-date-input').value;
+            pageData.header.imageUrl = document.getElementById('header-image-input').value;
+            renderHeaderPreview();
+            closeModal(e.target.closest('.modal'));
+        }
+
+        function handleStorySave(e) {
+            e.preventDefault();
+            pageData.story.title = document.getElementById('story-title-input').value;
+            pageData.story.text = document.getElementById('story-text-input').value;
+            renderStoryPreview();
+            closeModal(e.target.closest('.modal'));
         }
         
-        function updateHeaderTitle() {
-            switch (eventConfig.type) {
-                case 'casamento':
-                    headerTitle.textContent = 'Página dos Noivos';
-                    break;
-                case 'aniversario_infantil':
-                    headerTitle.textContent = 'Página do Aniversariante';
-                    break;
-                case 'formatura':
-                    headerTitle.textContent = 'Página do Formando';
-                    break;
-                default:
-                    headerTitle.textContent = 'Página do Evento';
-            }
+        function handleGallerySave(e) {
+            e.preventDefault();
+            const inputs = document.querySelectorAll('.gallery-photo-input');
+            const newPhotos = [];
+            inputs.forEach(input => {
+                const url = input.value.trim();
+                if (url) {
+                    newPhotos.push({ url });
+                }
+            });
+            pageData.gallery.photos = newPhotos;
+            renderGalleryPreview();
+            closeModal(e.target.closest('.modal'));
         }
 
-        function updateImagePreview() {
-            const url = imageUrlInput.value.trim();
-            if (url) {
-                imagePreview.src = url;
-                imagePreview.classList.remove('hidden');
-            } else {
-                imagePreview.classList.add('hidden');
-            }
+        function handleDetailsSave(e) {
+            e.preventDefault();
+            pageData.details.ceremony.name = document.getElementById('ceremony-name').value;
+            pageData.details.ceremony.time = document.getElementById('ceremony-time').value;
+            pageData.details.ceremony.address = document.getElementById('ceremony-address').value;
+            pageData.details.ceremony.mapUrl = document.getElementById('ceremony-map').value;
+            pageData.details.reception.name = document.getElementById('reception-name').value;
+            pageData.details.reception.time = document.getElementById('reception-time').value;
+            pageData.details.reception.address = document.getElementById('reception-address').value;
+            pageData.details.reception.mapUrl = document.getElementById('reception-map').value;
+            renderDetailsPreview();
+            closeModal(e.target.closest('.modal'));
         }
 
-        async function handleSave() {
+        // Lógica da Galeria no Modal
+        function populateGalleryForm() {
+            const container = document.getElementById('gallery-inputs-container');
+            container.innerHTML = '';
+            pageData.gallery.photos.forEach(photo => {
+                addPhotoField(photo.url);
+            });
+        }
+
+        function addPhotoField(url = '') {
+            const container = document.getElementById('gallery-inputs-container');
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            div.innerHTML = `
+                <input type="url" class="gallery-photo-input flex-grow p-2 border border-gray-300 rounded-md" value="${url}" placeholder="https://exemplo.com/foto.jpg">
+                <button type="button" class="remove-photo-btn text-red-500 hover:text-red-700 p-1 rounded-full"><svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button>
+            `;
+            div.querySelector('.remove-photo-btn').addEventListener('click', () => div.remove());
+            container.appendChild(div);
+        }
+
+        // --- SALVAMENTO FINAL NO FIREBASE ---
+        async function handleFullSave() {
             saveButton.disabled = true;
-            saveButton.textContent = 'A salvar...';
-
-            const dataToSave = {
-                title: pageTitleInput.value,
-                imageUrl: imageUrlInput.value,
-                story: storyEditor.value,
-                updatedAt: new Date()
-            };
+            saveButton.innerHTML = 'A salvar...';
 
             try {
                 const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-                await setDoc(pageDataRef, dataToSave, { merge: true });
+                await setDoc(pageDataRef, { ...pageData, updatedAt: new Date() });
                 
                 successMessage.classList.remove('hidden');
+                window.scrollTo(0, 0);
                 setTimeout(() => {
                     successMessage.classList.add('hidden');
                 }, 3000);
@@ -187,6 +573,7 @@
                 saveButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg> Salvar Alterações`;
             }
         }
+
     </script>
 </body>
 </html>
