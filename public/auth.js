@@ -36,9 +36,10 @@ import {
 // A configuração do seu projeto Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY",
-  authDomain: "simperfeito.com", // <-- ALTERAÇÃO IMPORTANTE AQUI
+  authDomain: "simperfeito.com",
   projectId: "simperfeito",
-  storageBucket: "simperfeito.appspot.com", // <-- CORREÇÃO IMPORTANTE AQUI
+  // *** CORREÇÃO CRÍTICA AQUI: O endereço do bucket foi atualizado para corresponder ao seu projeto. ***
+  storageBucket: "simperfeito.firebasestorage.app",
   messagingSenderId: "276559476496",
   appId: "1:276559476496:web:c811781762486bb5001795",
   measurementId: "G-CB5X7JY7Y6"
