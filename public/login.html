@@ -112,11 +112,14 @@
             getFriendlyErrorMessage
         } from './auth.js';
 
-        // Verifica se o usuário já está logado. Se estiver, redireciona para o painel.
+        // *** MUDANÇA PRINCIPAL AQUI ***
+        // Verifica se o utilizador já está logado E NÃO é anónimo.
         onAuthStateChanged(auth, (user) => {
-            if (user) {
+            if (user && !user.isAnonymous) {
+                // Se for um utilizador real, redireciona para o painel.
                 window.location.href = '/areadousuario.html';
             }
+            // Se o utilizador for nulo ou anónimo, ele permanece na página de login.
         });
 
         // Pega os elementos da página que vamos usar
