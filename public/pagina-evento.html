@@ -437,7 +437,7 @@
 
     <!-- Scripts -->
     <script type="module">
-        import { auth, onAuthStateChanged, db, storage, ref, uploadBytes, getDownloadURL } from './auth.js';
+        import { auth, onAuthStateChanged, db, storage, ref, uploadBytes, getDownloadURL, updateDoc } from './auth.js';
         import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         // --- ELEMENTOS GLOBAIS ---
@@ -513,7 +513,7 @@
                     header: { ...defaultData.header, ...(loadedData.header || {}) },
                     story: { ...defaultData.story, ...(loadedData.story || {}) },
                     gallery: { ...defaultData.gallery, ...(loadedData.gallery || {}) },
-                    details: { ...defaultData.details, ...(loadedData.details || {}) },
+                    details: { ...defaultData.details, ...(loadedData.details || {}) }, // CORREÇÃO DO ERRO DE DIGITAÇÃO
                     rsvp: { ...defaultData.rsvp, ...(loadedData.rsvp || {}) }
                 };
                  if (!Array.isArray(pageData.gallery.photos) || pageData.gallery.photos.length === 0) {
@@ -599,7 +599,7 @@
             return await getDownloadURL(storageRef);
         }
 
-        // --- LÓGICA DE SALVAMENTO DOS FORMULÁRIOS ---
+        // --- LÓGICA DE SALVAMENTO DOS FORMULÁRIOS (MODIFICADA) ---
         async function handleHeaderSave(e) {
             e.preventDefault();
             const uploader = document.getElementById('header-image-uploader');
@@ -607,26 +607,41 @@
             saveBtn.disabled = true;
             saveBtn.textContent = 'A salvar...';
 
-            pageData.header.coupleNames = document.getElementById('couple-names-input').value.split(',').map(name => name.trim());
-            pageData.header.eventDate = document.getElementById('event-date-input').value;
+            const newHeaderData = {
+                coupleNames: document.getElementById('couple-names-input').value.split(',').map(name => name.trim()),
+                eventDate: document.getElementById('event-date-input').value,
+                imageUrl: pageData.header.imageUrl
+            };
 
             const { type, value } = uploader.dataSource;
-            if (type === 'file') {
+            if (type === 'file' && value) {
                 uploader.querySelector('.loading-text').style.display = 'block';
                 try {
-                    pageData.header.imageUrl = await uploadImageAndGetURL(value);
+                    newHeaderData.imageUrl = await uploadImageAndGetURL(value);
                 } catch (err) {
                     console.error("Upload failed", err);
                     alert("O envio da imagem falhou.");
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Salvar';
+                    return;
                 }
-            } else {
-                pageData.header.imageUrl = value;
+            } else if (type === 'url') {
+                newHeaderData.imageUrl = value;
             }
-            
-            renderHeaderPreview();
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Salvar';
-            closeModal(e.target.closest('.modal'));
+
+            try {
+                pageData.header = newHeaderData;
+                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
+                await updateDoc(pageDataRef, { header: pageData.header });
+                renderHeaderPreview();
+                closeModal(e.target.closest('.modal'));
+            } catch (error) {
+                console.error("Erro ao salvar cabeçalho:", error);
+                alert("Ocorreu um erro ao salvar as informações do cabeçalho.");
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Salvar';
+            }
         }
 
         async function handleGallerySave(e) {
@@ -636,28 +651,33 @@
             saveBtn.textContent = 'A salvar...';
 
             const uploaderDivs = document.querySelectorAll('#gallery-inputs-container .image-uploader-wrapper');
-            const uploadPromises = Array.from(uploaderDivs).map(async (wrapper) => {
-                const uploader = wrapper.querySelector('.image-uploader');
-                const { type, value } = uploader.dataSource;
-                if (type === 'file') {
-                    wrapper.querySelector('.loading-text').style.display = 'block';
-                    return uploadImageAndGetURL(value);
-                }
-                return value; // It's already a URL
-            });
             
             try {
+                const uploadPromises = Array.from(uploaderDivs).map(async (wrapper) => {
+                    const uploader = wrapper.querySelector('.image-uploader');
+                    const { type, value } = uploader.dataSource;
+                    if (type === 'file' && value) {
+                        wrapper.querySelector('.loading-text').style.display = 'block';
+                        return uploadImageAndGetURL(value);
+                    }
+                    return value;
+                });
+
                 const urls = await Promise.all(uploadPromises);
                 pageData.gallery.photos = urls.filter(url => url).map(url => ({ url }));
-            } catch (err) {
-                console.error("Gallery upload failed", err);
-                alert("O envio de uma ou mais imagens da galeria falhou.");
-            }
 
-            renderGalleryPreview();
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Salvar';
-            closeModal(e.target.closest('.modal'));
+                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
+                await updateDoc(pageDataRef, { "gallery.photos": pageData.gallery.photos });
+
+                renderGalleryPreview();
+                closeModal(e.target.closest('.modal'));
+            } catch (err) {
+                console.error("Gallery save failed", err);
+                alert("O envio de uma ou mais imagens da galeria falhou.");
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Salvar';
+            }
         }
 
         function addPhotoField(url = '') {
@@ -753,7 +773,6 @@
                     case 'header-modal':
                         document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
                         document.getElementById('event-date-input').value = pageData.header.eventDate;
-                        // O uploader é recriado sempre, então não precisa preencher aqui
                         break;
                     case 'story-modal':
                         document.getElementById('story-title-input').value = pageData.story.title;
@@ -805,30 +824,54 @@
             document.getElementById('add-photo-btn').addEventListener('click', () => addPhotoField());
         }
 
-        function handleStorySave(e) {
+        async function handleStorySave(e) {
             e.preventDefault();
             pageData.story.title = document.getElementById('story-title-input').value;
             pageData.story.text = document.getElementById('story-text-input').value;
-            renderStoryPreview();
-            closeModal(e.target.closest('.modal'));
+            
+            try {
+                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
+                await updateDoc(pageDataRef, { story: pageData.story });
+                renderStoryPreview();
+                closeModal(e.target.closest('.modal'));
+            } catch (error) {
+                console.error("Erro ao salvar história:", error);
+                alert("Ocorreu um erro ao salvar a história.");
+            }
         }
         
-        function handleDetailsSave(e) {
+        async function handleDetailsSave(e) {
             e.preventDefault();
             pageData.details.ceremony = { name: document.getElementById('ceremony-name').value, time: document.getElementById('ceremony-time').value, address: document.getElementById('ceremony-address').value, mapUrl: document.getElementById('ceremony-map').value };
             pageData.details.reception = { name: document.getElementById('reception-name').value, time: document.getElementById('reception-time').value, address: document.getElementById('reception-address').value, mapUrl: document.getElementById('reception-map').value };
-            renderDetailsPreview();
-            closeModal(e.target.closest('.modal'));
+            
+            try {
+                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
+                await updateDoc(pageDataRef, { details: pageData.details });
+                renderDetailsPreview();
+                closeModal(e.target.closest('.modal'));
+            } catch(error) {
+                console.error("Erro ao salvar detalhes:", error);
+                alert("Ocorreu um erro ao salvar os detalhes do evento.");
+            }
         }
 
-        function handleRsvpSave(e) {
+        async function handleRsvpSave(e) {
             e.preventDefault();
             pageData.rsvp.title = document.getElementById('rsvp-title-input').value;
             pageData.rsvp.text = document.getElementById('rsvp-text-input').value;
             pageData.rsvp.buttonText = document.getElementById('rsvp-button-text-input').value;
             pageData.rsvp.buttonLink = document.getElementById('rsvp-button-link-input').value;
-            renderRsvpPreview();
-            closeModal(e.target.closest('.modal'));
+            
+            try {
+                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
+                await updateDoc(pageDataRef, { rsvp: pageData.rsvp });
+                renderRsvpPreview();
+                closeModal(e.target.closest('.modal'));
+            } catch(error) {
+                console.error("Erro ao salvar RSVP:", error);
+                alert("Ocorreu um erro ao salvar a seção de RSVP.");
+            }
         }
 
         function populateGalleryForm() {
