@@ -21,17 +21,31 @@
             color: white;
             border-color: #EC4899;
         }
-        .status-badge {
+        /* Estilos para os botões de status individuais */
+        .member-status-btn {
             cursor: pointer;
             transition: all 0.2s ease-in-out;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border-radius: 9999px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            color: white;
         }
-        .status-badge:hover {
-            transform: scale(1.1);
+        .member-status-btn:not(.active) {
+            opacity: 0.3;
+            transform: scale(0.85);
+        }
+         .member-status-btn:not(.active):hover {
+            opacity: 0.7;
+            transform: scale(1);
+        }
+        .member-status-btn.active {
+            opacity: 1;
+            transform: scale(1);
         }
     </style>
 </head>
@@ -143,7 +157,7 @@
         const familyListContainer = document.getElementById('family-list-container');
         const noFamiliesMessage = document.getElementById('no-families-message');
         const relationshipFiltersContainer = document.getElementById('relationship-filters');
-        const statusFiltersContainer = document.getElementById('status-filters'); // NOVO
+        const statusFiltersContainer = document.getElementById('status-filters');
         const searchInput = document.getElementById('search-input');
         
         // Elementos do Modal de Adicionar/Editar
@@ -176,9 +190,8 @@
         let currentUser;
         let allFamilies = [];
         let eventConfig = null;
-        let confirmCallback = null;
         let currentRelationshipFilter = 'todos';
-        let currentStatusFilter = 'todos'; // NOVO
+        let currentStatusFilter = 'pendente'; // MUDANÇA: Filtro padrão é 'pendente'
 
         const eventDefinitions = {
             casamento: { label: 'Casamento', relations: ['Família da Noiva', 'Família do Noivo', 'Amigos da Noiva', 'Amigos do Noivo', 'Amigos do Casal'] },
@@ -241,13 +254,60 @@
             pageContent.classList.remove('hidden');
             setupDynamicUI();
             listenForFamilies();
+            setupEventListeners();
         }
         
         function setupDynamicUI() {
             relationshipContainer.innerHTML = createRelationshipSelector(eventConfig.relations);
             createRelationshipFilterButtons();
-            createStatusFilterButtons(); // NOVO
+            createStatusFilterButtons();
         }
+        
+        function setupEventListeners() {
+            searchInput.addEventListener('input', renderPageContent);
+            openAddFamilyModalButton.addEventListener('click', openModalForCreate);
+            modalCancelButton.addEventListener('click', closeModal);
+            familyForm.addEventListener('submit', handleFormSubmit);
+            addMemberButton.addEventListener('click', () => createMemberField(membersContainer));
+
+            familyListContainer.addEventListener('click', async (e) => {
+                const editBtn = e.target.closest('.edit-family-button');
+                const deleteBtn = e.target.closest('.delete-family-button');
+                const statusBtn = e.target.closest('.member-status-btn');
+
+                if (editBtn) {
+                    const family = allFamilies.find(f => f.id === editBtn.dataset.familyId);
+                    if (family) openModalForEdit(family);
+                }
+                if (deleteBtn) {
+                    const familyId = deleteBtn.dataset.familyId;
+                    showConfirmModal('Tem a certeza que quer apagar esta família e todos os seus membros?', async () => {
+                        try { await deleteDoc(doc(db, 'users', currentUser.uid, 'families', familyId)); } 
+                        catch (error) { console.error("Erro ao apagar família: ", error); }
+                    });
+                }
+                if (statusBtn) {
+                    const familyId = statusBtn.dataset.familyId;
+                    const memberIndex = parseInt(statusBtn.dataset.memberIndex, 10);
+                    const newStatus = statusBtn.dataset.status;
+
+                    const familyToUpdate = allFamilies.find(f => f.id === familyId);
+                    if (!familyToUpdate) return;
+
+                    const updatedMembers = JSON.parse(JSON.stringify(familyToUpdate.members));
+                    if (updatedMembers[memberIndex].status !== newStatus) {
+                        updatedMembers[memberIndex].status = newStatus;
+                        const docRef = doc(db, 'users', currentUser.uid, 'families', familyId);
+                        try {
+                            await updateDoc(docRef, { members: updatedMembers });
+                        } catch (error) {
+                            console.error("Erro ao atualizar status do membro:", error);
+                        }
+                    }
+                }
+            });
+        }
+
 
         // --- LÓGICA DO MODAL DE ADICIONAR/EDITAR ---
         const openModalForCreate = () => {
@@ -255,7 +315,7 @@
             modalTitle.textContent = 'Adicionar Nova Família';
             familyIdInput.value = '';
             membersContainer.innerHTML = '';
-            addMemberField(membersContainer);
+            createMemberField(membersContainer);
             formErrorMessage.classList.add('hidden');
             familyModal.classList.remove('hidden');
         };
@@ -277,11 +337,9 @@
         };
 
         const closeModal = () => familyModal.classList.add('hidden');
-        openAddFamilyModalButton.addEventListener('click', openModalForCreate);
-        modalCancelButton.addEventListener('click', closeModal);
 
         // --- LÓGICA DO FORMULÁRIO ---
-        familyForm.addEventListener('submit', async (e) => {
+        async function handleFormSubmit(e) {
             e.preventDefault();
             formErrorMessage.classList.add('hidden');
             const familyId = familyIdInput.value;
@@ -305,6 +363,9 @@
                 if (familyId) {
                     const docRef = doc(db, 'users', currentUser.uid, 'families', familyId);
                     const oldFamily = allFamilies.find(f => f.id === familyId);
+                    if (!oldFamily) {
+                        throw new Error("Família não encontrada para edição.");
+                    }
                     const updatedMembers = members.map(newMember => {
                         const oldMember = oldFamily.members.find(m => m.name === newMember.name);
                         return oldMember ? { ...newMember, status: oldMember.status } : newMember;
@@ -321,7 +382,7 @@
                 formErrorMessage.textContent = 'Ocorreu um erro ao salvar.';
                 formErrorMessage.classList.remove('hidden');
             }
-        });
+        }
 
         const createMemberField = (parentContainer) => {
             const div = document.createElement('div');
@@ -339,8 +400,7 @@
             parentContainer.appendChild(div);
             return div;
         };
-        addMemberButton.addEventListener('click', () => addMemberField(membersContainer));
-
+        
         // --- LÓGICA DE RENDERIZAÇÃO E DADOS ---
         const listenForFamilies = () => {
             const q = query(collection(db, 'users', currentUser.uid, 'families'));
@@ -366,7 +426,6 @@
                 filteredFamilies = filteredFamilies.filter(f => f.relationship === currentRelationshipFilter);
             }
             
-            // NOVO: Filtro por status
             if (currentStatusFilter !== 'todos') {
                 filteredFamilies = filteredFamilies.filter(family => 
                     family.members.some(member => member.status === currentStatusFilter)
@@ -388,25 +447,22 @@
             const card = document.createElement('div');
             card.className = 'bg-white p-5 rounded-lg shadow-sm border flex flex-col fade-in';
             
-            const membersHtml = family.members.map((member, index) => {
+            const membersHtml = (family.members || []).map((member, index) => {
                 let typeBadgeClass = '';
                 if (member.type === 'adulto') typeBadgeClass = 'bg-blue-100 text-blue-800';
                 else if (member.type === 'adolescente') typeBadgeClass = 'bg-yellow-100 text-yellow-800';
                 else typeBadgeClass = 'bg-green-100 text-green-800';
 
-                const statusInfo = {
-                    'pendente': { icon: '?', class: 'bg-yellow-400 hover:bg-yellow-500', next: 'confirmado', title: 'Pendente' },
-                    'confirmado': { icon: '✓', class: 'bg-green-500 hover:bg-green-600', next: 'recusado', title: 'Confirmado' },
-                    'recusado': { icon: '✕', class: 'bg-red-500 hover:bg-red-600', next: 'pendente', title: 'Recusado' }
-                };
-                const currentStatus = statusInfo[member.status] || statusInfo['pendente'];
-
                 return `<li class="flex justify-between items-center py-2 border-b last:border-b-0">
-                            <div class="flex items-center gap-2">
-                                <button title="${currentStatus.title}" data-family-id="${family.id}" data-member-index="${index}" data-next-status="${currentStatus.next}" class="member-status-badge status-badge text-white text-sm font-bold rounded-full ${currentStatus.class}">${currentStatus.icon}</button>
-                                <span class="text-gray-700">${member.name}</span>
+                            <span class="text-gray-700">${member.name}</span>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-medium px-2 py-1 rounded-full ${typeBadgeClass}">${member.type}</span>
+                                <div class="flex items-center gap-1">
+                                    <button title="Confirmado" data-family-id="${family.id}" data-member-index="${index}" data-status="confirmado" class="member-status-btn bg-green-500 ${member.status === 'confirmado' ? 'active' : ''}">✓</button>
+                                    <button title="Pendente" data-family-id="${family.id}" data-member-index="${index}" data-status="pendente" class="member-status-btn bg-yellow-400 ${member.status === 'pendente' ? 'active' : ''}">?</button>
+                                    <button title="Recusado" data-family-id="${family.id}" data-member-index="${index}" data-status="recusado" class="member-status-btn bg-red-500 ${member.status === 'recusado' ? 'active' : ''}">✕</button>
+                                </div>
                             </div>
-                            <span class="text-xs font-medium px-2 py-1 rounded-full ${typeBadgeClass}">${member.type}</span>
                         </li>`;
             }).join('');
 
@@ -424,7 +480,7 @@
                     </div>
                     <ul class="mb-4">${membersHtml}</ul>
                 </div>
-                <div class="text-xs text-gray-400 pt-2 border-t text-right">Total: ${family.members.length} membro(s)</div>`;
+                <div class="text-xs text-gray-400 pt-2 border-t text-right">Total: ${(family.members || []).length} membro(s)</div>`;
             return card;
         };
 
@@ -433,7 +489,7 @@
             
             totals.families = families.length;
             families.forEach(f => {
-                f.members.forEach(m => {
+                (f.members || []).forEach(m => {
                     totals.guests++;
                     if (m.status === 'confirmado') totals.confirmed++;
                     else if (m.status === 'recusado') totals.declined++;
@@ -495,42 +551,6 @@
             }
         };
 
-        // --- EVENT LISTENERS ---
-        searchInput.addEventListener('input', renderPageContent);
-
-        familyListContainer.addEventListener('click', async (e) => {
-            const editBtn = e.target.closest('.edit-family-button');
-            const deleteBtn = e.target.closest('.delete-family-button');
-            const statusBtn = e.target.closest('.member-status-badge');
-
-            if (editBtn) {
-                const family = allFamilies.find(f => f.id === editBtn.dataset.familyId);
-                if (family) openModalForEdit(family);
-            }
-            if (deleteBtn) {
-                const familyId = deleteBtn.dataset.familyId;
-                showConfirmModal('Tem a certeza que quer apagar esta família e todos os seus membros?', async () => {
-                    try { await deleteDoc(doc(db, 'users', currentUser.uid, 'families', familyId)); } 
-                    catch (error) { console.error("Erro ao apagar família: ", error); }
-                });
-            }
-            if (statusBtn) {
-                const familyId = statusBtn.dataset.familyId;
-                const memberIndex = parseInt(statusBtn.dataset.memberIndex, 10);
-                const nextStatus = statusBtn.dataset.nextStatus;
-                const familyToUpdate = allFamilies.find(f => f.id === familyId);
-                if (!familyToUpdate) return;
-                const updatedMembers = JSON.parse(JSON.stringify(familyToUpdate.members));
-                updatedMembers[memberIndex].status = nextStatus;
-                const docRef = doc(db, 'users', currentUser.uid, 'families', familyId);
-                try {
-                    await updateDoc(docRef, { members: updatedMembers });
-                } catch (error) {
-                    console.error("Erro ao atualizar status do membro:", error);
-                }
-            }
-        });
-
         const showConfirmModal = (message, onConfirm) => {
             const confirmModalEl = document.getElementById('confirm-modal');
             confirmModalEl.innerHTML = `
@@ -569,7 +589,6 @@
             });
         }
         
-        // NOVO: Função para criar botões de filtro de status
         function createStatusFilterButtons() {
             statusFiltersContainer.innerHTML = '';
             const statuses = {
