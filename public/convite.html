@@ -135,10 +135,13 @@
           measurementId: "G-CB5X7JY7Y6"
         };
 
-        // Inicialização dos serviços Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // *** MUDANÇA CRÍTICA: INICIALIZAÇÃO ISOLADA PARA CONVIDADOS ***
+        // Isto cria uma instância separada do Firebase para esta página, prevenindo conflitos de login.
+        // O nome único com timestamp garante que cada aba de convite seja independente.
+        const guestAppName = `guest-app-${Date.now()}`;
+        const guestApp = initializeApp(firebaseConfig, guestAppName);
+        const auth = getAuth(guestApp);
+        const db = getFirestore(guestApp);
 
         // Elementos da UI
         const loadingState = document.getElementById('loading-state');
