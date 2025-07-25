@@ -329,7 +329,7 @@
                     await loadPageData();
                     initializePage();
                 } catch (error) {
-                    console.error("Erro na inicialização da página:", error);
+                    console.error("Erro fatal na inicialização da página:", error);
                     loadingState.innerHTML = '<p class="text-lg text-red-500">Ocorreu um erro ao carregar os dados. Tente recarregar a página.</p>';
                 }
             } else {
@@ -354,58 +354,68 @@
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
             const docSnap = await getDoc(pageDataRef);
 
-            // Começa com uma cópia profunda dos dados padrão. Isto é o mais seguro.
             pageData = JSON.parse(JSON.stringify(defaultData));
 
             if (docSnap.exists()) {
                 const loadedData = docSnap.data();
+                if (!loadedData) return; // Sai se os dados do documento estiverem vazios
 
-                // --- MIGRAÇÃO E FUSÃO DE DADOS ---
-                // Esta seção mescla com segurança os dados carregados na estrutura padrão,
-                // lidando com possíveis formatos antigos e partes em falta.
-
+                // --- FUSÃO DE DADOS SEGURA E ROBUSTA ---
+                
                 // 1. Mesclar Cabeçalho
-                if (loadedData.header && typeof loadedData.header === 'object') {
-                    pageData.header = { ...pageData.header, ...loadedData.header };
-                }
-                // Garantir que coupleNames é um array
-                if (!Array.isArray(pageData.header.coupleNames)) {
-                    pageData.header.coupleNames = defaultData.header.coupleNames;
+                try {
+                    if (loadedData.header && typeof loadedData.header === 'object') {
+                        pageData.header = { ...pageData.header, ...loadedData.header };
+                    }
+                    if (!Array.isArray(pageData.header.coupleNames)) {
+                        pageData.header.coupleNames = JSON.parse(JSON.stringify(defaultData.header.coupleNames));
+                    }
+                } catch (e) {
+                    console.error("Não foi possível fundir os dados do cabeçalho:", e);
+                    pageData.header = JSON.parse(JSON.stringify(defaultData.header));
                 }
 
-                // 2. Mesclar História (lida com formato de string antigo e novo formato de objeto)
-                if (loadedData.story) {
-                    if (typeof loadedData.story === 'object' && loadedData.story !== null) {
-                        pageData.story = { ...pageData.story, ...loadedData.story };
-                    } else if (typeof loadedData.story === 'string') {
-                        pageData.story.text = loadedData.story; // Migrar do formato antigo
+                // 2. Mesclar História
+                try {
+                    if (loadedData.story) {
+                        if (typeof loadedData.story === 'object' && loadedData.story !== null) {
+                            pageData.story = { ...pageData.story, ...loadedData.story };
+                        } else if (typeof loadedData.story === 'string') {
+                            pageData.story.text = loadedData.story;
+                        }
                     }
-                }
-                // Migrar campo 'title' antigo se existir e story.title for o padrão
-                if (loadedData.title && pageData.story.title === defaultData.story.title) {
-                    pageData.story.title = loadedData.title;
-                }
-                 // Migrar campo 'imageUrl' antigo
-                if (loadedData.imageUrl && pageData.header.imageUrl === defaultData.header.imageUrl) {
-                    pageData.header.imageUrl = loadedData.imageUrl;
+                    if (loadedData.title) pageData.story.title = loadedData.title;
+                    if (loadedData.imageUrl) pageData.header.imageUrl = loadedData.imageUrl;
+                } catch(e) {
+                    console.error("Não foi possível fundir os dados da história:", e);
+                    pageData.story = JSON.parse(JSON.stringify(defaultData.story));
                 }
 
                 // 3. Mesclar Galeria
-                if (loadedData.gallery && typeof loadedData.gallery === 'object' && Array.isArray(loadedData.gallery.photos)) {
-                    pageData.gallery = { ...pageData.gallery, ...loadedData.gallery };
+                try {
+                    if (loadedData.gallery && typeof loadedData.gallery === 'object' && Array.isArray(loadedData.gallery.photos)) {
+                        pageData.gallery = { ...pageData.gallery, ...loadedData.gallery };
+                    }
+                } catch(e) {
+                    console.error("Não foi possível fundir os dados da galeria:", e);
+                    pageData.gallery = JSON.parse(JSON.stringify(defaultData.gallery));
                 }
 
                 // 4. Mesclar Detalhes
-                if (loadedData.details && typeof loadedData.details === 'object') {
-                    if (loadedData.details.ceremony && typeof loadedData.details.ceremony === 'object') {
-                        pageData.details.ceremony = { ...pageData.details.ceremony, ...loadedData.details.ceremony };
+                try {
+                    if (loadedData.details && typeof loadedData.details === 'object') {
+                        if (loadedData.details.ceremony && typeof loadedData.details.ceremony === 'object') {
+                            pageData.details.ceremony = { ...pageData.details.ceremony, ...loadedData.details.ceremony };
+                        }
+                        if (loadedData.details.reception && typeof loadedData.details.reception === 'object') {
+                            pageData.details.reception = { ...pageData.details.reception, ...loadedData.details.reception };
+                        }
                     }
-                    if (loadedData.details.reception && typeof loadedData.details.reception === 'object') {
-                        pageData.details.reception = { ...pageData.details.reception, ...loadedData.details.reception };
-                    }
+                } catch(e) {
+                    console.error("Não foi possível fundir os dados dos detalhes:", e);
+                    pageData.details = JSON.parse(JSON.stringify(defaultData.details));
                 }
             }
-            // Se o documento não existir, pageData já está definido como o padrão, então não fazemos nada.
         }
 
 
@@ -419,7 +429,6 @@
 
         function renderHeaderPreview() {
             const { coupleNames, eventDate, imageUrl } = pageData.header;
-            // Verificação de segurança: garantir que coupleNames é um array antes de juntar.
             const namesText = Array.isArray(coupleNames) ? coupleNames.join(' & ') : defaultData.header.coupleNames.join(' & ');
             document.getElementById('couple-names-preview').textContent = namesText;
             document.getElementById('event-date-preview').textContent = eventDate;
@@ -437,7 +446,6 @@
         function renderGalleryPreview() {
             const container = document.getElementById('gallery-preview-container');
             container.innerHTML = '';
-            // Garante que photos seja um array
             const photos = Array.isArray(pageData.gallery.photos) ? pageData.gallery.photos : [];
             photos.forEach(photo => {
                 const img = document.createElement('img');
