@@ -481,8 +481,13 @@
 
         // --- RENDERIZAÇÃO E PRÉ-VISUALIZAÇÃO ---
         function renderAllPreviews() {
-            const { header, story, details, gallery, rsvp, icon } = pageData;
+            const { header, story, details, gallery, rsvp, icon, template } = pageData;
             
+            // Apply template class
+            const preview = document.getElementById('event-page-preview');
+            preview.className = 'max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden';
+            preview.classList.add(`template-${template}`);
+
             const allPhotos = [header.imageUrl, ...gallery.photos.map(p => p.url)];
             const slidesHtml = allPhotos.map(url => `<div class="swiper-slide"><img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/></div>`).join('');
             headerContentWrapper.innerHTML = `
@@ -545,6 +550,22 @@
             centerVBtn.addEventListener('click', () => centerElement('vertical'));
             recenterBtn.addEventListener('click', () => centerElement('both'));
             
+            // *** CORREÇÃO: Adicionar listeners para os botões de template e ícone ***
+            document.getElementById('open-template-modal').addEventListener('click', () => openModal('template-modal'));
+            document.getElementById('open-icon-modal').addEventListener('click', () => openModal('icon-modal'));
+
+            // *** CORREÇÃO: Adicionar listener para a seleção de template ***
+            document.getElementById('template-selection-container').addEventListener('click', (e) => {
+                const card = e.target.closest('.template-card');
+                if (!card) return;
+                const templateId = card.dataset.template;
+                pageData.template = templateId;
+                renderAllPreviews(); // Re-renderiza para aplicar a classe e os estilos
+                // Atualiza a classe 'active' no modal
+                document.querySelectorAll('#template-selection-container .template-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+            });
+
             document.body.addEventListener('click', function(e) {
                 const editBtn = e.target.closest('.edit-btn');
                 if (editBtn) openModal(editBtn.dataset.modal);
@@ -593,11 +614,17 @@
                     durationContainer.style.display = autoplayCheck.checked ? 'flex' : 'none';
                 };
 
-                // Popula a lista de fotos adicionais
                 const galleryContainer = document.getElementById('gallery-inputs-container');
                 galleryContainer.innerHTML = '';
                 pageData.gallery.photos.forEach((photo, index) => {
                     createGalleryUploader(photo.url, index);
+                });
+            }
+            
+            // *** CORREÇÃO: Destacar o template ativo ao abrir o modal ***
+            if (modalId === 'template-modal') {
+                document.querySelectorAll('#template-selection-container .template-card').forEach(card => {
+                    card.classList.toggle('active', card.dataset.template === pageData.template);
                 });
             }
             
@@ -646,8 +673,8 @@
 
             const div = document.createElement('div');
             div.className = 'flex items-center gap-2 gallery-item';
-            div.dataset.index = index; // Guarda o índice original se for uma foto existente
-            div.dataset.url = url; // Guarda a URL original
+            div.dataset.index = index;
+            div.dataset.url = url;
 
             div.innerHTML = `
                 <img src="${isNew ? placeholder : url}" class="w-24 h-16 object-cover rounded-md bg-gray-100 border">
@@ -668,7 +695,7 @@
             fileInput.addEventListener('change', (e) => {
                 if (e.target.files && e.target.files[0]) {
                     previewImg.src = URL.createObjectURL(e.target.files[0]);
-                    div.dataset.file = 'true'; // Marca que há um novo arquivo
+                    div.dataset.file = 'true';
                 }
             });
 
@@ -684,7 +711,6 @@
             const saveBtn = e.target.querySelector('.modal-save-btn');
             saveBtn.disabled = true; saveBtn.textContent = 'A salvar...';
             try {
-                // Salva textos e foto principal
                 pageData.header.coupleNames = document.getElementById('couple-names-input').value.split(',').map(n => n.trim());
                 pageData.header.eventDate = document.getElementById('event-date-input').value;
                 const mainFileInput = document.getElementById('header-image-input');
@@ -698,11 +724,9 @@
                     pageData.header.imageUrl = defaultData.header.imageUrl;
                 }
                 
-                // Salva configurações do carrossel
                 pageData.gallery.autoplay = document.getElementById('gallery-autoplay').checked;
                 pageData.gallery.duration = parseInt(document.getElementById('gallery-duration').value, 10) || 5;
 
-                // Salva fotos adicionais
                 const galleryItems = document.querySelectorAll('#gallery-inputs-container .gallery-item');
                 const uploadPromises = [];
                 const newPhotosData = [];
@@ -726,7 +750,7 @@
                 });
 
                 await Promise.all(uploadPromises);
-                pageData.gallery.photos = newPhotosData.filter(Boolean); // Remove itens vazios/removidos
+                pageData.gallery.photos = newPhotosData.filter(Boolean);
 
                 renderAllPreviews();
                 closeModal(document.getElementById('header-modal'));
