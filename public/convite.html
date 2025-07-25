@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Você foi convidado!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; }
+        #event-details {
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'Cormorant Garamond', serif;
+            --color-primary: #DB2777;
+            --color-background: #FDF2F8;
+            --color-text-main: #1F2937;
+            --color-text-light: #4B5563;
+        }
+        #event-details .font-display { font-family: var(--font-display); }
+        #event-details .font-body { font-family: var(--font-body); }
+        #event-details .text-primary { color: var(--color-primary); }
+        
+        .fade-in { animation: fadeIn 0.7s ease-in-out forwards; }
+        .fade-in-late { animation: fadeIn 0.7s ease-in-out 0.3s forwards; opacity: 0; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .gift-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="loading-state" class="text-center">
+        <p class="text-lg text-gray-600">A carregar convite...</p>
+    </div>
+
+    <div id="error-state" class="hidden text-center bg-red-100 p-8 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold text-red-700 font-display">Convite Inválido</h2>
+        <p class="text-gray-600 mt-2">O link deste convite parece estar quebrado. Por favor, entre em contato com os anfitriões.</p>
+    </div>
+
+    <div id="content-wrapper" class="hidden w-full max-w-4xl mx-auto">
+        <!-- Detalhes do Evento -->
+        <div id="event-details" class="bg-white rounded-lg shadow-xl overflow-hidden">
+            <!-- Conteúdo do evento será carregado aqui -->
+        </div>
+
+        <!-- Seção de RSVP -->
+        <div id="rsvp-section" class="text-center bg-white p-8 mt-8 rounded-lg shadow-xl fade-in">
+             <h2 class="text-3xl font-bold text-gray-800 font-display">Olá, <span id="guest-family-name" class="text-primary"></span>!</h2>
+             <p class="text-lg text-gray-600 mt-2">Gostaríamos de contar com a sua presença. <br>Por favor, confirme se você poderá comparecer.</p>
+             <div id="rsvp-buttons" class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                 <button id="confirm-button" class="w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105">
+                     Sim, eu vou!
+                 </button>
+                 <button id="decline-button" class="w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-red-700 transition-transform transform hover:scale-105">
+                     Não poderei ir
+                 </button>
+             </div>
+             <div id="rsvp-message" class="hidden mt-6 text-xl text-gray-700 font-semibold"></div>
+        </div>
+
+        <!-- Seção da Lista de Presentes (inicialmente oculta) -->
+        <div id="gift-list-section" class="hidden mt-8 fade-in-late">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl md:text-4xl font-bold font-display text-gray-800">Lista de Presentes</h2>
+                <p class="text-gray-600 mt-2">Seu carinho é o maior presente, mas se desejar nos presentear, aqui estão algumas sugestões.</p>
+            </div>
+            <div id="gift-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards de presentes serão inseridos aqui -->
+            </div>
+             <div id="no-gifts-message" class="hidden text-center py-10 px-6 bg-white rounded-lg shadow-md border">
+                <p class="text-gray-600">Os anfitriões optaram por não criar uma lista de presentes online.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, doc, getDoc, updateDoc, collection, getDocs } from './auth.js';
+
+        // --- ELEMENTOS DA UI ---
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const contentWrapper = document.getElementById('content-wrapper');
+        const eventDetailsContainer = document.getElementById('event-details');
+        const guestFamilyNameEl = document.getElementById('guest-family-name');
+        const rsvpSection = document.getElementById('rsvp-section');
+        const rsvpButtons = document.getElementById('rsvp-buttons');
+        const rsvpMessage = document.getElementById('rsvp-message');
+        const confirmButton = document.getElementById('confirm-button');
+        const declineButton = document.getElementById('decline-button');
+        const giftListSection = document.getElementById('gift-list-section');
+        const giftListContainer = document.getElementById('gift-list-container');
+        const noGiftsMessage = document.getElementById('no-gifts-message');
+
+        let creatorId, guestId;
+
+        // --- FUNÇÃO PRINCIPAL DE INICIALIZAÇÃO ---
+        window.onload = async () => {
+            const params = new URLSearchParams(window.location.search);
+            creatorId = params.get('user');
+            guestId = params.get('guest');
+
+            if (!creatorId || !guestId) {
+                showError();
+                return;
+            }
+
+            try {
+                const eventData = await fetchEventData();
+                const guestData = await fetchGuestData();
+
+                if (!eventData || !guestData) {
+                    showError();
+                    return;
+                }
+
+                renderEventPage(eventData);
+                guestFamilyNameEl.textContent = guestData.name;
+                
+                // Verifica se o convidado já respondeu
+                const firstMemberStatus = guestData.members[0]?.status;
+                if (firstMemberStatus && firstMemberStatus !== 'pendente') {
+                    handleAlreadyResponded(firstMemberStatus);
+                }
+
+                showContent();
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+                showError();
+            }
+        };
+
+        // --- FUNÇÕES DE BUSCA DE DADOS ---
+        async function fetchEventData() {
+            const eventRef = doc(db, 'users', creatorId, 'eventPage', 'details');
+            const docSnap = await getDoc(eventRef);
+            return docSnap.exists() ? docSnap.data() : null;
+        }
+
+        async function fetchGuestData() {
+            const guestRef = doc(db, 'users', creatorId, 'families', guestId);
+            const docSnap = await getDoc(guestRef);
+            return docSnap.exists() ? docSnap.data() : null;
+        }
+
+        // --- FUNÇÕES DE RENDERIZAÇÃO ---
+        function renderEventPage(data) {
+            // Aplica o template e as fontes
+            eventDetailsContainer.className = `bg-white rounded-lg shadow-xl overflow-hidden template-${data.template || 'elegancia'}`;
+            
+            const header = data.header || {};
+            const story = data.story || {};
+
+            eventDetailsContainer.innerHTML = `
+                <section class="relative text-center">
+                    <img src="${header.imageUrl}" class="w-full h-80 object-cover">
+                    <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4">
+                        <h1 class="font-display text-white text-4xl md:text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${(header.coupleNames || []).join(' & ')}</h1>
+                        <p class="text-white text-lg mt-2" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${header.eventDate || ''}</p>
+                    </div>
+                </section>
+                <section class="p-8 md:p-12 text-center bg-primary-light">
+                    <h2 class="font-display text-3xl md:text-4xl text-primary">${story.title || 'Nossa História'}</h2>
+                    <p class="font-body text-lg mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${story.text || ''}</p>
+                </section>
+            `;
+        }
+
+        function renderGiftList(gifts) {
+            if (gifts.length === 0) {
+                noGiftsMessage.classList.remove('hidden');
+                return;
+            }
+
+            giftListContainer.innerHTML = '';
+            gifts.forEach(gift => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md border flex flex-col overflow-hidden transition-all duration-300 gift-card';
+                const formattedPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gift.price);
+                const placeholderImg = `https://placehold.co/600x400/FCE7F3/DB2777?text=${encodeURIComponent(gift.name)}`;
+
+                card.innerHTML = `
+                    <img src="${gift.imageUrl || placeholderImg}" alt="${gift.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='${placeholderImg}';">
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h4 class="text-base font-bold text-gray-800 flex-grow">${gift.name}</h4>
+                        <p class="text-lg font-semibold text-primary mt-2">${formattedPrice}</p>
+                        ${gift.isPurchased ? `<p class="text-xs text-gray-500 mt-1">Presenteado por <strong>${gift.purchasedBy || 'Anônimo'}</strong></p>` : ''}
+                    </div>
+                    <div class="p-4 border-t">
+                        <button class="w-full font-bold py-2 px-4 rounded-lg ${gift.isPurchased ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-pink-500 text-white hover:bg-pink-600'}" ${gift.isPurchased ? 'disabled' : ''}>
+                            ${gift.isPurchased ? 'Já foi presenteado' : 'Quero presentear'}
+                        </button>
+                    </div>
+                `;
+                giftListContainer.appendChild(card);
+            });
+        }
+
+        // --- LÓGICA DE RSVP ---
+        async function handleRsvp(status) {
+            rsvpButtons.classList.add('hidden');
+            
+            try {
+                const guestRef = doc(db, 'users', creatorId, 'families', guestId);
+                const guestSnap = await getDoc(guestRef);
+                if (!guestSnap.exists()) throw new Error("Convidado não encontrado");
+
+                const familyData = guestSnap.data();
+                const updatedMembers = familyData.members.map(member => ({ ...member, status: status }));
+
+                await updateDoc(guestRef, { members: updatedMembers });
+
+                if (status === 'confirmado') {
+                    rsvpMessage.textContent = 'Obrigado por confirmar! Sua presença é muito importante para nós.';
+                    rsvpMessage.classList.remove('hidden');
+                    await loadAndShowGiftList();
+                } else {
+                    rsvpMessage.textContent = 'Que pena que você não poderá vir. Sentiremos sua falta!';
+                    rsvpMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Erro ao atualizar RSVP:", error);
+                rsvpMessage.textContent = 'Ocorreu um erro ao processar sua resposta. Tente novamente.';
+                rsvpMessage.classList.remove('hidden');
+                rsvpButtons.classList.remove('hidden'); // Mostra botões de novo se der erro
+            }
+        }
+        
+        async function handleAlreadyResponded(status) {
+             rsvpButtons.classList.add('hidden');
+             if (status === 'confirmado') {
+                rsvpMessage.textContent = 'Você já confirmou sua presença. Obrigado!';
+                rsvpMessage.classList.remove('hidden');
+                await loadAndShowGiftList();
+             } else { // recusado
+                rsvpMessage.textContent = 'Você já informou que não poderá comparecer.';
+                rsvpMessage.classList.remove('hidden');
+             }
+        }
+
+        async function loadAndShowGiftList() {
+            try {
+                const giftsRef = collection(db, 'users', creatorId, 'gifts');
+                const giftsSnap = await getDocs(giftsRef);
+                const gifts = giftsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                giftListSection.classList.remove('hidden');
+                renderGiftList(gifts);
+            } catch (error) {
+                console.error("Erro ao carregar lista de presentes:", error);
+                // Não mostra erro para o usuário, apenas não exibe a lista
+            }
+        }
+
+        // --- FUNÇÕES DE CONTROLE DE UI ---
+        function showError() {
+            loadingState.classList.add('hidden');
+            errorState.classList.remove('hidden');
+        }
+
+        function showContent() {
+            loadingState.classList.add('hidden');
+            contentWrapper.classList.remove('hidden');
+            contentWrapper.classList.add('fade-in');
+        }
+
+        // --- EVENT LISTENERS ---
+        confirmButton.addEventListener('click', () => handleRsvp('confirmado'));
+        declineButton.addEventListener('click', () => handleRsvp('recusado'));
+
+    </script>
+</body>
+</html>

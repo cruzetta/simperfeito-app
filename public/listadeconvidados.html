@@ -21,7 +21,6 @@
             color: white;
             border-color: #EC4899;
         }
-        /* Estilos para os botões de status individuais */
         .member-status-btn {
             cursor: pointer;
             transition: all 0.2s ease-in-out;
@@ -46,6 +45,27 @@
         .member-status-btn.active {
             opacity: 1;
             transform: scale(1);
+        }
+        /* Estilo para o toast de link copiado */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #22c55e; /* green-500 */
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+        }
+        #toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -10px);
         }
     </style>
 </head>
@@ -144,6 +164,9 @@
     <!-- Outros Modais -->
     <div id="event-type-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 h-full w-full z-40 flex items-center justify-center"></div>
     <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-50 flex items-center justify-center"></div>
+    
+    <!-- Toast de Notificação -->
+    <div id="toast">Link do convite copiado!</div>
 
 
     <!-- Scripts -->
@@ -159,6 +182,7 @@
         const relationshipFiltersContainer = document.getElementById('relationship-filters');
         const statusFiltersContainer = document.getElementById('status-filters');
         const searchInput = document.getElementById('search-input');
+        const toastEl = document.getElementById('toast');
         
         // Elementos do Modal de Adicionar/Editar
         const openAddFamilyModalButton = document.getElementById('open-add-family-modal-button');
@@ -191,7 +215,7 @@
         let allFamilies = [];
         let eventConfig = null;
         let currentRelationshipFilter = 'todos';
-        let currentStatusFilter = 'pendente'; // MUDANÇA: Filtro padrão é 'pendente'
+        let currentStatusFilter = 'pendente'; 
 
         const eventDefinitions = {
             casamento: { label: 'Casamento', relations: ['Família da Noiva', 'Família do Noivo', 'Amigos da Noiva', 'Amigos do Noivo', 'Amigos do Casal'] },
@@ -274,6 +298,19 @@
                 const editBtn = e.target.closest('.edit-family-button');
                 const deleteBtn = e.target.closest('.delete-family-button');
                 const statusBtn = e.target.closest('.member-status-btn');
+                const shareBtn = e.target.closest('.share-invite-button'); // *** NOVA LÓGICA ***
+
+                if (shareBtn) { // *** NOVA LÓGICA ***
+                    const familyId = shareBtn.dataset.familyId;
+                    const inviteUrl = `${window.location.origin}/convite.html?user=${currentUser.uid}&guest=${familyId}`;
+                    try {
+                        await navigator.clipboard.writeText(inviteUrl);
+                        showToast("Link do convite copiado!");
+                    } catch (err) {
+                        console.error('Falha ao copiar o link: ', err);
+                        showToast("Erro ao copiar o link.", true);
+                    }
+                }
 
                 if (editBtn) {
                     const family = allFamilies.find(f => f.id === editBtn.dataset.familyId);
@@ -466,6 +503,7 @@
                         </li>`;
             }).join('');
 
+            // *** MUDANÇA AQUI: Adicionado o botão de compartilhar ***
             card.innerHTML = `
                 <div class="flex-grow">
                     <div class="flex justify-between items-start mb-3">
@@ -474,8 +512,15 @@
                             <span class="text-xs font-semibold px-2 py-1 rounded-full bg-pink-100 text-pink-800">${family.relationship}</span>
                         </div>
                         <div class="flex items-center space-x-1">
-                            <button data-family-id="${family.id}" class="edit-family-button text-gray-400 hover:text-blue-600 p-1"><svg class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                            <button data-family-id="${family.id}" class="delete-family-button text-gray-400 hover:text-red-600 p-1"><svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>
+                            <button data-family-id="${family.id}" class="share-invite-button text-gray-400 hover:text-pink-600 p-1" title="Copiar link do convite">
+                                <svg class="h-5 w-5 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+                            </button>
+                            <button data-family-id="${family.id}" class="edit-family-button text-gray-400 hover:text-blue-600 p-1" title="Editar família">
+                                <svg class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                            </button>
+                            <button data-family-id="${family.id}" class="delete-family-button text-gray-400 hover:text-red-600 p-1" title="Apagar família">
+                                <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            </button>
                         </div>
                     </div>
                     <ul class="mb-4">${membersHtml}</ul>
@@ -619,6 +664,17 @@
                 <label for="${id}" class="block text-sm font-medium text-gray-700 mb-1">Relação/Vínculo</label>
                 <select id="${id}" class="w-full p-2 border border-gray-300 rounded-md" required>${options}</select>`;
         }
+
+        // *** NOVA FUNÇÃO: Mostrar toast de notificação ***
+        function showToast(message, isError = false) {
+            toastEl.textContent = message;
+            toastEl.style.backgroundColor = isError ? '#ef4444' : '#22c55e'; // red-500 ou green-500
+            toastEl.classList.add('show');
+            setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 3000);
+        }
+
     </script>
 </body>
 </html>
