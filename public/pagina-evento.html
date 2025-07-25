@@ -199,7 +199,6 @@
         <p id="toast-message"></p>
     </div>
 
-    <!-- *** CORREÇÃO AQUI: O HTML DOS MODAIS FOI RESTAURADO *** -->
     <div id="modal-container">
         <div id="icon-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Ícone para o seu Evento</h3><p class="text-gray-600 mb-6">Este ícone aparecerá como um detalhe gráfico nas seções da sua página.</p><div id="icon-selection-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4"></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-pink-500 text-white rounded-md">Confirmar</button></div></div></div>
         <div id="template-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Template</h3><p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p><div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"><div class="template-card" data-template="classic"><div class="p-4 border-b text-center" style="background-color: #F8F7F5;"><h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div><div class="template-card" data-template="modern"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div><div class="template-card" data-template="romantic"><div class="p-4 border-b text-center" style="background-color: #FFF1F2;"><h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div><div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button></div></div></div>
@@ -215,6 +214,7 @@
         import { doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         import { iconLibrary } from './icon-library.js?v=2';
 
+        // --- ELEMENTOS DA UI ---
         const pageContent = document.getElementById('page-content');
         const loadingState = document.getElementById('loading-state');
         const saveButton = document.getElementById('save-button');
@@ -222,9 +222,9 @@
         const verticalGuide = document.getElementById('vertical-guide');
         const horizontalGuide = document.getElementById('horizontal-guide');
 
+        // --- DADOS E ESTADO ---
         let currentUser;
         let pageData = {};
-
         const defaultData = {
             template: 'elegancia',
             icon: iconLibrary.find(i => i.id === 'flower-2').svg,
@@ -241,6 +241,7 @@
             rsvp: { title: "Confirme sua Presença", text: "Sua presença é o nosso maior presente!", buttonText: "Confirmar Presença", buttonLink: "#" }
         };
 
+        // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
@@ -278,9 +279,10 @@
             renderAllPreviews();
             setupEventListeners();
             setupDraggableText();
-            populateIconModal(); // *** CORREÇÃO: Chamada da função que faltava ***
+            populateIconModal();
         }
         
+        // --- LÓGICA DO EDITOR DE TEXTO FLUTUANTE ---
         const toolbar = document.getElementById('text-editor-toolbar');
         const fontFamilySelect = document.getElementById('font-family-select');
         const fontSizeInput = document.getElementById('font-size-input');
@@ -419,6 +421,7 @@
             renderAllPreviews();
         }
 
+        // --- RENDERIZAÇÃO E PRÉ-VISUALIZAÇÃO ---
         function renderAllPreviews() {
             const { header, story, details, gallery, rsvp, icon } = pageData;
             
@@ -460,13 +463,11 @@
                                      <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">${rsvp.buttonText}</a>`;
         }
 
-
+        // --- EVENTOS E MANIPULADORES ---
         function setupEventListeners() {
-            document.getElementById('open-template-modal').addEventListener('click', () => openModal('template-modal'));
-            document.getElementById('open-icon-modal').addEventListener('click', () => openModal('icon-modal'));
-            
             saveButton.addEventListener('click', handleFullSave);
             
+            // Listeners do Editor de Texto
             fontFamilySelect.addEventListener('change', updateSelectedTextStyle);
             fontSizeInput.addEventListener('input', updateSelectedTextStyle);
             fontColorInput.addEventListener('input', updateSelectedTextStyle);
@@ -474,50 +475,18 @@
             centerVBtn.addEventListener('click', () => centerElement('vertical'));
             recenterBtn.addEventListener('click', () => centerElement('both'));
             
+            // Listeners de Modal (Abertura/Fechamento)
             document.body.addEventListener('click', function(e) {
                 const editBtn = e.target.closest('.edit-btn');
-                if (editBtn) {
-                    openModal(editBtn.dataset.modal);
-                }
+                if (editBtn) openModal(editBtn.dataset.modal);
+                
                 const closeModalBtn = e.target.closest('.modal-close-btn');
-                if (closeModalBtn) {
-                    closeModal(closeModalBtn.closest('.modal'));
-                }
+                if (closeModalBtn) closeModal(closeModalBtn.closest('.modal'));
             });
-        }
-        
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('is-open');
-            }
-        }
 
-        function closeModal(modal) {
-            if (modal) {
-                modal.classList.remove('is-open');
-            }
-        }
-
-        function populateIconModal() {
-            const container = document.getElementById('icon-selection-container');
-            container.innerHTML = '';
-            iconLibrary.forEach(icon => {
-                const card = document.createElement('div');
-                card.className = 'icon-card p-4 flex items-center justify-center';
-                card.dataset.iconId = icon.id;
-                card.innerHTML = icon.svg;
-                if (pageData.icon === icon.svg) {
-                    card.classList.add('active');
-                }
-                card.addEventListener('click', () => {
-                    pageData.icon = icon.svg;
-                    document.querySelectorAll('#icon-selection-container .icon-card').forEach(c => c.classList.remove('active'));
-                    card.classList.add('active');
-                    renderAllPreviews();
-                });
-                container.appendChild(card);
-            });
+            // Listeners de Formulários dos Modais
+            document.getElementById('header-form').addEventListener('submit', handleHeaderFormSubmit);
+            // Adicionar outros listeners de formulário aqui (story-form, etc.) quando forem implementados
         }
         
         async function handleFullSave() {
@@ -534,7 +503,121 @@
                 saveButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg> Salvar Alterações`;
             }
         }
+
+        // --- LÓGICA DOS MODAIS ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            // Preenche o formulário com os dados atuais antes de abrir
+            if (modalId === 'header-modal') {
+                document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
+                document.getElementById('event-date-input').value = pageData.header.eventDate;
+                setupImageUploader('header-image-uploader', pageData.header.imageUrl);
+            }
+            // Adicionar outros `if` para outros modais aqui
+            
+            modal.classList.add('is-open');
+        }
+
+        function closeModal(modal) {
+            if (modal) modal.classList.remove('is-open');
+        }
+
+        function populateIconModal() {
+            const container = document.getElementById('icon-selection-container');
+            container.innerHTML = '';
+            iconLibrary.forEach(icon => {
+                const card = document.createElement('div');
+                card.className = 'icon-card p-4 flex items-center justify-center';
+                card.dataset.iconId = icon.id;
+                card.innerHTML = icon.svg;
+                if (pageData.icon === icon.svg) card.classList.add('active');
+                card.addEventListener('click', () => {
+                    pageData.icon = icon.svg;
+                    document.querySelectorAll('#icon-selection-container .icon-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    renderAllPreviews();
+                });
+                container.appendChild(card);
+            });
+        }
         
+        // --- UPLOAD DE IMAGEM ---
+        function setupImageUploader(containerId, currentUrl) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <img id="uploader-preview" src="${currentUrl}" class="w-full h-48 object-contain rounded-md mb-2 bg-gray-100 border" onerror="this.onerror=null;this.src='${defaultData.header.imageUrl}';">
+                <div class="flex items-center justify-between gap-2">
+                    <label for="header-image-input" class="flex-grow text-center px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 rounded-md cursor-pointer hover:bg-gray-50">
+                        Trocar Imagem
+                    </label>
+                    <input type="file" id="header-image-input" class="hidden" accept="image/jpeg, image/png, image/webp">
+                    <button type="button" id="remove-image-btn" class="px-4 py-2 bg-red-100 border border-red-200 text-sm font-medium text-red-700 rounded-md hover:bg-red-200">Remover</button>
+                </div>
+            `;
+
+            const fileInput = document.getElementById('header-image-input');
+            const preview = document.getElementById('uploader-preview');
+            const removeBtn = document.getElementById('remove-image-btn');
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    preview.src = URL.createObjectURL(file);
+                }
+            });
+
+            removeBtn.addEventListener('click', () => {
+                fileInput.value = ''; // Limpa o seletor de arquivo
+                preview.src = defaultData.header.imageUrl;
+                // Marca a imagem para ser removida no salvamento do formulário
+                preview.dataset.shouldRemove = "true"; 
+            });
+        }
+
+        async function handleHeaderFormSubmit(e) {
+            e.preventDefault();
+            const saveBtn = e.target.querySelector('.modal-save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'A salvar...';
+
+            try {
+                // Atualiza os campos de texto
+                pageData.header.coupleNames = document.getElementById('couple-names-input').value.split(',').map(n => n.trim());
+                pageData.header.eventDate = document.getElementById('event-date-input').value;
+
+                const fileInput = document.getElementById('header-image-input');
+                const preview = document.getElementById('uploader-preview');
+
+                // Verifica se uma nova imagem foi selecionada
+                if (fileInput && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const imageRef = ref(storage, `users/${currentUser.uid}/eventPage/header_image`);
+                    await uploadBytes(imageRef, file);
+                    const downloadURL = await getDownloadURL(imageRef);
+                    pageData.header.imageUrl = downloadURL;
+                } 
+                // Verifica se o botão de remover foi clicado
+                else if (preview.dataset.shouldRemove === "true") {
+                    pageData.header.imageUrl = defaultData.header.imageUrl;
+                }
+
+                renderAllPreviews();
+                closeModal(document.getElementById('header-modal'));
+
+            } catch (error) {
+                console.error("Erro ao atualizar cabeçalho:", error);
+                showToast("Erro ao carregar a nova imagem.", true);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Salvar';
+                const preview = document.getElementById('uploader-preview');
+                if(preview) preview.dataset.shouldRemove = "false";
+            }
+        }
+
+        // --- FUNÇÕES AUXILIARES ---
         function rgbToHex(rgb) {
             if (!rgb || !rgb.startsWith('rgb')) return '#FFFFFF';
             let [r, g, b] = rgb.match(/\d+/g).map(Number);
