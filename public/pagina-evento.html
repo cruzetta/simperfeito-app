@@ -432,7 +432,8 @@
 
         async function loadPageData() {
             const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-            const docSnap = await getDoc(docSnap.ref);
+            // CORREÇÃO: A linha abaixo estava com um erro de digitação (usava docSnap antes de ser definido).
+            const docSnap = await getDoc(pageDataRef);
 
             if (!docSnap.exists()) {
                 console.log("Nenhum dado da página encontrado. A criar documento padrão.");
