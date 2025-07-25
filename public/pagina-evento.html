@@ -31,94 +31,50 @@
         #event-page-preview .border-primary { border-color: var(--color-primary); }
         #event-page-preview .section-graphic { display: none; }
 
-        /* Template: Clássico */
-        #event-page-preview.template-classic {
-            --font-display: 'Playfair Display', serif;
-            --font-body: 'Cormorant Garamond', serif;
-            --color-primary: #831843; /* pink-800 */
-            --color-background: #F8F7F5;
-            --color-text-main: #37322F;
+        /* Template: Elegância (e outros) */
+        #event-page-preview.template-elegancia .section-graphic,
+        #event-page-preview.template-classic .section-graphic,
+        #event-page-preview.template-romantic .section-graphic { 
+            display: block; 
+            margin: 0 auto 1rem; 
+            color: var(--color-primary); 
         }
-
-        /* Template: Moderno */
-        #event-page-preview.template-modern {
-            --font-display: 'Inter', sans-serif;
-            --font-body: 'Inter', sans-serif;
-            --color-primary: #111827; /* gray-900 */
-            --color-background: #F9FAFB; /* gray-50 */
-            --color-text-main: #1F2937; /* gray-800 */
+        #event-page-preview.template-modern .section-graphic {
+             display: none; /* Ícone não combina com o template moderno */
         }
-        #event-page-preview.template-modern #header-section h1 { font-weight: 700; }
-        #event-page-preview.template-modern #story-section, 
-        #event-page-preview.template-modern #details-section { text-align: left; }
-        #event-page-preview.template-modern .section-title { text-align: left; }
-
-        /* Template: Romântico */
-        #event-page-preview.template-romantic {
-            --font-display: 'Dancing Script', cursive;
-            --font-body: 'Cormorant Garamond', serif;
-            --color-primary: #DB2777; /* pink-600 */
-            --color-background: #FFF1F2; /* rose-50 */
-            --color-text-main: #881337; /* rose-900 */
-        }
-        #event-page-preview.template-romantic #header-section { border-bottom: 4px solid var(--color-primary); }
-
-        /* Template: Elegância */
-        #event-page-preview.template-elegancia {
-            --font-display: 'Dancing Script', cursive;
-            --font-body: 'Playfair Display', serif;
-            --color-primary: #374151; /* gray-700 */
-            --color-background: #F9FAFB; /* gray-50 */
-            --color-text-main: #1F2937; /* gray-800 */
-            --color-text-light: #4B5563; /* gray-600 */
-        }
-        #event-page-preview.template-elegancia .section-graphic { display: block; margin: 0 auto 1rem; color: var(--color-primary); }
         #event-page-preview.template-elegancia #couple-names-preview { font-family: var(--font-display); }
         #event-page-preview.template-elegancia .section-title { font-family: var(--font-body); font-weight: 600; }
+        
+        /* Outros estilos de templates... */
+        #event-page-preview.template-classic { --font-display: 'Playfair Display', serif; --font-body: 'Cormorant Garamond', serif; --color-primary: #831843; --color-background: #F8F7F5; --color-text-main: #37322F; }
+        #event-page-preview.template-modern { --font-display: 'Inter', sans-serif; --font-body: 'Inter', sans-serif; --color-primary: #111827; --color-background: #F9FAFB; --color-text-main: #1F2937; }
+        #event-page-preview.template-modern #header-section h1 { font-weight: 700; }
+        #event-page-preview.template-modern #story-section, #event-page-preview.template-modern #details-section { text-align: left; }
+        #event-page-preview.template-modern .section-title { text-align: left; }
+        #event-page-preview.template-romantic { --font-display: 'Dancing Script', cursive; --font-body: 'Cormorant Garamond', serif; --color-primary: #DB2777; --color-background: #FFF1F2; --color-text-main: #881337; }
+        #event-page-preview.template-romantic #header-section { border-bottom: 4px solid var(--color-primary); }
 
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .editable-section { position: relative; border: 2px dashed transparent; transition: border-color 0.3s; }
         .editable-section:hover { border-color: #F472B6; } /* pink-400 */
-        .edit-btn {
-            position: absolute; top: 1rem; right: 1rem;
-            background-color: white; color: #4B5563; /* gray-600 */
-            border-radius: 9999px; padding: 0.5rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            cursor: pointer; transition: all 0.2s; z-index: 10;
-        }
+        .edit-btn { position: absolute; top: 1rem; right: 1rem; background-color: white; color: #4B5563; border-radius: 9999px; padding: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; z-index: 10; }
         .edit-btn:hover { background-color: #EC4899; color: white; transform: scale(1.1); }
         
-        /* Estilos do Modal */
-        .modal {
-            position: fixed; inset: 0; background-color: rgba(0,0,0,0.6);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
-        }
+        .modal { position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
         .modal.is-open { opacity: 1; visibility: visible; }
-        .modal-content {
-            background-color: white; padding: 2rem; border-radius: 0.75rem;
-            width: 90%; max-width: 50rem; max-height: 90vh;
-            overflow-y: auto; transform: scale(0.95); transition: transform 0.3s;
-        }
+        .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 50rem; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s; }
         .modal.is-open .modal-content { transform: scale(1); }
 
-        .template-card {
-            cursor: pointer; border: 2px solid #E5E7EB; /* gray-200 */
-            border-radius: 0.5rem; overflow: hidden; transition: all 0.2s ease-in-out;
-        }
-        .template-card:hover { border-color: var(--color-primary); transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        .template-card.active { border-color: var(--color-primary); border-width: 3px; }
+        .template-card, .icon-card { cursor: pointer; border: 2px solid #E5E7EB; border-radius: 0.5rem; overflow: hidden; transition: all 0.2s ease-in-out; }
+        .template-card:hover, .icon-card:hover { border-color: var(--color-primary); transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .template-card.active, .icon-card.active { border-color: var(--color-primary); border-width: 3px; background-color: #FDF2F8; }
+        .icon-card svg { width: 2.5rem; height: 2.5rem; margin: auto; color: #4B5563; }
+        .icon-card.active svg { color: var(--color-primary); }
 
-        /* Estilos do Uploader de Imagem */
-        .drop-zone {
-            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-        }
-        .drop-zone.drag-over {
-            background-color: #FCE7F3; /* pink-100 */
-            border-color: #F472B6; /* pink-400 */
-        }
+        .drop-zone { transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; }
+        .drop-zone.drag-over { background-color: #FCE7F3; border-color: #F472B6; }
     </style>
 </head>
 <body>
@@ -138,6 +94,11 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
                     Templates
                 </button>
+                <!-- NOVO BOTÃO DE ÍCONE -->
+                <button id="open-icon-modal" class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                    Ícone
+                </button>
                  <button id="save-button" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg>
                     Salvar Alterações
@@ -151,14 +112,10 @@
                 <p>As suas alterações foram salvas.</p>
             </div>
             
-            <!-- A pré-visualização do site do evento é renderizada aqui -->
             <div id="event-page-preview" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
                 
-                <!-- Seção Header -->
                 <section id="header-section" class="editable-section relative text-center bg-gray-300">
-                    <button class="edit-btn" data-modal="header-modal" title="Editar Cabeçalho">
-                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                    </button>
+                    <button class="edit-btn" data-modal="header-modal" title="Editar Cabeçalho"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
                     <img id="header-image-preview" src="https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui" class="w-full h-96 object-cover">
                     <div class="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4">
                         <h1 id="couple-names-preview" class="font-display text-white text-4xl md:text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Nomes Aqui</h1>
@@ -166,80 +123,36 @@
                     </div>
                 </section>
 
-                <!-- Seção da História -->
                 <section id="story-section" class="editable-section p-8 md:p-16 text-center bg-primary-light">
-                     <button class="edit-btn" data-modal="story-modal" title="Editar Título e História">
-                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                    </button>
-                    <div class="section-graphic w-16 h-8">
-                        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><path d="M20,25 C30,15 40,15 50,25 C60,15 70,15 80,25 M20,25 C30,35 40,35 50,25 C60,35 70,35 80,25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </div>
+                     <button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                    <div class="section-graphic w-16 h-10"></div>
                     <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">Nossa História</h2>
-                    <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">
-                        Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!
-                    </p>
+                    <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">Clique no botão de edição para contar a sua história de amor, a jornada até a formatura ou as boas-vindas para a sua festa de aniversário. Este espaço é seu!</p>
                 </section>
 
-                <!-- Seção de Detalhes do Evento -->
                 <section id="details-section" class="editable-section p-8 md:p-16">
-                     <button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento">
-                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                    </button>
-                    <div class="section-graphic w-16 h-8">
-                        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><path d="M20,25 C30,15 40,15 50,25 C60,15 70,15 80,25 M20,25 C30,35 40,35 50,25 C60,35 70,35 80,25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </div>
+                     <button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                    <div class="section-graphic w-16 h-10"></div>
                     <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-                        <!-- Cerimônia -->
-                        <div id="ceremony-details-preview" class="text-center">
-                            <h3 class="font-display text-2xl text-primary">Cerimónia</h3>
-                            <p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">Nome do Local</p>
-                            <p style="color: var(--color-text-light);">Endereço do Local, 123</p>
-                            <p class="mt-1" style="color: var(--color-text-light);">Sábado, 25 de Outubro de 2025, às 16:00</p>
-                            <a href="#" class="mt-2 inline-block font-semibold text-primary hover:underline" target="_blank">Ver no mapa</a>
-                        </div>
-                        <!-- Recepção -->
-                        <div id="reception-details-preview" class="text-center">
-                            <h3 class="font-display text-2xl text-primary">Recepção</h3>
-                            <p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">Nome do Local</p>
-                            <p style="color: var(--color-text-light);">Endereço do Local, 456</p>
-                            <p class="mt-1" style="color: var(--color-text-light);">Logo após a cerimónia</p>
-                            <a href="#" class="mt-2 inline-block font-semibold text-primary hover:underline" target="_blank">Ver no mapa</a>
-                        </div>
+                        <div id="ceremony-details-preview" class="text-center"></div>
+                        <div id="reception-details-preview" class="text-center"></div>
                     </div>
                 </section>
 
-                <!-- Seção da Galeria -->
                 <section id="gallery-section" class="editable-section p-8 md:p-16 bg-primary-light">
-                     <button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos">
-                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                    </button>
-                     <div class="section-graphic w-16 h-8">
-                        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><path d="M20,25 C30,15 40,15 50,25 C60,15 70,15 80,25 M20,25 C30,35 40,35 50,25 C60,35 70,35 80,25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </div>
+                     <button class="edit-btn" data-modal="gallery-modal" title="Editar Galeria de Fotos"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                     <div class="section-graphic w-16 h-10"></div>
                     <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-8">Nossos Momentos</h2>
-                    <div id="gallery-preview-container" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
-                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
-                        <img src="https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+3" class="rounded-lg shadow-md object-cover w-full h-full aspect-square">
-                    </div>
+                    <div id="gallery-preview-container" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
                 </section>
 
-                <!-- Seção de RSVP -->
                 <section id="rsvp-section" class="editable-section p-8 md:p-16 text-center">
-                    <button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença">
-                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                    </button>
-                    <div class="section-graphic w-16 h-8">
-                        <svg viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><path d="M20,25 C30,15 40,15 50,25 C60,15 70,15 80,25 M20,25 C30,35 40,35 50,25 C60,35 70,35 80,25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                    </div>
+                    <button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                    <div class="section-graphic w-16 h-10"></div>
                     <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">Confirme sua Presença</h2>
-                    <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">
-                        Sua presença é o nosso maior presente! Por favor, confirme até o dia DD/MM/AAAA.
-                    </p>
-                    <a id="rsvp-button-preview" href="#" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">
-                        Confirmar Presença
-                    </a>
+                    <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);"></p>
+                    <a id="rsvp-button-preview" href="#" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);"></a>
                 </section>
 
             </div>
@@ -248,197 +161,35 @@
 
     <!-- Modais de Edição -->
     <div id="modal-container">
-        <!-- Modal de Templates -->
-        <div id="template-modal" class="modal">
+        <!-- Modal de Ícones -->
+        <div id="icon-modal" class="modal">
             <div class="modal-content">
-                <h3 class="text-xl font-bold mb-4">Escolha um Template</h3>
-                <p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p>
-                <div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                    <!-- Template Clássico -->
-                    <div class="template-card" data-template="classic">
-                        <div class="p-4 border-b text-center" style="background-color: #F8F7F5;">
-                            <h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4>
-                        </div>
-                        <div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div>
-                    </div>
-                    <!-- Template Moderno -->
-                    <div class="template-card" data-template="modern">
-                        <div class="p-4 border-b text-center" style="background-color: #F9FAFB;">
-                            <h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4>
-                        </div>
-                        <div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div>
-                    </div>
-                    <!-- Template Romântico -->
-                    <div class="template-card" data-template="romantic">
-                         <div class="p-4 border-b text-center" style="background-color: #FFF1F2;">
-                            <h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4>
-                        </div>
-                        <div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div>
-                    </div>
-                    <!-- Template Elegância -->
-                    <div class="template-card" data-template="elegancia">
-                         <div class="p-4 border-b text-center" style="background-color: #F9FAFB;">
-                            <h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4>
-                        </div>
-                        <div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div>
-                    </div>
+                <h3 class="text-xl font-bold mb-4">Escolha um Ícone para o seu Evento</h3>
+                <p class="text-gray-600 mb-6">Este ícone aparecerá como um detalhe gráfico nas seções da sua página.</p>
+                <div id="icon-selection-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4">
+                    <!-- Ícones serão inseridos aqui pelo JavaScript -->
                 </div>
                  <div class="flex justify-end gap-2 mt-8">
-                    <button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button>
+                    <button type="button" class="modal-close-btn px-6 py-2 bg-pink-500 text-white rounded-md">Confirmar</button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Modal do Cabeçalho -->
-        <div id="header-modal" class="modal">
-            <div class="modal-content">
-                <h3 class="text-xl font-bold mb-4">Editar Cabeçalho</h3>
-                <form id="header-form" class="space-y-4">
-                    <div>
-                        <label for="couple-names-input" class="block text-sm font-medium text-gray-700 mb-1">Nomes (separados por vírgula)</label>
-                        <input type="text" id="couple-names-input" class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="event-date-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da Data</label>
-                        <input type="text" id="event-date-input" class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto Principal</label>
-                        <div id="header-image-uploader" class="image-uploader"></div>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
-                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Modal da Galeria -->
-        <div id="gallery-modal" class="modal">
-            <div class="modal-content">
-                <h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos</h3>
-                <form id="gallery-form">
-                    <div id="gallery-inputs-container" class="space-y-6 mb-4"></div>
-                    <button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
-                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
-                    </div>
-                </form>
             </div>
         </div>
         
-        <!-- Modal da História -->
-        <div id="story-modal" class="modal">
-            <div class="modal-content">
-                <h3 class="text-xl font-bold mb-4">Editar História</h3>
-                <form id="story-form" class="space-y-4">
-                    <div>
-                        <label for="story-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label>
-                        <input type="text" id="story-title-input" class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="story-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da História</label>
-                        <textarea id="story-text-input" rows="8" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
-                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Modal de Detalhes do Evento -->
-        <div id="details-modal" class="modal">
-             <div class="modal-content">
-                <h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3>
-                <form id="details-form" class="space-y-6">
-                    <fieldset class="border p-4 rounded-md">
-                        <legend class="text-lg font-semibold px-2">Cerimónia</legend>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label>
-                                <input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md">
-                            </div>
-                             <div>
-                                <label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label>
-                                <input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00">
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-                            <input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mt-4">
-                            <label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label>
-                            <input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                    </fieldset>
-                    <fieldset class="border p-4 rounded-md">
-                        <legend class="text-lg font-semibold px-2">Recepção</legend>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label>
-                                <input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md">
-                            </div>
-                             <div>
-                                <label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label>
-                                <input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia">
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-                            <input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mt-4">
-                            <label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label>
-                            <input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                    </fieldset>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
-                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Modal de RSVP -->
-        <div id="rsvp-modal" class="modal">
-            <div class="modal-content">
-                <h3 class="text-xl font-bold mb-4">Editar Confirmação de Presença</h3>
-                <form id="rsvp-form" class="space-y-4">
-                    <div>
-                        <label for="rsvp-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label>
-                        <input type="text" id="rsvp-title-input" class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="rsvp-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto de Apoio</label>
-                        <textarea id="rsvp-text-input" rows="4" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
-                    </div>
-                    <div>
-                        <label for="rsvp-button-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto do Botão</label>
-                        <input type="text" id="rsvp-button-text-input" class="w-full p-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label for="rsvp-button-link-input" class="block text-sm font-medium text-gray-700 mb-1">Link do Botão (para seu formulário de RSVP)</label>
-                        <input type="url" id="rsvp-button-link-input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://seu-link-de-rsvp.com">
-                    </div>
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
-                        <button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <!-- Outros Modais (Templates, Header, etc.) -->
+        <div id="template-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Template</h3><p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p><div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"><div class="template-card" data-template="classic"><div class="p-4 border-b text-center" style="background-color: #F8F7F5;"><h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div><div class="template-card" data-template="modern"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div><div class="template-card" data-template="romantic"><div class="p-4 border-b text-center" style="background-color: #FFF1F2;"><h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div><div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button></div></div></div>
+        <div id="header-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Cabeçalho</h3><form id="header-form" class="space-y-4"><div><label for="couple-names-input" class="block text-sm font-medium text-gray-700 mb-1">Nomes (separados por vírgula)</label><input type="text" id="couple-names-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="event-date-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da Data</label><input type="text" id="event-date-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Foto Principal</label><div id="header-image-uploader" class="image-uploader"></div></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
+        <div id="gallery-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Galeria de Fotos</h3><form id="gallery-form"><div id="gallery-inputs-container" class="space-y-6 mb-4"></div><button type="button" id="add-photo-btn" class="text-sm text-pink-600 font-semibold hover:text-pink-800 mb-4">+ Adicionar outra foto</button><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
+        <div id="story-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar História</h3><form id="story-form" class="space-y-4"><div><label for="story-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="story-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="story-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da História</label><textarea id="story-text-input" rows="8" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
+        <div id="details-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3><form id="details-form" class="space-y-6"><fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Cerimónia</legend><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="ceremony-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="ceremony-name" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div></div><div class="mt-4"><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div><div class="mt-4"><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md"></div></fieldset><fieldset class="border p-4 rounded-md"><legend class="text-lg font-semibold px-2">Recepção</legend><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label for="reception-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Local</label><input type="text" id="reception-name" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div></div><div class="mt-4"><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div><div class="mt-4"><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md"></div></fieldset><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
+        <div id="rsvp-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar Confirmação de Presença</h3><form id="rsvp-form" class="space-y-4"><div><label for="rsvp-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="rsvp-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="rsvp-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto de Apoio</label><textarea id="rsvp-text-input" rows="4" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div><label for="rsvp-button-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto do Botão</label><input type="text" id="rsvp-button-text-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="rsvp-button-link-input" class="block text-sm font-medium text-gray-700 mb-1">Link do Botão (para seu formulário de RSVP)</label><input type="url" id="rsvp-button-link-input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://seu-link-de-rsvp.com"></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
     </div>
 
     <!-- Scripts -->
     <script type="module">
         import { auth, onAuthStateChanged, db, storage, ref, uploadBytes, getDownloadURL } from './auth.js';
         import { doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        // Importa a biblioteca de ícones
+        import { iconLibrary } from './icon-library.js';
 
         // --- ELEMENTOS GLOBAIS ---
         const loadingState = document.getElementById('loading-state');
@@ -454,6 +205,7 @@
 
         const defaultData = {
             template: 'elegancia',
+            icon: iconLibrary.find(i => i.id === 'flower-2').svg, // Ícone padrão
             header: { coupleNames: ["Noiva & Noivo"], eventDate: "Data do Evento", imageUrl: "https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui" },
             story: { title: "Nossa História", text: "Clique no botão de edição para contar a sua história de amor..." },
             gallery: { photos: [{ url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+1" }, { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+2" }, { url: "https://placehold.co/400x400/FCE7F3/DB2777?text=Foto+3" }] },
@@ -465,7 +217,7 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                viewPublicPageLink.href = `/public-event.html?user=${user.uid}`;
+                viewPublicPageLink.href = `/convite.html?user=${user.uid}`; // Corrigido para apontar para o convite
                 try {
                     await loadEventConfig();
                     await loadPageData();
@@ -475,7 +227,7 @@
                     loadingState.innerHTML = `<p class="text-lg text-red-500">Ocorreu um erro ao carregar os dados. Tente recarregar a página.</p>`;
                 }
             } else {
-                loadingState.innerHTML = '<p class="text-lg text-red-500">Erro de autenticação. Por favor, recarregue o painel.</p>';
+                window.location.href = '/login.html';
             }
         });
 
@@ -485,6 +237,7 @@
             applyTemplate(pageData.template || 'elegancia');
             renderAllPreviews();
             setupEventListeners();
+            populateIconModal();
             createImageUploader(document.getElementById('header-image-uploader'), pageData.header.imageUrl);
         }
 
@@ -499,14 +252,11 @@
             const docSnap = await getDoc(pageDataRef);
 
             if (!docSnap.exists()) {
-                console.log("Nenhum dado da página encontrado. A criar documento padrão.");
                 pageData = JSON.parse(JSON.stringify(defaultData));
-                await setDoc(pageDataRef, pageData).catch(e => {
-                    console.error("Erro ao criar documento padrão:", e);
-                    throw new Error("Não foi possível criar os dados iniciais da página na base de dados.");
-                });
+                await setDoc(pageDataRef, pageData);
             } else {
                 const loadedData = docSnap.data();
+                // Merge profundo para garantir que todos os campos padrão existam
                 pageData = {
                     ...JSON.parse(JSON.stringify(defaultData)),
                     ...loadedData,
@@ -522,382 +272,96 @@
             }
         }
         
+        // --- LÓGICA DE ÍCONES ---
+        function populateIconModal() {
+            const container = document.getElementById('icon-selection-container');
+            container.innerHTML = '';
+            iconLibrary.forEach(icon => {
+                const card = document.createElement('div');
+                card.className = 'icon-card p-4 flex items-center justify-center';
+                card.dataset.iconId = icon.id;
+                card.innerHTML = icon.svg;
+                if (pageData.icon === icon.svg) {
+                    card.classList.add('active');
+                }
+                card.addEventListener('click', () => {
+                    pageData.icon = icon.svg;
+                    document.querySelectorAll('#icon-selection-container .icon-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    renderAllPreviews();
+                });
+                container.appendChild(card);
+            });
+        }
+
         // --- LÓGICA DE UPLOAD DE IMAGEM ---
         function createImageUploader(container, existingUrl = '') {
-            container.innerHTML = `
-                <div class="bg-gray-50 p-4 rounded-lg border">
-                    <label class="drop-zone border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-pink-400 bg-white">
-                        <div class="uploader-prompt">
-                            <svg class="mx-auto h-10 w-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                            <p class="mt-2 text-sm text-gray-600">Arraste uma foto aqui ou <span class="font-semibold text-pink-600">clique para selecionar</span></p>
-                        </div>
-                        <input type="file" class="hidden" accept="image/*">
-                    </label>
-                    <div class="preview-container mt-4 text-center" style="display: none;">
-                        <img class="preview-image max-h-40 rounded-lg inline-block">
-                        <p class="loading-text text-sm text-gray-500 mt-2" style="display: none;">A enviar...</p>
-                    </div>
-                    <div class="my-3 flex items-center"><div class="flex-grow border-t"></div><span class="flex-shrink mx-4 text-gray-400 text-xs">OU</span><div class="flex-grow border-t"></div></div>
-                    <div><input type="url" class="url-input w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="Cole a URL da imagem aqui"></div>
-                </div>
-            `;
-            const dropZone = container.querySelector('.drop-zone');
+            container.innerHTML = `<div class="bg-gray-50 p-4 rounded-lg border"><label class="drop-zone border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-pink-400 bg-white"><div class="uploader-prompt"><svg class="mx-auto h-10 w-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg><p class="mt-2 text-sm text-gray-600">Arraste uma foto aqui ou <span class="font-semibold text-pink-600">clique para selecionar</span></p></div><input type="file" class="hidden" accept="image/*"></label><div class="preview-container mt-4 text-center" style="display: none;"><img class="preview-image max-h-40 rounded-lg inline-block"><p class="loading-text text-sm text-gray-500 mt-2" style="display: none;">A enviar...</p></div><div class="my-3 flex items-center"><div class="flex-grow border-t"></div><span class="flex-shrink mx-4 text-gray-400 text-xs">OU</span><div class="flex-grow border-t"></div></div><div><input type="url" class="url-input w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="Cole a URL da imagem aqui"></div></div>`;
             const fileInput = container.querySelector('input[type="file"]');
             const urlInput = container.querySelector('.url-input');
-            const previewContainer = container.querySelector('.preview-container');
             const previewImage = container.querySelector('.preview-image');
-            const loadingText = container.querySelector('.loading-text');
-
             container.dataSource = { type: 'url', value: existingUrl };
-
-            const showPreview = (src) => {
-                previewImage.src = src;
-                previewContainer.style.display = 'block';
-                loadingText.style.display = 'none';
-            };
-            
-            if (existingUrl) {
-                showPreview(existingUrl);
-                urlInput.value = existingUrl;
-            }
-
-            dropZone.addEventListener('click', () => fileInput.click());
-            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-            dropZone.addEventListener('drop', e => {
-                e.preventDefault();
-                dropZone.classList.remove('drag-over');
-                if (e.dataTransfer.files.length) {
-                    const file = e.dataTransfer.files[0];
-                    handleFile(file);
-                }
-            });
-            fileInput.addEventListener('change', e => {
-                if (e.target.files.length) {
-                    handleFile(e.target.files[0]);
-                }
-            });
-            urlInput.addEventListener('input', () => {
-                const url = urlInput.value.trim();
-                container.dataSource = { type: 'url', value: url };
-                if(url) showPreview(url);
-            });
-
-            const handleFile = (file) => {
-                if (!file.type.startsWith('image/')) return;
-                container.dataSource = { type: 'file', value: file };
-                const reader = new FileReader();
-                reader.onload = (e) => showPreview(e.target.result);
-                reader.readAsDataURL(file);
-            };
+            const showPreview = (src) => { previewImage.src = src; container.querySelector('.preview-container').style.display = 'block'; };
+            if (existingUrl) { showPreview(existingUrl); urlInput.value = existingUrl; }
+            container.querySelector('.drop-zone').addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', e => { if (e.target.files.length) { container.dataSource = { type: 'file', value: e.target.files[0] }; const reader = new FileReader(); reader.onload = (ev) => showPreview(ev.target.result); reader.readAsDataURL(e.target.files[0]); } });
+            urlInput.addEventListener('input', () => { const url = urlInput.value.trim(); container.dataSource = { type: 'url', value: url }; if(url) showPreview(url); });
         }
+        async function uploadImageAndGetURL(file) { if (!file) return null; const storageRef = ref(storage, `users/${currentUser.uid}/eventImages/${Date.now()}-${file.name}`); await uploadBytes(storageRef, file); return await getDownloadURL(storageRef); }
 
-        async function uploadImageAndGetURL(file) {
-            if (!file) return null;
-            // CORREÇÃO: O caminho agora corresponde às regras do Storage.
-            const storageRef = ref(storage, `users/${currentUser.uid}/eventImages/${Date.now()}-${file.name}`);
-            await uploadBytes(storageRef, file);
-            return await getDownloadURL(storageRef);
-        }
+        // --- LÓGICA DE SALVAMENTO ---
+        async function handleHeaderSave(e) { e.preventDefault(); const uploader = document.getElementById('header-image-uploader'); const saveBtn = e.target.querySelector('.modal-save-btn'); saveBtn.disabled = true; saveBtn.textContent = 'A salvar...'; const newHeaderData = { coupleNames: document.getElementById('couple-names-input').value.split(',').map(name => name.trim()), eventDate: document.getElementById('event-date-input').value, imageUrl: pageData.header.imageUrl }; const { type, value } = uploader.dataSource; if (type === 'file' && value) { try { newHeaderData.imageUrl = await uploadImageAndGetURL(value); } catch (err) { console.error("Upload failed", err); alert("O envio da imagem falhou."); saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; return; } } else if (type === 'url') { newHeaderData.imageUrl = value; } try { pageData.header = newHeaderData; await updateDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), { header: pageData.header }); renderAllPreviews(); closeModal(e.target.closest('.modal')); } catch (error) { console.error("Erro ao salvar cabeçalho:", error); } finally { saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; } }
+        async function handleGallerySave(e) { e.preventDefault(); const saveBtn = e.target.querySelector('.modal-save-btn'); saveBtn.disabled = true; saveBtn.textContent = 'A salvar...'; const uploaderDivs = document.querySelectorAll('#gallery-inputs-container .image-uploader-wrapper'); try { const uploadPromises = Array.from(uploaderDivs).map(async (wrapper) => { const uploader = wrapper.querySelector('.image-uploader'); const { type, value } = uploader.dataSource; if (type === 'file' && value) { return uploadImageAndGetURL(value); } return value; }); const urls = await Promise.all(uploadPromises); pageData.gallery.photos = urls.filter(url => url).map(url => ({ url })); await updateDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), { "gallery.photos": pageData.gallery.photos }); renderAllPreviews(); closeModal(e.target.closest('.modal')); } catch (err) { console.error("Gallery save failed", err); } finally { saveBtn.disabled = false; saveBtn.textContent = 'Salvar'; } }
+        function addPhotoField(url = '') { const container = document.getElementById('gallery-inputs-container'); const wrapper = document.createElement('div'); wrapper.className = 'image-uploader-wrapper relative border-t pt-6 mt-6'; const uploaderDiv = document.createElement('div'); uploaderDiv.className = 'image-uploader'; const removeBtn = document.createElement('button'); removeBtn.type = 'button'; removeBtn.className = 'absolute top-0 right-0 text-red-500 hover:text-red-700 p-1 rounded-full'; removeBtn.innerHTML = `<svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>`; removeBtn.onclick = () => wrapper.remove(); wrapper.appendChild(uploaderDiv); wrapper.appendChild(removeBtn); container.appendChild(wrapper); createImageUploader(uploaderDiv, url); }
+        async function handleFullSave() { saveButton.disabled = true; saveButton.textContent = 'A salvar...'; try { await setDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), { ...pageData, updatedAt: new Date() }); successMessage.classList.remove('hidden'); window.scrollTo(0, 0); setTimeout(() => successMessage.classList.add('hidden'), 3000); } catch (error) { console.error("Erro ao salvar dados da página: ", error); } finally { saveButton.disabled = false; saveButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg> Salvar Alterações`; } }
 
-        // --- LÓGICA DE SALVAMENTO DOS FORMULÁRIOS (MODIFICADA) ---
-        async function handleHeaderSave(e) {
-            e.preventDefault();
-            const uploader = document.getElementById('header-image-uploader');
-            const saveBtn = e.target.querySelector('.modal-save-btn');
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'A salvar...';
-
-            const newHeaderData = {
-                coupleNames: document.getElementById('couple-names-input').value.split(',').map(name => name.trim()),
-                eventDate: document.getElementById('event-date-input').value,
-                imageUrl: pageData.header.imageUrl
-            };
-
-            const { type, value } = uploader.dataSource;
-            if (type === 'file' && value) {
-                uploader.querySelector('.loading-text').style.display = 'block';
-                try {
-                    newHeaderData.imageUrl = await uploadImageAndGetURL(value);
-                } catch (err) {
-                    console.error("Upload failed", err);
-                    alert("O envio da imagem falhou.");
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = 'Salvar';
-                    return;
-                }
-            } else if (type === 'url') {
-                newHeaderData.imageUrl = value;
-            }
-
-            try {
-                pageData.header = newHeaderData;
-                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-                await updateDoc(pageDataRef, { header: pageData.header });
-                renderHeaderPreview();
-                closeModal(e.target.closest('.modal'));
-            } catch (error) {
-                console.error("Erro ao salvar cabeçalho:", error);
-                alert("Ocorreu um erro ao salvar as informações do cabeçalho.");
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Salvar';
-            }
-        }
-
-        async function handleGallerySave(e) {
-            e.preventDefault();
-            const saveBtn = e.target.querySelector('.modal-save-btn');
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'A salvar...';
-
-            const uploaderDivs = document.querySelectorAll('#gallery-inputs-container .image-uploader-wrapper');
-            
-            try {
-                const uploadPromises = Array.from(uploaderDivs).map(async (wrapper) => {
-                    const uploader = wrapper.querySelector('.image-uploader');
-                    const { type, value } = uploader.dataSource;
-                    if (type === 'file' && value) {
-                        wrapper.querySelector('.loading-text').style.display = 'block';
-                        return uploadImageAndGetURL(value);
-                    }
-                    return value;
-                });
-
-                const urls = await Promise.all(uploadPromises);
-                pageData.gallery.photos = urls.filter(url => url).map(url => ({ url }));
-
-                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-                await updateDoc(pageDataRef, { "gallery.photos": pageData.gallery.photos });
-
-                renderGalleryPreview();
-                closeModal(e.target.closest('.modal'));
-            } catch (err) {
-                console.error("Gallery save failed", err);
-                alert("O envio de uma ou mais imagens da galeria falhou.");
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Salvar';
-            }
-        }
-
-        function addPhotoField(url = '') {
-            const container = document.getElementById('gallery-inputs-container');
-            const wrapper = document.createElement('div');
-            wrapper.className = 'image-uploader-wrapper relative border-t pt-6 mt-6';
-            
-            const uploaderDiv = document.createElement('div');
-            uploaderDiv.className = 'image-uploader';
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'absolute top-0 right-0 text-red-500 hover:text-red-700 p-1 rounded-full';
-            removeBtn.innerHTML = `<svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>`;
-            removeBtn.onclick = () => wrapper.remove();
-            
-            wrapper.appendChild(uploaderDiv);
-            wrapper.appendChild(removeBtn);
-            container.appendChild(wrapper);
-            
-            createImageUploader(uploaderDiv, url);
-        }
-
-        function applyTemplate(templateId) {
-            eventPagePreview.classList.remove('template-classic', 'template-modern', 'template-romantic', 'template-elegancia');
-            eventPagePreview.classList.add(`template-${templateId}`);
-            pageData.template = templateId;
-
-            document.querySelectorAll('.template-card').forEach(card => {
-                card.classList.toggle('active', card.dataset.template === templateId);
-            });
-        }
-
+        // --- RENDERIZAÇÃO ---
+        function applyTemplate(templateId) { eventPagePreview.className = 'max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden'; eventPagePreview.classList.add(`template-${templateId}`); pageData.template = templateId; document.querySelectorAll('.template-card').forEach(card => card.classList.toggle('active', card.dataset.template === templateId)); renderAllPreviews(); }
         function renderAllPreviews() {
-            renderHeaderPreview();
-            renderStoryPreview();
-            renderDetailsPreview();
-            renderGalleryPreview();
-            renderRsvpPreview();
+            const { header, story, details, gallery, rsvp, icon } = pageData;
+            document.getElementById('couple-names-preview').textContent = Array.isArray(header.coupleNames) ? header.coupleNames.join(' & ') : '';
+            document.getElementById('event-date-preview').textContent = header.eventDate;
+            const imgPreview = document.getElementById('header-image-preview'); imgPreview.src = header.imageUrl || defaultData.header.imageUrl; imgPreview.onerror = () => { imgPreview.src = defaultData.header.imageUrl; };
+            document.getElementById('story-title-preview').textContent = story.title;
+            document.getElementById('story-text-preview').textContent = story.text;
+            document.getElementById('ceremony-details-preview').innerHTML = `<h3 class="font-display text-2xl text-primary">Cerimónia</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.ceremony.name || ''}</p><p style="color: var(--color-text-light);">${details.ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>`;
+            document.getElementById('reception-details-preview').innerHTML = `<h3 class="font-display text-2xl text-primary">Recepção</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.reception.name || ''}</p><p style="color: var(--color-text-light);">${details.reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>`;
+            const galleryContainer = document.getElementById('gallery-preview-container'); galleryContainer.innerHTML = ''; (gallery.photos || []).forEach(photo => { const img = document.createElement('img'); img.src = photo.url; img.className = 'rounded-lg shadow-md object-cover w-full h-full aspect-square'; img.onerror = () => { img.src = 'https://placehold.co/400x400/FCE7F3/DB2777?text=Inválida'; }; galleryContainer.appendChild(img); });
+            document.getElementById('rsvp-title-preview').textContent = rsvp.title;
+            document.getElementById('rsvp-text-preview').textContent = rsvp.text;
+            const rsvpButton = document.getElementById('rsvp-button-preview'); rsvpButton.textContent = rsvp.buttonText; rsvpButton.href = rsvp.buttonLink || '#';
+            document.querySelectorAll('.section-graphic').forEach(el => el.innerHTML = icon || '');
         }
 
-        function renderHeaderPreview() {
-            const { coupleNames, eventDate, imageUrl } = pageData.header;
-            document.getElementById('couple-names-preview').textContent = Array.isArray(coupleNames) ? coupleNames.join(' & ') : '';
-            document.getElementById('event-date-preview').textContent = eventDate;
-            const imgPreview = document.getElementById('header-image-preview');
-            imgPreview.src = imageUrl || defaultData.header.imageUrl;
-            imgPreview.onerror = () => { imgPreview.src = defaultData.header.imageUrl; };
-        }
-
-        function renderStoryPreview() {
-            const { title, text } = pageData.story;
-            document.getElementById('story-title-preview').textContent = title;
-            document.getElementById('story-text-preview').textContent = text;
-        }
-
-        function renderDetailsPreview() {
-            const { ceremony, reception } = pageData.details;
-            const ceremonyDiv = document.getElementById('ceremony-details-preview');
-            const receptionDiv = document.getElementById('reception-details-preview');
-
-            ceremonyDiv.innerHTML = `<h3 class="font-display text-2xl text-primary">Cerimónia</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${ceremony.name || ''}</p><p style="color: var(--color-text-light);">${ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${ceremony.time || ''}</p><a href="${ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>`;
-            receptionDiv.innerHTML = `<h3 class="font-display text-2xl text-primary">Recepção</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${reception.name || ''}</p><p style="color: var(--color-text-light);">${reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${reception.time || ''}</p><a href="${reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a>`;
-        }
-        
-        function renderGalleryPreview() {
-            const container = document.getElementById('gallery-preview-container');
-            container.innerHTML = '';
-            const photos = pageData.gallery.photos || [];
-            photos.forEach(photo => {
-                const img = document.createElement('img');
-                img.src = photo.url;
-                img.alt = 'Foto da galeria';
-                img.className = 'rounded-lg shadow-md object-cover w-full h-full aspect-square';
-                img.onerror = () => { img.src = 'https://placehold.co/400x400/FCE7F3/DB2777?text=Imagem+Inv%C3%A1lida'; };
-                container.appendChild(img);
-            });
-        }
-
-        function renderRsvpPreview() {
-            const { title, text, buttonText, buttonLink } = pageData.rsvp;
-            document.getElementById('rsvp-title-preview').textContent = title;
-            document.getElementById('rsvp-text-preview').textContent = text;
-            const button = document.getElementById('rsvp-button-preview');
-            button.textContent = buttonText;
-            button.href = buttonLink || '#';
-        }
-
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                switch (modalId) {
-                    case 'header-modal':
-                        document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
-                        document.getElementById('event-date-input').value = pageData.header.eventDate;
-                        break;
-                    case 'story-modal':
-                        document.getElementById('story-title-input').value = pageData.story.title;
-                        document.getElementById('story-text-input').value = pageData.story.text;
-                        break;
-                    case 'gallery-modal':
-                        populateGalleryForm();
-                        break;
-                    case 'details-modal':
-                        const { ceremony, reception } = pageData.details;
-                        document.getElementById('ceremony-name').value = ceremony.name;
-                        document.getElementById('ceremony-time').value = ceremony.time;
-                        document.getElementById('ceremony-address').value = ceremony.address;
-                        document.getElementById('ceremony-map').value = ceremony.mapUrl;
-                        document.getElementById('reception-name').value = reception.name;
-                        document.getElementById('reception-time').value = reception.time;
-                        document.getElementById('reception-address').value = reception.address;
-                        document.getElementById('reception-map').value = reception.mapUrl;
-                        break;
-                    case 'rsvp-modal':
-                        const { rsvp } = pageData;
-                        document.getElementById('rsvp-title-input').value = rsvp.title;
-                        document.getElementById('rsvp-text-input').value = rsvp.text;
-                        document.getElementById('rsvp-button-text-input').value = rsvp.buttonText;
-                        document.getElementById('rsvp-button-link-input').value = rsvp.buttonLink;
-                        break;
-                }
-                modal.classList.add('is-open');
-            }
-        }
-
-        function closeModal(modal) {
-            modal.classList.remove('is-open');
-        }
-
+        // --- EVENT LISTENERS ---
         function setupEventListeners() {
             document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.modal)));
             document.getElementById('open-template-modal').addEventListener('click', () => openModal('template-modal'));
+            document.getElementById('open-icon-modal').addEventListener('click', () => openModal('icon-modal'));
             document.querySelectorAll('.modal-close-btn').forEach(btn => btn.addEventListener('click', () => closeModal(btn.closest('.modal'))));
             document.querySelectorAll('.template-card').forEach(card => card.addEventListener('click', () => applyTemplate(card.dataset.template)));
-            
             document.getElementById('header-form').addEventListener('submit', handleHeaderSave);
-            document.getElementById('story-form').addEventListener('submit', handleStorySave);
+            document.getElementById('story-form').addEventListener('submit', async (e) => { e.preventDefault(); pageData.story.title = document.getElementById('story-title-input').value; pageData.story.text = document.getElementById('story-text-input').value; await updateDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), { story: pageData.story }); renderAllPreviews(); closeModal(e.target.closest('.modal')); });
+            document.getElementById('details-form').addEventListener('submit', async (e) => { e.preventDefault(); pageData.details.ceremony = { name: document.getElementById('ceremony-name').value, time: document.getElementById('ceremony-time').value, address: document.getElementById('ceremony-address').value, mapUrl: document.getElementById('ceremony-map').value }; pageData.details.reception = { name: document.getElementById('reception-name').value, time: document.getElementById('reception-time').value, address: document.getElementById('reception-address').value, mapUrl: document.getElementById('reception-map').value }; await updateDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), { details: pageData.details }); renderAllPreviews(); closeModal(e.target.closest('.modal')); });
+            document.getElementById('rsvp-form').addEventListener('submit', async (e) => { e.preventDefault(); pageData.rsvp = { title: document.getElementById('rsvp-title-input').value, text: document.getElementById('rsvp-text-input').value, buttonText: document.getElementById('rsvp-button-text-input').value, buttonLink: document.getElementById('rsvp-button-link-input').value }; await updateDoc(doc(db, 'users', currentUser.uid, 'eventPage', 'details'), { rsvp: pageData.rsvp }); renderAllPreviews(); closeModal(e.target.closest('.modal')); });
             document.getElementById('gallery-form').addEventListener('submit', handleGallerySave);
-            document.getElementById('details-form').addEventListener('submit', handleDetailsSave);
-            document.getElementById('rsvp-form').addEventListener('submit', handleRsvpSave);
-
             saveButton.addEventListener('click', handleFullSave);
             document.getElementById('add-photo-btn').addEventListener('click', () => addPhotoField());
         }
-
-        async function handleStorySave(e) {
-            e.preventDefault();
-            pageData.story.title = document.getElementById('story-title-input').value;
-            pageData.story.text = document.getElementById('story-text-input').value;
-            
-            try {
-                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-                await updateDoc(pageDataRef, { story: pageData.story });
-                renderStoryPreview();
-                closeModal(e.target.closest('.modal'));
-            } catch (error) {
-                console.error("Erro ao salvar história:", error);
-                alert("Ocorreu um erro ao salvar a história.");
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                if (modalId === 'header-modal') { document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', '); document.getElementById('event-date-input').value = pageData.header.eventDate; }
+                else if (modalId === 'story-modal') { document.getElementById('story-title-input').value = pageData.story.title; document.getElementById('story-text-input').value = pageData.story.text; }
+                else if (modalId === 'gallery-modal') { populateGalleryForm(); }
+                else if (modalId === 'details-modal') { const { ceremony, reception } = pageData.details; document.getElementById('ceremony-name').value = ceremony.name; document.getElementById('ceremony-time').value = ceremony.time; document.getElementById('ceremony-address').value = ceremony.address; document.getElementById('ceremony-map').value = ceremony.mapUrl; document.getElementById('reception-name').value = reception.name; document.getElementById('reception-time').value = reception.time; document.getElementById('reception-address').value = reception.address; document.getElementById('reception-map').value = reception.mapUrl; }
+                else if (modalId === 'rsvp-modal') { const { rsvp } = pageData; document.getElementById('rsvp-title-input').value = rsvp.title; document.getElementById('rsvp-text-input').value = rsvp.text; document.getElementById('rsvp-button-text-input').value = rsvp.buttonText; document.getElementById('rsvp-button-link-input').value = rsvp.buttonLink; }
+                modal.classList.add('is-open');
             }
         }
-        
-        async function handleDetailsSave(e) {
-            e.preventDefault();
-            pageData.details.ceremony = { name: document.getElementById('ceremony-name').value, time: document.getElementById('ceremony-time').value, address: document.getElementById('ceremony-address').value, mapUrl: document.getElementById('ceremony-map').value };
-            pageData.details.reception = { name: document.getElementById('reception-name').value, time: document.getElementById('reception-time').value, address: document.getElementById('reception-address').value, mapUrl: document.getElementById('reception-map').value };
-            
-            try {
-                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-                await updateDoc(pageDataRef, { details: pageData.details });
-                renderDetailsPreview();
-                closeModal(e.target.closest('.modal'));
-            } catch(error) {
-                console.error("Erro ao salvar detalhes:", error);
-                alert("Ocorreu um erro ao salvar os detalhes do evento.");
-            }
-        }
-
-        async function handleRsvpSave(e) {
-            e.preventDefault();
-            pageData.rsvp.title = document.getElementById('rsvp-title-input').value;
-            pageData.rsvp.text = document.getElementById('rsvp-text-input').value;
-            pageData.rsvp.buttonText = document.getElementById('rsvp-button-text-input').value;
-            pageData.rsvp.buttonLink = document.getElementById('rsvp-button-link-input').value;
-            
-            try {
-                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-                await updateDoc(pageDataRef, { rsvp: pageData.rsvp });
-                renderRsvpPreview();
-                closeModal(e.target.closest('.modal'));
-            } catch(error) {
-                console.error("Erro ao salvar RSVP:", error);
-                alert("Ocorreu um erro ao salvar a seção de RSVP.");
-            }
-        }
-
-        function populateGalleryForm() {
-            const container = document.getElementById('gallery-inputs-container');
-            container.innerHTML = '';
-            (pageData.gallery.photos || []).forEach(photo => addPhotoField(photo.url));
-        }
-
-        async function handleFullSave() {
-            saveButton.disabled = true;
-            saveButton.innerHTML = 'A salvar...';
-            try {
-                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
-                await setDoc(pageDataRef, { ...pageData, updatedAt: new Date() });
-                successMessage.classList.remove('hidden');
-                window.scrollTo(0, 0);
-                setTimeout(() => successMessage.classList.add('hidden'), 3000);
-            } catch (error) {
-                console.error("Erro ao salvar dados da página: ", error);
-                alert("Ocorreu um erro ao salvar. Tente novamente.");
-            } finally {
-                saveButton.disabled = false;
-                saveButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" /></svg> Salvar Alterações`;
-            }
-        }
+        function closeModal(modal) { modal.classList.remove('is-open'); }
+        function populateGalleryForm() { const container = document.getElementById('gallery-inputs-container'); container.innerHTML = ''; (pageData.gallery.photos || []).forEach(photo => addPhotoField(photo.url)); }
     </script>
+    <script type="module" src="./icon-library.js"></script>
 </body>
 </html>

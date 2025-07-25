@@ -7,113 +7,55 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* Estilo para a fonte e cores principais, para garantir consistência */
         body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
         .font-display { font-family: 'Playfair Display', serif; }
         .font-body { font-family: 'Cormorant Garamond', serif; }
-        .text-primary { color: #831843; } /* Tom de rosa mais escuro para elegância */
+        .text-primary { color: #831843; }
         .bg-primary-light { background-color: #F8F7F5; }
 
-        /* Animações de entrada */
         .fade-in { animation: fadeIn 0.7s ease-in-out forwards; }
-        .fade-in-late { animation: fadeIn 0.7s ease-in-out 0.3s forwards; opacity: 0; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Estilo para o cartão de presente */
-        .gift-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Estilo para a barra de navegação fixa */
-        .sticky-nav {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            transition: background-color 0.3s, box-shadow 0.3s;
+        .sticky-nav { position: sticky; top: 0; z-index: 50; transition: background-color 0.3s, box-shadow 0.3s; }
+
+        /* Estilos dinâmicos do template */
+        #content-wrapper {
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'Cormorant Garamond', serif;
+            --color-primary: #831843;
+            --color-background: #F8F7F5;
+            --color-text-main: #37322F;
+            --color-text-light: #4B5563;
         }
+        #content-wrapper .font-display { font-family: var(--font-display); }
+        #content-wrapper .font-body { font-family: var(--font-body); }
+        #content-wrapper .text-primary { color: var(--color-primary); }
+        #content-wrapper .bg-primary-light { background-color: var(--color-background); }
+        #content-wrapper .section-graphic { display: block; margin: 0 auto 1rem; color: var(--color-primary); width: 4rem; height: 2.5rem;}
+
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-0 sm:p-4">
 
-    <!-- Estado de Carregamento -->
-    <div id="loading-state" class="text-center">
-        <p class="text-lg text-gray-600">A carregar convite...</p>
-    </div>
+    <div id="loading-state" class="text-center"><p class="text-lg text-gray-600">A carregar convite...</p></div>
+    <div id="error-state" class="hidden text-center bg-red-100 p-8 rounded-lg shadow-md"><h2 class="text-2xl font-bold text-red-700 font-display">Convite Inválido</h2><p class="text-gray-600 mt-2">O link deste convite parece estar quebrado.</p><p id="error-details" class="text-xs text-gray-500 mt-4"></p></div>
 
-    <!-- Estado de Erro -->
-    <div id="error-state" class="hidden text-center bg-red-100 p-8 rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold text-red-700 font-display">Convite Inválido</h2>
-        <p class="text-gray-600 mt-2">O link deste convite parece estar quebrado. Por favor, entre em contato com os anfitriões.</p>
-        <p id="error-details" class="text-xs text-gray-500 mt-4"></p>
-    </div>
-
-    <!-- Conteúdo Principal da Página -->
     <div id="content-wrapper" class="hidden w-full max-w-5xl mx-auto bg-white shadow-xl rounded-lg">
         
-        <!-- Barra de Navegação -->
         <nav id="main-nav" class="sticky-nav bg-white/80 backdrop-blur-lg shadow-sm">
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <div class="flex items-center">
-                        <span id="nav-title" class="font-display text-xl text-primary"></span>
-                    </div>
-                    <div class="hidden md:block">
-                        <div class="ml-10 flex items-baseline space-x-4">
-                            <a href="#header-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Início</a>
-                            <a href="#story-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">A História</a>
-                            <a href="#details-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">O Evento</a>
-                            <a href="#gift-list-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Presentes</a>
-                            <a href="#rsvp-section" class="bg-pink-800 text-white hover:bg-pink-700 px-3 py-2 rounded-md text-sm font-medium">Confirmar Presença</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex items-center justify-between h-16"><div class="flex items-center"><span id="nav-title" class="font-display text-xl text-primary"></span></div><div class="hidden md:block"><div class="ml-10 flex items-baseline space-x-4"><a href="#header-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Início</a><a href="#story-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">A História</a><a href="#details-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">O Evento</a><a href="#gift-list-section" class="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Presentes</a><a href="#rsvp-section" class="bg-pink-800 text-white hover:bg-pink-700 px-3 py-2 rounded-md text-sm font-medium">Confirmar Presença</a></div></div></div></div>
         </nav>
 
-        <!-- Corpo do Evento -->
         <main>
-            <!-- Seção do Cabeçalho -->
-            <section id="header-section" class="relative text-center">
-                <!-- O conteúdo do cabeçalho será carregado aqui -->
-            </section>
-
-            <!-- Seção da História -->
-            <section id="story-section" class="p-8 md:p-16 text-center bg-primary-light">
-                <!-- O conteúdo da história será carregado aqui -->
-            </section>
-            
-            <!-- Seção de Detalhes do Evento -->
-            <section id="details-section" class="p-8 md:p-16 bg-white">
-                <!-- O conteúdo dos detalhes será carregado aqui -->
-            </section>
-
-            <!-- Seção da Lista de Presentes -->
-            <section id="gift-list-section" class="hidden p-8 md:p-16 bg-primary-light">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold font-display text-primary">Lista de Presentes</h2>
-                    <p class="font-body text-lg text-gray-600 mt-2">O seu carinho é o maior presente, mas se desejar presentear, aqui ficam algumas sugestões.</p>
-                </div>
-                <div id="gift-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Cards de presentes serão inseridos aqui -->
-                </div>
-                <div id="no-gifts-message" class="hidden text-center py-10 px-6 bg-white rounded-lg shadow-sm border">
-                    <p class="text-gray-600 font-body text-lg">Os anfitriões optaram por não criar uma lista de presentes online.</p>
-                </div>
-            </section>
-
-            <!-- Seção de RSVP -->
+            <section id="header-section" class="relative text-center"></section>
+            <section id="story-section" class="p-8 md:p-16 text-center bg-primary-light"></section>
+            <section id="details-section" class="p-8 md:p-16 bg-white"></section>
+            <section id="gift-list-section" class="hidden p-8 md:p-16 bg-primary-light"><div class="text-center mb-12"><h2 class="text-3xl md:text-4xl font-bold font-display text-primary">Lista de Presentes</h2><p class="font-body text-lg text-gray-600 mt-2">O seu carinho é o maior presente, mas se desejar presentear, aqui ficam algumas sugestões.</p></div><div id="gift-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div><div id="no-gifts-message" class="hidden text-center py-10 px-6 bg-white rounded-lg shadow-sm border"><p class="text-gray-600 font-body text-lg">Os anfitriões optaram por não criar uma lista de presentes online.</p></div></section>
             <section id="rsvp-section" class="text-center bg-white p-8 md:p-16 border-t">
+                 <div class="section-graphic"></div>
                  <h2 class="text-3xl font-bold font-display text-primary">Olá, <span id="guest-family-name" class="text-pink-700"></span>!</h2>
                  <p class="text-lg text-gray-600 mt-2 font-body">Gostaríamos de contar com a sua presença. <br>Por favor, confirme se poderá comparecer.</p>
-                 <div id="rsvp-buttons" class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-                     <button id="confirm-button" class="w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105">
-                         Sim, eu vou!
-                     </button>
-                     <button id="decline-button" class="w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-red-700 transition-transform transform hover:scale-105">
-                         Não poderei ir
-                     </button>
-                 </div>
+                 <div id="rsvp-buttons" class="mt-8 flex flex-col sm:flex-row justify-center gap-4"><button id="confirm-button" class="w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-green-700">Sim, eu vou!</button><button id="decline-button" class="w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-10 rounded-lg hover:bg-red-700">Não poderei ir</button></div>
                  <div id="rsvp-message" class="hidden mt-6 text-xl text-gray-700 font-semibold font-body"></div>
             </section>
         </main>
@@ -121,229 +63,129 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        // *** MUDANÇA 1: Importar as funções necessárias para a autenticação em memória ***
         import { initializeAuth, signInAnonymously, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        // Configuração do Firebase
-        const firebaseConfig = {
-          apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY",
-          authDomain: "simperfeito.com",
-          projectId: "simperfeito",
-          storageBucket: "simperfeito.appspot.com",
-          messagingSenderId: "276559476496",
-          appId: "1:276559476496:web:c811781762486bb5001795",
-          measurementId: "G-CB5X7JY7Y6"
-        };
-
-        // Inicialização isolada para convidados
-        const guestAppName = `guest-app-${Date.now()}`;
-        const guestApp = initializeApp(firebaseConfig, guestAppName);
-        
-        // *** MUDANÇA 2: Inicializar a autenticação com persistência em memória ***
-        // Isto garante que a sessão anónima não é guardada no disco e não interfere com outras sessões.
-        const auth = initializeAuth(guestApp, {
-            persistence: inMemoryPersistence
-        });
+        const firebaseConfig = { apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY", authDomain: "simperfeito.com", projectId: "simperfeito", storageBucket: "simperfeito.appspot.com", messagingSenderId: "276559476496", appId: "1:276559476496:web:c811781762486bb5001795" };
+        const guestApp = initializeApp(firebaseConfig, `guest-app-${Date.now()}`);
+        const auth = initializeAuth(guestApp, { persistence: inMemoryPersistence });
         const db = getFirestore(guestApp);
 
-        // Elementos da UI
         const loadingState = document.getElementById('loading-state');
         const errorState = document.getElementById('error-state');
-        const errorDetails = document.getElementById('error-details');
         const contentWrapper = document.getElementById('content-wrapper');
-        
-        // Seções
         const headerSection = document.getElementById('header-section');
         const storySection = document.getElementById('story-section');
         const detailsSection = document.getElementById('details-section');
         const giftListSection = document.getElementById('gift-list-section');
         const giftListContainer = document.getElementById('gift-list-container');
         const noGiftsMessage = document.getElementById('no-gifts-message');
-        
-        // RSVP
         const guestFamilyNameEl = document.getElementById('guest-family-name');
         const rsvpButtons = document.getElementById('rsvp-buttons');
         const rsvpMessage = document.getElementById('rsvp-message');
         const confirmButton = document.getElementById('confirm-button');
         const declineButton = document.getElementById('decline-button');
-        
-        // Navegação
         const navTitle = document.getElementById('nav-title');
 
         let creatorId, guestId;
 
-        // Função principal executada ao carregar a página
         window.onload = async () => {
             try {
                 const params = new URLSearchParams(window.location.search);
                 creatorId = params.get('user');
                 guestId = params.get('guest');
-
-                if (!creatorId || !guestId) {
-                    throw new Error("Parâmetros 'user' ou 'guest' em falta no URL.");
-                }
+                if (!creatorId || !guestId) throw new Error("Parâmetros 'user' ou 'guest' em falta no URL.");
 
                 await signInAnonymously(auth);
-
                 const eventData = await fetchEventData();
                 if (!eventData) throw new Error("Dados do evento não encontrados.");
-
                 const guestData = await fetchGuestData();
                 if (!guestData) throw new Error("Dados do convidado não encontrados.");
 
-                // Renderiza todas as seções da página
+                applyTemplate(eventData.template);
                 renderHeader(eventData.header);
-                renderStory(eventData.story);
-                renderDetails(eventData.details);
-                
-                // Carrega a lista de presentes imediatamente
+                renderStory(eventData.story, eventData.icon);
+                renderDetails(eventData.details, eventData.icon);
                 await loadAndShowGiftList();
 
-                // Personaliza a saudação e o estado do RSVP
                 guestFamilyNameEl.textContent = guestData.name;
                 const firstMemberStatus = guestData.members[0]?.status;
                 if (firstMemberStatus && firstMemberStatus !== 'pendente') {
                     handleAlreadyResponded(firstMemberStatus);
                 }
 
-                // Exibe o conteúdo
                 showContent();
-
             } catch (error) {
                 console.error("ERRO NO PROCESSO:", error);
                 showError(error.message);
             }
         };
 
-        // Funções de busca de dados no Firestore
-        async function fetchEventData() {
-            const eventRef = doc(db, 'users', creatorId, 'eventPage', 'details');
-            const docSnap = await getDoc(eventRef);
-            return docSnap.exists() ? docSnap.data() : null;
+        async function fetchEventData() { const eventRef = doc(db, 'users', creatorId, 'eventPage', 'details'); const docSnap = await getDoc(eventRef); return docSnap.exists() ? docSnap.data() : null; }
+        async function fetchGuestData() { const guestRef = doc(db, 'users', creatorId, 'families', guestId); const docSnap = await getDoc(guestRef); return docSnap.exists() ? docSnap.data() : null; }
+
+        function applyTemplate(templateId = 'classic') {
+            const templates = {
+                classic: { '--font-display': "'Playfair Display', serif", '--font-body': "'Cormorant Garamond', serif", '--color-primary': '#831843', '--color-background': '#F8F7F5', '--color-text-main': '#37322F' },
+                modern: { '--font-display': "'Inter', sans-serif", '--font-body': "'Inter', sans-serif", '--color-primary': '#111827', '--color-background': '#F9FAFB', '--color-text-main': '#1F2937' },
+                romantic: { '--font-display': "'Dancing Script', cursive", '--font-body': "'Cormorant Garamond', serif", '--color-primary': '#DB2777', '--color-background': '#FFF1F2', '--color-text-main': '#881337' },
+                elegancia: { '--font-display': "'Dancing Script', cursive", '--font-body': "'Playfair Display', serif", '--color-primary': '#374151', '--color-background': '#F9FAFB', '--color-text-main': '#1F2937' }
+            };
+            const style = templates[templateId] || templates.classic;
+            for (const [key, value] of Object.entries(style)) {
+                contentWrapper.style.setProperty(key, value);
+            }
         }
 
-        async function fetchGuestData() {
-            const guestRef = doc(db, 'users', creatorId, 'families', guestId);
-            const docSnap = await getDoc(guestRef);
-            return docSnap.exists() ? docSnap.data() : null;
-        }
-
-        // Funções para renderizar cada seção da página
         function renderHeader(header = {}) {
             const coupleNames = (header.coupleNames || []).join(' & ');
             navTitle.textContent = coupleNames;
-            headerSection.innerHTML = `
-                <img src="${header.imageUrl}" class="w-full h-96 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui'">
-                <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4">
-                    <h1 class="font-display text-white text-4xl md:text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${coupleNames}</h1>
-                    <p class="text-white text-lg mt-2 font-body" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${header.eventDate || ''}</p>
-                </div>
-            `;
+            headerSection.innerHTML = `<img src="${header.imageUrl}" class="w-full h-96 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/1200x600/F8F7F5/C7B2A4?text=Sua+Foto+Aqui'"><div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4"><h1 class="font-display text-white text-4xl md:text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">${coupleNames}</h1><p class="text-white text-lg mt-2 font-body" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">${header.eventDate || ''}</p></div>`;
         }
         
-        function renderStory(story = {}) {
-            storySection.innerHTML = `
-                <h2 class="font-display text-3xl md:text-4xl text-primary">${story.title || 'Nossa História'}</h2>
-                <p class="font-body text-lg mt-6 max-w-3xl mx-auto leading-relaxed text-gray-700">${story.text || ''}</p>
-            `;
+        function renderStory(story = {}, icon = '') {
+            storySection.innerHTML = `<div class="section-graphic">${icon}</div><h2 class="font-display text-3xl md:text-4xl text-primary">${story.title || 'Nossa História'}</h2><p class="font-body text-lg mt-6 max-w-3xl mx-auto leading-relaxed text-gray-700">${story.text || ''}</p>`;
         }
 
-        function renderDetails(details = {}) {
+        function renderDetails(details = {}, icon = '') {
             const { ceremony = {}, reception = {} } = details;
-            detailsSection.innerHTML = `
-                <h2 class="font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-                    <div class="text-center font-body">
-                        <h3 class="font-display text-2xl text-primary">Cerimónia</h3>
-                        <p class="mt-4 font-semibold text-lg text-gray-800">${ceremony.name || ''}</p>
-                        <p class="text-gray-600">${ceremony.address || ''}</p>
-                        <p class="mt-1 text-gray-600">${ceremony.time || ''}</p>
-                        ${ceremony.mapUrl ? `<a href="${ceremony.mapUrl}" class="mt-2 inline-block font-semibold text-pink-700 hover:underline" target="_blank">Ver no mapa</a>` : ''}
-                    </div>
-                    <div class="text-center font-body">
-                        <h3 class="font-display text-2xl text-primary">Recepção</h3>
-                        <p class="mt-4 font-semibold text-lg text-gray-800">${reception.name || ''}</p>
-                        <p class="text-gray-600">${reception.address || ''}</p>
-                        <p class="mt-1 text-gray-600">${reception.time || ''}</p>
-                        ${reception.mapUrl ? `<a href="${reception.mapUrl}" class="mt-2 inline-block font-semibold text-pink-700 hover:underline" target="_blank">Ver no mapa</a>` : ''}
-                    </div>
-                </div>
-            `;
+            detailsSection.innerHTML = `<div class="section-graphic">${icon}</div><h2 class="font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"><div class="text-center font-body"><h3 class="font-display text-2xl text-primary">Cerimónia</h3><p class="mt-4 font-semibold text-lg text-gray-800">${ceremony.name || ''}</p><p class="text-gray-600">${ceremony.address || ''}</p><p class="mt-1 text-gray-600">${ceremony.time || ''}</p>${ceremony.mapUrl ? `<a href="${ceremony.mapUrl}" class="mt-2 inline-block font-semibold text-pink-700 hover:underline" target="_blank">Ver no mapa</a>` : ''}</div><div class="text-center font-body"><h3 class="font-display text-2xl text-primary">Recepção</h3><p class="mt-4 font-semibold text-lg text-gray-800">${reception.name || ''}</p><p class="text-gray-600">${reception.address || ''}</p><p class="mt-1 text-gray-600">${reception.time || ''}</p>${reception.mapUrl ? `<a href="${reception.mapUrl}" class="mt-2 inline-block font-semibold text-pink-700 hover:underline" target="_blank">Ver no mapa</a>` : ''}</div></div>`;
         }
 
-        function renderGiftList(gifts) {
-            if (gifts.length === 0) {
-                noGiftsMessage.classList.remove('hidden');
-                return;
-            }
-            giftListContainer.innerHTML = '';
-            gifts.forEach(gift => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg shadow-md border flex flex-col overflow-hidden transition-all duration-300 gift-card';
-                const formattedPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gift.price);
-                const placeholderImg = `https://placehold.co/600x400/FCE7F3/DB2777?text=${encodeURIComponent(gift.name)}`;
-                card.innerHTML = `
-                    <img src="${gift.imageUrl || placeholderImg}" alt="${gift.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='${placeholderImg}';">
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h4 class="text-base font-bold text-gray-800 flex-grow">${gift.name}</h4>
-                        <p class="text-lg font-semibold text-primary mt-2">${formattedPrice}</p>
-                        ${gift.isPurchased ? `<p class="text-xs text-gray-500 mt-1">Presenteado por <strong>${gift.purchasedBy || 'Anónimo'}</strong></p>` : ''}
-                    </div>
-                    <div class="p-4 border-t">
-                        <button class="w-full font-bold py-2 px-4 rounded-lg ${gift.isPurchased ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}" ${gift.isPurchased ? 'disabled' : ''}>
-                            ${gift.isPurchased ? 'Já foi presenteado' : 'Quero presentear'}
-                        </button>
-                    </div>
-                `;
-                giftListContainer.appendChild(card);
-            });
-        }
-
-        // Função para carregar e exibir a lista de presentes
         async function loadAndShowGiftList() {
             try {
-                const giftsRef = collection(db, 'users', creatorId, 'gifts');
-                const giftsSnap = await getDocs(giftsRef);
+                const giftsSnap = await getDocs(collection(db, 'users', creatorId, 'gifts'));
                 const gifts = giftsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                // Só mostra a seção se houver presentes
                 if (gifts.length > 0) {
                     giftListSection.classList.remove('hidden');
-                    renderGiftList(gifts);
+                    giftListContainer.innerHTML = gifts.map(gift => {
+                        const formattedPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gift.price);
+                        const placeholderImg = `https://placehold.co/600x400/FCE7F3/DB2777?text=${encodeURIComponent(gift.name)}`;
+                        return `<div class="bg-white rounded-lg shadow-md border flex flex-col overflow-hidden transition-all duration-300 hover:transform hover:-translate-y-1"><img src="${gift.imageUrl || placeholderImg}" alt="${gift.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='${placeholderImg}';"><div class="p-4 flex flex-col flex-grow"><h4 class="text-base font-bold text-gray-800 flex-grow">${gift.name}</h4><p class="text-lg font-semibold text-primary mt-2">${formattedPrice}</p>${gift.isPurchased ? `<p class="text-xs text-gray-500 mt-1">Presenteado por <strong>${gift.purchasedBy || 'Anónimo'}</strong></p>` : ''}</div><div class="p-4 border-t"><button class="w-full font-bold py-2 px-4 rounded-lg ${gift.isPurchased ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}" ${gift.isPurchased ? 'disabled' : ''}>${gift.isPurchased ? 'Já foi presenteado' : 'Quero presentear'}</button></div></div>`;
+                    }).join('');
                 } else {
-                    noGiftsMessage.classList.remove('hidden'); // Mostra a mensagem de que não há presentes
-                    giftListSection.classList.remove('hidden'); // Garante que a seção (com a mensagem) seja visível
+                    noGiftsMessage.classList.remove('hidden');
+                    giftListSection.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error("Erro ao carregar lista de presentes:", error);
-                // Não quebra a página se a lista de presentes falhar
             }
         }
 
-        // Funções de manipulação de RSVP
         async function handleRsvp(status) {
             rsvpButtons.classList.add('hidden');
             try {
                 const guestRef = doc(db, 'users', creatorId, 'families', guestId);
                 const guestSnap = await getDoc(guestRef);
                 if (!guestSnap.exists()) throw new Error("Convidado não encontrado para atualizar.");
-                
                 const familyData = guestSnap.data();
                 const updatedMembers = familyData.members.map(member => ({ ...member, status: status }));
                 await updateDoc(guestRef, { members: updatedMembers });
-
-                if (status === 'confirmado') {
-                    rsvpMessage.textContent = 'Obrigado por confirmar! A sua presença é muito importante para nós.';
-                } else {
-                    rsvpMessage.textContent = 'Que pena que não poderá vir. Sentiremos a sua falta!';
-                }
-                rsvpMessage.classList.remove('hidden');
-
+                rsvpMessage.textContent = status === 'confirmado' ? 'Obrigado por confirmar! A sua presença é muito importante para nós.' : 'Que pena que não poderá vir. Sentiremos a sua falta!';
             } catch (error) {
                 console.error("Erro ao atualizar RSVP:", error);
                 rsvpMessage.textContent = 'Ocorreu um erro ao processar a sua resposta. Tente novamente.';
-                rsvpButtons.classList.remove('hidden'); // Mostra os botões de novo se der erro
+                rsvpButtons.classList.remove('hidden');
             } finally {
                 rsvpMessage.classList.remove('hidden');
             }
@@ -351,48 +193,17 @@
         
         function handleAlreadyResponded(status) {
              rsvpButtons.classList.add('hidden');
-             if (status === 'confirmado') {
-                rsvpMessage.textContent = 'Você já confirmou a sua presença. Obrigado!';
-             } else {
-                rsvpMessage.textContent = 'Você já informou que não poderá comparecer.';
-             }
+             rsvpMessage.textContent = status === 'confirmado' ? 'Você já confirmou a sua presença. Obrigado!' : 'Você já informou que não poderá comparecer.';
              rsvpMessage.classList.remove('hidden');
         }
 
-        // Funções de controle da UI (erros, carregamento)
-        function showError(details = 'Ocorreu um erro desconhecido.') {
-            loadingState.classList.add('hidden');
-            contentWrapper.classList.add('hidden');
-            errorState.classList.remove('hidden');
-            errorDetails.textContent = `Detalhes: ${details}`;
-        }
+        function showError(details = '') { loadingState.classList.add('hidden'); contentWrapper.classList.add('hidden'); errorState.classList.remove('hidden'); document.getElementById('error-details').textContent = `Detalhes: ${details}`; }
+        function showContent() { loadingState.classList.add('hidden'); errorState.classList.add('hidden'); contentWrapper.classList.remove('hidden'); contentWrapper.classList.add('fade-in'); }
 
-        function showContent() {
-            loadingState.classList.add('hidden');
-            errorState.classList.add('hidden');
-            contentWrapper.classList.remove('hidden');
-            contentWrapper.classList.add('fade-in');
-        }
-
-        // Event Listeners
         confirmButton.addEventListener('click', () => handleRsvp('confirmado'));
         declineButton.addEventListener('click', () => handleRsvp('recusado'));
         
-        // Smooth scroll para a navegação
-        document.querySelectorAll('#main-nav a').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
+        document.querySelectorAll('#main-nav a').forEach(anchor => { anchor.addEventListener('click', function (e) { e.preventDefault(); const targetElement = document.querySelector(this.getAttribute('href')); if (targetElement) { targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }); });
     </script>
 </body>
 </html>
