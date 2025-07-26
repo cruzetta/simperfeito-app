@@ -120,7 +120,23 @@
         #event-page-preview.template-modern .section-graphic { display: none; }
         #event-page-preview.template-elegancia #couple-names-preview { font-family: var(--font-display); }
         #event-page-preview.template-elegancia .section-title { font-family: var(--font-body); font-weight: 600; }
-        #event-page-preview.template-classic { --font-display: 'Playfair Display', serif; --font-body: "'Cormorant Garamond', serif"; --color-primary: #831843; --color-background: #F8F7F5; --color-text-main: #37322F; }
+        
+        /* ALTERAÇÃO APLICADA AQUI */
+        #event-page-preview.template-classic { 
+            --font-display: 'Playfair Display', serif; 
+            --font-body: "'Cormorant Garamond', serif"; 
+            --color-primary: #FFFFFF; /* Branco para ícones e acentos */
+            --color-background: #1F2937; /* Cinza escuro para o fundo da seção */
+            --color-text-main: #FFFFFF; /* Branco para o texto principal */
+            --color-text-light: #D1D5DB; /* Cinza claro para parágrafos */
+            background-color: #111827; /* Cinza muito escuro para o fundo principal */
+        }
+        #event-page-preview.template-classic #rsvp-button-preview {
+            background-color: var(--color-primary);
+            color: #111827;
+        }
+        /* FIM DA ALTERAÇÃO */
+
         #event-page-preview.template-modern { --font-display: 'Inter', sans-serif; --font-body: "'Inter', sans-serif"; --color-primary: #111827; --color-background: #F9FAFB; --color-text-main: #1F2937; }
         #event-page-preview.template-modern #header-section h1 { font-weight: 700; }
         #event-page-preview.template-modern #story-section, #event-page-preview.template-modern #details-section { text-align: left; }
@@ -356,7 +372,7 @@
         let headerSwiper = null;
 
         const defaultData = {
-            template: 'elegancia',
+            template: 'classic', // Alterado para 'classic' para aplicar o tema escuro por padrão
             icon: iconLibrary.find(i => i.id === 'flower-2').svg,
             header: { 
                 coupleNames: ["Noiva & Noivo"], 
