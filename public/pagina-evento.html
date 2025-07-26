@@ -235,7 +235,6 @@
         <div id="icon-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Ícone para o seu Evento</h3><p class="text-gray-600 mb-6">Este ícone aparecerá como um detalhe gráfico nas seções da sua página.</p><div id="icon-selection-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4"></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-pink-500 text-white rounded-md">Confirmar</button></div></div></div>
         <div id="template-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Template</h3><p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p><div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"><div class="template-card" data-template="classic"><div class="p-4 border-b text-center" style="background-color: #F8F7F5;"><h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div><div class="template-card" data-template="modern"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div><div class="template-card" data-template="romantic"><div class="p-4 border-b text-center" style="background-color: #FFF1F2;"><h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div><div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button></div></div></div>
         
-        <!-- MODAL DO CABEÇALHO ATUALIZADO PARA INCLUIR GALERIA -->
         <div id="header-modal" class="modal"><div class="modal-content">
             <h3 class="text-xl font-bold mb-6">Editar Cabeçalho e Carrossel</h3>
             <form id="header-form" class="space-y-6">
@@ -279,14 +278,12 @@
 
         <div id="story-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar História</h3><form id="story-form" class="space-y-4"><div><label for="story-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="story-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="story-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da História</label><textarea id="story-text-input" rows="8" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
         
-        <!-- MODAL DE DETALHES ATUALIZADO -->
         <div id="details-modal" class="modal"><div class="modal-content">
             <h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3>
             <form id="details-form" class="space-y-6">
                 <fieldset class="border p-4 rounded-md">
-                    <legend class="text-lg font-semibold px-2 flex items-center gap-2">
-                        <label for="ceremony-title" class="text-sm font-medium text-gray-700">Título da Seção</label>
-                        <input type="text" id="ceremony-title" class="w-full p-1 border border-gray-300 rounded-md text-base">
+                    <legend class="text-lg font-semibold px-2">
+                        <input type="text" id="ceremony-title" class="p-1 border-b border-gray-300 rounded-md text-base w-auto focus:border-pink-500 focus:ring-0">
                     </legend>
                     <div class="space-y-4 mt-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -294,15 +291,17 @@
                             <div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div>
                         </div>
                         <div><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <!-- CORREÇÃO: type="url" para validação correta -->
                         <div><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://maps.app.goo.gl/exemplo"></div>
                     </div>
                 </fieldset>
                 
-                <fieldset class="border p-4 rounded-md">
-                     <legend class="text-lg font-semibold px-2 flex items-center gap-2">
-                        <label for="reception-title" class="text-sm font-medium text-gray-700">Título da Seção</label>
-                        <input type="text" id="reception-title" class="w-full p-1 border border-gray-300 rounded-md text-base">
+                <fieldset id="reception-fieldset" class="border p-4 rounded-md">
+                     <legend class="text-lg font-semibold px-2 flex items-center justify-between w-full">
+                        <input type="text" id="reception-title" class="p-1 border-b border-gray-300 rounded-md text-base w-auto focus:border-pink-500 focus:ring-0">
+                        <button type="button" id="remove-reception-btn" class="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            Remover
+                        </button>
                     </legend>
                     <div class="flex items-center my-4">
                         <input type="checkbox" id="same-location-checkbox" class="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500">
@@ -314,10 +313,15 @@
                             <div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div>
                         </div>
                         <div><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <!-- CORREÇÃO: type="url" para validação correta -->
                         <div><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://maps.app.goo.gl/exemplo"></div>
                     </div>
                 </fieldset>
+
+                <div id="add-reception-container" class="hidden text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
+                    <button type="button" id="add-reception-btn" class="text-gray-600 font-semibold hover:text-pink-600">
+                        + Adicionar Recepção
+                    </button>
+                </div>
 
                 <div class="flex justify-end gap-2 mt-6">
                     <button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button>
@@ -368,11 +372,11 @@
                 duration: 5 
             },
             details: { 
+                receptionEnabled: true, // NOVO: Flag para controlar a recepção
                 sameLocation: false,
                 ceremony: { title: "Cerimónia", name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "" }, 
                 reception: { title: "Recepção", name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "" } 
             },
-            // CORREÇÃO: Removido o "#" do link padrão
             rsvp: { title: "Confirme sua Presença", text: "Sua presença é o nosso maior presente!", buttonText: "Confirmar Presença", buttonLink: "" }
         };
 
@@ -572,8 +576,20 @@
 
             const storySection = document.getElementById('story-section');
             storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${story.title}</h2> <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${story.text}</p>`;
+            
+            // NOVO: Lógica de renderização da seção de detalhes
             const detailsSection = document.getElementById('details-section');
-            detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto"> <div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">${details.ceremony.title}</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.ceremony.name || ''}</p><p style="color: var(--color-text-light);">${details.ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.ceremony.time || ''}</p><a href="${details.ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> <div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">${details.reception.title}</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${details.reception.name || ''}</p><p style="color: var(--color-text-light);">${details.reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${details.reception.time || ''}</p><a href="${details.reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div> </div>`;
+            const { ceremony, reception, receptionEnabled } = details;
+            const isReceptionVisible = receptionEnabled !== false;
+            
+            const ceremonyHtml = `<div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">${ceremony.title}</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${ceremony.name || ''}</p><p style="color: var(--color-text-light);">${ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${ceremony.time || ''}</p><a href="${ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div>`;
+
+            const receptionHtml = isReceptionVisible ? `<div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">${reception.title}</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${reception.name || ''}</p><p style="color: var(--color-text-light);">${reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${reception.time || ''}</p><a href="${reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div>` : '';
+
+            const gridClasses = isReceptionVisible ? 'md:grid-cols-2' : 'md:grid-cols-1 justify-center';
+
+            detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 ${gridClasses} gap-12 max-w-4xl mx-auto">${ceremonyHtml}${receptionHtml}</div>`;
+
             const rsvpSection = document.getElementById('rsvp-section');
             rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${rsvp.title}</h2> <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${rsvp.text}</p> <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">${rsvp.buttonText}</a>`;
         }
@@ -671,18 +687,17 @@
                 document.getElementById('story-title-input').value = pageData.story.title;
                 document.getElementById('story-text-input').value = pageData.story.text;
             } else if (modalId === 'details-modal') {
-                const { ceremony, reception, sameLocation } = pageData.details;
+                const { ceremony, reception, sameLocation, receptionEnabled } = pageData.details;
                 document.getElementById('ceremony-title').value = ceremony.title;
                 document.getElementById('ceremony-name').value = ceremony.name;
                 document.getElementById('ceremony-time').value = ceremony.time;
                 document.getElementById('ceremony-address').value = ceremony.address;
-                // CORREÇÃO: Limpa o campo se o valor for "#"
                 document.getElementById('ceremony-map').value = ceremony.mapUrl === '#' ? '' : ceremony.mapUrl;
+                
                 document.getElementById('reception-title').value = reception.title;
                 document.getElementById('reception-name').value = reception.name;
                 document.getElementById('reception-time').value = reception.time;
                 document.getElementById('reception-address').value = reception.address;
-                // CORREÇÃO: Limpa o campo se o valor for "#"
                 document.getElementById('reception-map').value = reception.mapUrl === '#' ? '' : reception.mapUrl;
                 
                 const sameLocationCheckbox = document.getElementById('same-location-checkbox');
@@ -690,11 +705,28 @@
                 sameLocationCheckbox.removeEventListener('change', toggleReceptionFields);
                 sameLocationCheckbox.addEventListener('change', toggleReceptionFields);
                 toggleReceptionFields();
+
+                // NOVO: Lógica para mostrar/esconder a recepção no modal
+                const receptionFieldset = document.getElementById('reception-fieldset');
+                const addReceptionContainer = document.getElementById('add-reception-container');
+                const isReceptionVisible = receptionEnabled !== false;
+
+                receptionFieldset.style.display = isReceptionVisible ? 'block' : 'none';
+                addReceptionContainer.style.display = isReceptionVisible ? 'none' : 'block';
+
+                document.getElementById('remove-reception-btn').onclick = () => {
+                    receptionFieldset.style.display = 'none';
+                    addReceptionContainer.style.display = 'block';
+                };
+                document.getElementById('add-reception-btn').onclick = () => {
+                    receptionFieldset.style.display = 'block';
+                    addReceptionContainer.style.display = 'none';
+                };
+
             } else if (modalId === 'rsvp-modal') {
                 document.getElementById('rsvp-title-input').value = pageData.rsvp.title;
                 document.getElementById('rsvp-text-input').value = pageData.rsvp.text;
                 document.getElementById('rsvp-button-text-input').value = pageData.rsvp.buttonText;
-                // CORREÇÃO: Limpa o campo se o valor for "#"
                 document.getElementById('rsvp-button-link-input').value = pageData.rsvp.buttonLink === '#' ? '' : pageData.rsvp.buttonLink;
             } else if (modalId === 'template-modal') {
                 document.querySelectorAll('#template-selection-container .template-card').forEach(card => {
@@ -795,24 +827,30 @@
 
         function handleDetailsFormSubmit(e) {
             e.preventDefault();
-            const sameLocation = document.getElementById('same-location-checkbox').checked;
-            pageData.details = {
-                sameLocation: sameLocation,
-                ceremony: {
-                    title: document.getElementById('ceremony-title').value,
-                    name: document.getElementById('ceremony-name').value,
-                    time: document.getElementById('ceremony-time').value,
-                    address: document.getElementById('ceremony-address').value,
-                    mapUrl: document.getElementById('ceremony-map').value,
-                },
-                reception: {
-                    title: document.getElementById('reception-title').value,
-                    name: sameLocation ? '' : document.getElementById('reception-name').value,
-                    time: document.getElementById('reception-time').value,
-                    address: sameLocation ? '' : document.getElementById('reception-address').value,
-                    mapUrl: sameLocation ? '' : document.getElementById('reception-map').value,
-                }
+            const receptionFieldset = document.getElementById('reception-fieldset');
+            const receptionEnabled = receptionFieldset.style.display !== 'none';
+
+            pageData.details.receptionEnabled = receptionEnabled;
+            pageData.details.sameLocation = document.getElementById('same-location-checkbox').checked;
+            
+            pageData.details.ceremony = {
+                title: document.getElementById('ceremony-title').value,
+                name: document.getElementById('ceremony-name').value,
+                time: document.getElementById('ceremony-time').value,
+                address: document.getElementById('ceremony-address').value,
+                mapUrl: document.getElementById('ceremony-map').value,
             };
+            
+            if (receptionEnabled) {
+                pageData.details.reception = {
+                    title: document.getElementById('reception-title').value,
+                    name: pageData.details.sameLocation ? '' : document.getElementById('reception-name').value,
+                    time: document.getElementById('reception-time').value,
+                    address: pageData.details.sameLocation ? '' : document.getElementById('reception-address').value,
+                    mapUrl: pageData.details.sameLocation ? '' : document.getElementById('reception-map').value,
+                };
+            }
+
             renderAllPreviews();
             closeModal(document.getElementById('details-modal'));
         }
