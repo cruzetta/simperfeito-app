@@ -136,6 +136,18 @@
         #event-page-preview.template-modern #details-section { text-align: left; }
         #event-page-preview.template-modern .section-title { text-align: left; }
         
+        /* --- ESTILO DA MOLDURA DECORATIVA --- */
+        .com-moldura-decorativa {
+            /* A espessura da borda visível na tela */
+            border: 30px solid transparent;
+            /* A URL da imagem da moldura */
+            border-image-source: url(https://i.ibb.co/tBSdTLM/leaf-border-final.png);
+            /* O "corte" da imagem original. Este valor é crucial. */
+            border-image-slice: 40;
+            /* Como a imagem se repete nas laterais. 'round' evita padrões cortados. */
+            border-image-repeat: round;
+        }
+
         /* --- OUTROS ESTILOS --- */
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -249,13 +261,26 @@
                 </div>
             </div>
 
-            <div class="border-t pt-8">
+            <div class="border-t pt-8 mb-8">
                 <h4 class="font-semibold text-gray-800 mb-3">2. Escolha o Estilo</h4>
                  <div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                     <div class="template-card" data-template="classic"><div class="p-4 border-b text-center"><h4 class="font-display text-xl">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div>
                     <div class="template-card" data-template="modern"><div class="p-4 border-b text-center"><h4 class="font-display text-xl font-bold">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div>
                     <div class="template-card" data-template="romantic"><div class="p-4 border-b text-center"><h4 class="font-display text-xl">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div>
                     <div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center"><h4 class="font-display text-xl">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div>
+                </div>
+            </div>
+
+            <!-- NOVA SEÇÃO PARA MOLDURA -->
+            <div class="border-t pt-8">
+                <h4 class="font-semibold text-gray-800 mb-3">3. Escolha a Moldura</h4>
+                <div id="frame-selection-container" class="grid grid-cols-2 gap-4">
+                    <button class="theme-btn p-4 text-center" data-frame="disabled">
+                        <span class="font-semibold">Sem Moldura</span>
+                    </button>
+                    <button class="theme-btn p-4 text-center" data-frame="enabled">
+                        <span class="font-semibold">Moldura Floral</span>
+                    </button>
                 </div>
             </div>
 
@@ -388,8 +413,9 @@
 
         const defaultData = {
             template: 'classic',
-            theme: 'light', // Nova propriedade para o tema
+            theme: 'light',
             icon: iconLibrary.find(i => i.id === 'flower-2').svg,
+            frameEnabled: false, // NOVA PROPRIEDADE PARA A MOLDURA
             header: { 
                 coupleNames: ["Noiva & Noivo"], 
                 eventDate: "Data do Evento", 
@@ -574,7 +600,7 @@
 
         // --- RENDERIZAÇÃO E PRÉ-VISUALIZAÇÃO ---
         function renderAllPreviews() {
-            const { header, story, details, gallery, rsvp, icon, template, theme } = pageData;
+            const { header, story, details, gallery, rsvp, icon, template, theme, frameEnabled } = pageData;
             
             const preview = document.getElementById('event-page-preview');
             // Limpa classes antigas e aplica as novas de template e tema
@@ -583,6 +609,9 @@
             if (theme === 'dark') {
                 preview.classList.add('theme-dark');
             }
+            // Adiciona ou remove a classe da moldura
+            preview.classList.toggle('com-moldura-decorativa', frameEnabled);
+
 
             const allPhotos = [header.imageUrl, ...(gallery.photos || []).map(p => p.url)];
             const slidesHtml = allPhotos.filter(Boolean).map(url => `<div class="swiper-slide"><img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/></div>`).join('');
@@ -665,6 +694,15 @@
                 const card = e.target.closest('.template-card');
                 if (!card) return;
                 pageData.template = card.dataset.template;
+                renderAllPreviews();
+                updateActiveStatesInModal();
+            });
+
+            // NOVO EVENT LISTENER PARA A MOLDURA
+            document.getElementById('frame-selection-container').addEventListener('click', (e) => {
+                const btn = e.target.closest('.theme-btn');
+                if (!btn) return;
+                pageData.frameEnabled = btn.dataset.frame === 'enabled';
                 renderAllPreviews();
                 updateActiveStatesInModal();
             });
@@ -788,6 +826,11 @@
             });
             document.querySelectorAll('#template-selection-container .template-card').forEach(card => {
                 card.classList.toggle('active', card.dataset.template === pageData.template);
+            });
+            // ATUALIZA O ESTADO DOS BOTÕES DA MOLDURA
+            document.querySelectorAll('#frame-selection-container .theme-btn').forEach(btn => {
+                const isActive = (btn.dataset.frame === 'enabled' && pageData.frameEnabled) || (btn.dataset.frame === 'disabled' && !pageData.frameEnabled);
+                btn.classList.toggle('active', isActive);
             });
         }
 
