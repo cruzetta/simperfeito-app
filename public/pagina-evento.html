@@ -155,15 +155,15 @@
             transition: transform 0.5s ease-in-out;
         }
         
-        /* === NOVOS ESTILOS PARA DECORAÇÃO === */
+        /* === ESTILOS ATUALIZADOS PARA DECORAÇÃO === */
         .floral-decoration {
             position: absolute;
-            z-index: 1; /* Fica sobre o fundo mas abaixo do conteúdo */
+            z-index: 1;
             width: 150px;
             height: 150px;
-            pointer-events: none; /* Não interfere com cliques */
+            pointer-events: none;
             color: var(--color-primary);
-            opacity: 0.15; /* Sutil para não sobrecarregar */
+            opacity: 0.15;
             transition: color 0.5s, opacity 0.5s;
         }
 
@@ -178,13 +178,12 @@
             transform: rotate(180deg);
         }
         
-        /* Esconder em telas pequenas para não poluir */
         @media (max-width: 768px) {
             .floral-decoration {
                 display: none;
             }
         }
-        /* === FIM DOS NOVOS ESTILOS === */
+        /* === FIM DOS ESTILOS ATUALIZADOS === */
     </style>
 </head>
 <body>
@@ -216,18 +215,14 @@
         <main class="p-4 sm:p-6 md:p-8 bg-gray-200">
             <div id="event-page-preview" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
                 
-                <!-- === NOVAS DECORAÇÕES FLORAIS === -->
+                <!-- === DECORAÇÕES FLORAIS COM NOVO SVG === -->
                 <div id="floral-decoration-top-left" class="floral-decoration">
-                    <svg viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M100 20C86.2 27.5 75.3 38.8 66.2 51.5C57.1 64.2 50 78 50 90C50 94.4 51.1 98.2 53 100H0V0H53C51.1 1.8 50 5.6 50 10C50 22 57.1 35.8 66.2 48.5C75.3 61.2 86.2 72.5 100 80V20Z"/>
-                    </svg>
+                    <svg viewBox="0 0 200 200" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M191.6 23.5c-12.8 2.3-25.2 6.4-36.8 12.1-11.6 5.7-22.3 12.9-31.9 21.6-9.6 8.7-18 18.8-25.1 30.1-7.1 11.3-12.8 23.7-17.1 37.1-4.3 13.4-7.2 27.7-8.5 42.8H0V0h100c-1.1 12.8-2.3 25.5-3.5 38.1-1.2 12.6-2.5 25.1-3.8 37.5 7.1-6.1 14.5-11.8 22.3-16.9 7.8-5.1 16-9.6 24.6-13.4 8.6-3.8 17.6-6.9 26.9-9.2 9.3-2.3 18.8-3.8 28.5-4.5V23.5z"/></svg>
                 </div>
                 <div id="floral-decoration-bottom-right" class="floral-decoration">
-                    <svg viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M100 20C86.2 27.5 75.3 38.8 66.2 51.5C57.1 64.2 50 78 50 90C50 94.4 51.1 98.2 53 100H0V0H53C51.1 1.8 50 5.6 50 10C50 22 57.1 35.8 66.2 48.5C75.3 61.2 86.2 72.5 100 80V20Z"/>
-                    </svg>
+                    <svg viewBox="0 0 200 200" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M191.6 23.5c-12.8 2.3-25.2 6.4-36.8 12.1-11.6 5.7-22.3 12.9-31.9 21.6-9.6 8.7-18 18.8-25.1 30.1-7.1 11.3-12.8 23.7-17.1 37.1-4.3 13.4-7.2 27.7-8.5 42.8H0V0h100c-1.1 12.8-2.3 25.5-3.5 38.1-1.2 12.6-2.5 25.1-3.8 37.5 7.1-6.1 14.5-11.8 22.3-16.9 7.8-5.1 16-9.6 24.6-13.4 8.6-3.8 17.6-6.9 26.9-9.2 9.3-2.3 18.8-3.8 28.5-4.5V23.5z"/></svg>
                 </div>
-                <!-- === FIM DAS NOVAS DECORAÇÕES === -->
+                <!-- === FIM DAS DECORAÇÕES === -->
 
                 <!-- SEÇÃO DO CABEÇALHO/CARROSSEL UNIFICADA -->
                 <section id="header-section" class="editable-section relative text-center bg-gray-700 h-[60vh]">
