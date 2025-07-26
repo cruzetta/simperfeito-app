@@ -76,6 +76,23 @@
         <p class="text-lg text-gray-500">A carregar a lista de convidados...</p>
     </div>
 
+    <!-- MENSAGEM PARA CONFIGURAR O EVENTO (NOVO) -->
+    <div id="config-missing-state" class="hidden min-h-screen flex items-center justify-center text-center p-4">
+        <div class="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <h2 class="text-2xl font-bold text-gray-800 font-display mt-4">Primeiro Passo</h2>
+            <p class="text-gray-600 mt-2">Para gerir os seus convidados, primeiro precisa de definir o tipo do seu evento na página de Configurações.</p>
+            <div class="mt-6">
+                <button id="go-to-settings-button" class="bg-pink-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-pink-600 transition-colors">
+                    Ir para Configurações
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Conteúdo da Página (inicialmente oculto) -->
     <div id="page-content" class="hidden">
         <header class="flex items-center justify-between h-16 px-6 bg-white border-b sticky top-0 z-20">
@@ -162,7 +179,6 @@
     </div>
     
     <!-- Outros Modais -->
-    <div id="event-type-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 h-full w-full z-40 flex items-center justify-center"></div>
     <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-50 flex items-center justify-center"></div>
     
     <!-- Toast de Notificação -->
@@ -177,6 +193,8 @@
         // --- ELEMENTOS DA UI ---
         const pageContent = document.getElementById('page-content');
         const loadingState = document.getElementById('loading-state');
+        const configMissingState = document.getElementById('config-missing-state');
+        const goToSettingsButton = document.getElementById('go-to-settings-button');
         const familyListContainer = document.getElementById('family-list-container');
         const noFamiliesMessage = document.getElementById('no-families-message');
         const relationshipFiltersContainer = document.getElementById('relationship-filters');
@@ -217,14 +235,6 @@
         let currentRelationshipFilter = 'todos';
         let currentStatusFilter = 'pendente'; 
 
-        const eventDefinitions = {
-            casamento: { label: 'Casamento', relations: ['Família da Noiva', 'Família do Noivo', 'Amigos da Noiva', 'Amigos do Noivo', 'Amigos do Casal'] },
-            aniversario_infantil: { label: 'Aniversário Infantil', relations: ['Família', 'Amigos da Escola', 'Amigos dos Pais'] },
-            formatura: { label: 'Formatura', relations: ['Família', 'Amigos'] },
-            bodas: { label: 'Bodas', relations: ['Família', 'Amigos'] },
-            outro: { label: 'Outro Evento', relations: ['Convidados'] }
-        };
-
         // --- LÓGICA DE AUTENTICAÇÃO E INICIALIZAÇÃO ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -235,6 +245,7 @@
             }
         });
 
+        // ATUALIZADO: Verifica a configuração do evento
         async function checkEventConfig() {
             const configRef = doc(db, 'users', currentUser.uid, 'config', 'event');
             const configSnap = await getDoc(configRef);
@@ -243,32 +254,22 @@
                 eventConfig = configSnap.data();
                 initializePage();
             } else {
-                document.getElementById('event-type-modal').innerHTML = `
-                    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 modal-fade-in">
-                        <h3 class="text-2xl font-bold text-gray-800 font-display mb-2">Bem-vindo(a)!</h3>
-                        <p class="text-gray-600 mb-6">Para começar, selecione o tipo do seu evento.</p>
-                        <form id="event-type-form">
-                            <select id="event-type-select" class="w-full p-3 border border-gray-300 rounded-md mb-6">
-                                <option value="casamento">Casamento</option>
-                                <option value="aniversario_infantil">Aniversário Infantil</option>
-                                <option value="formatura">Formatura</option>
-                                <option value="bodas">Bodas</option>
-                                <option value="outro">Outro Evento</option>
-                            </select>
-                            <button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-600">Confirmar</button>
-                        </form>
-                    </div>`;
-                document.getElementById('event-type-modal').classList.remove('hidden');
+                // NOVO: Se a config não existe, mostra a mensagem para ir para Configurações
                 loadingState.classList.add('hidden');
+                pageContent.classList.add('hidden');
+                configMissingState.classList.remove('hidden');
                 
-                document.getElementById('event-type-form').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const selectedType = document.getElementById('event-type-select').value;
-                    const config = { type: selectedType, ...eventDefinitions[selectedType] };
-                    await setDoc(configRef, config);
-                    eventConfig = config;
-                    document.getElementById('event-type-modal').classList.add('hidden');
-                    initializePage();
+                goToSettingsButton.addEventListener('click', () => {
+                    // Tenta navegar o painel principal para a página de configurações
+                    if (window.parent) {
+                        const settingsLink = window.parent.document.querySelector('a[href="configuracoes.html"]');
+                        if (settingsLink) {
+                            settingsLink.click();
+                        } else {
+                             // Fallback caso o link não seja encontrado
+                            alert("Por favor, clique em 'Configurações' no menu à esquerda.");
+                        }
+                    }
                 });
             }
         }
@@ -276,6 +277,7 @@
         function initializePage() {
             loadingState.classList.add('hidden');
             pageContent.classList.remove('hidden');
+            configMissingState.classList.add('hidden');
             setupDynamicUI();
             listenForFamilies();
             setupEventListeners();
@@ -298,9 +300,9 @@
                 const editBtn = e.target.closest('.edit-family-button');
                 const deleteBtn = e.target.closest('.delete-family-button');
                 const statusBtn = e.target.closest('.member-status-btn');
-                const shareBtn = e.target.closest('.share-invite-button'); // *** NOVA LÓGICA ***
+                const shareBtn = e.target.closest('.share-invite-button');
 
-                if (shareBtn) { // *** NOVA LÓGICA ***
+                if (shareBtn) {
                     const familyId = shareBtn.dataset.familyId;
                     const inviteUrl = `${window.location.origin}/convite.html?user=${currentUser.uid}&guest=${familyId}`;
                     try {
@@ -503,7 +505,6 @@
                         </li>`;
             }).join('');
 
-            // *** MUDANÇA AQUI: Adicionado o botão de compartilhar ***
             card.innerHTML = `
                 <div class="flex-grow">
                     <div class="flex justify-between items-start mb-3">
@@ -665,7 +666,6 @@
                 <select id="${id}" class="w-full p-2 border border-gray-300 rounded-md" required>${options}</select>`;
         }
 
-        // *** NOVA FUNÇÃO: Mostrar toast de notificação ***
         function showToast(message, isError = false) {
             toastEl.textContent = message;
             toastEl.style.backgroundColor = isError ? '#ef4444' : '#22c55e'; // red-500 ou green-500

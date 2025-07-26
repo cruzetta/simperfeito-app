@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Sim, Perfeito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-fade-in { animation: fadeIn 0.3s ease-out; }
+    </style>
+</head>
+<body>
+
+    <!-- Tela de Carregamento -->
+    <div id="loading-state" class="min-h-screen flex items-center justify-center">
+        <p class="text-lg text-gray-500">A carregar configurações...</p>
+    </div>
+
+    <!-- Conteúdo da Página (inicialmente oculto) -->
+    <div id="page-content" class="hidden">
+        <header class="flex items-center justify-between h-16 px-6 bg-white border-b sticky top-0 z-20">
+            <span class="text-xl font-bold text-gray-800 font-display">Configurações do Evento</span>
+        </header>
+
+        <main class="p-4 sm:p-6 md:p-8">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-sm border fade-in">
+                    <h3 class="text-lg font-semibold text-gray-800">Tipo de Evento</h3>
+                    <p class="text-sm text-gray-500 mt-1">Esta configuração personaliza os textos e opções em toda a plataforma.</p>
+                    
+                    <div class="mt-4 bg-pink-50 p-4 rounded-lg border border-pink-200">
+                        <p class="text-sm text-pink-800">Seu evento está configurado como:</p>
+                        <p id="current-event-type" class="text-xl font-bold text-pink-700 font-display"></p>
+                    </div>
+
+                    <form id="event-type-form" class="mt-6">
+                        <label for="event-type-select" class="block text-sm font-medium text-gray-700 mb-2">Alterar tipo de evento:</label>
+                        <select id="event-type-select" class="w-full p-3 border border-gray-300 rounded-md mb-4">
+                            <option value="casamento">Casamento</option>
+                            <option value="aniversario_infantil">Aniversário Infantil</option>
+                            <option value="formatura">Formatura</option>
+                            <option value="bodas">Bodas</option>
+                            <option value="outro">Outro Evento</option>
+                        </select>
+                        <button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-pink-600 transition-colors">
+                            Salvar Alterações
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-50 flex items-center justify-center p-4"></div>
+    
+    <!-- Toast de Notificação -->
+    <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300"></div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { auth, onAuthStateChanged, db } from './auth.js';
+        import { doc, getDoc, setDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // --- ELEMENTOS DA UI ---
+        const loadingState = document.getElementById('loading-state');
+        const pageContent = document.getElementById('page-content');
+        const currentEventTypeEl = document.getElementById('current-event-type');
+        const eventTypeForm = document.getElementById('event-type-form');
+        const eventTypeSelect = document.getElementById('event-type-select');
+        const confirmModalContainer = document.getElementById('confirm-modal');
+        const toastEl = document.getElementById('toast');
+
+        let currentUser;
+        let currentConfig;
+
+        const eventDefinitions = {
+            casamento: { label: 'Casamento', relations: ['Família da Noiva', 'Família do Noivo', 'Amigos da Noiva', 'Amigos do Noivo', 'Amigos do Casal'] },
+            aniversario_infantil: { label: 'Aniversário Infantil', relations: ['Família', 'Amigos da Escola', 'Amigos dos Pais'] },
+            formatura: { label: 'Formatura', relations: ['Família', 'Amigos'] },
+            bodas: { label: 'Bodas', relations: ['Família', 'Amigos'] },
+            outro: { label: 'Outro Evento', relations: ['Convidados'] }
+        };
+
+        // --- INICIALIZAÇÃO ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                initializePage();
+            } else {
+                loadingState.innerHTML = '<p class="text-lg text-red-500">Erro de autenticação.</p>';
+            }
+        });
+
+        async function initializePage() {
+            const configRef = doc(db, 'users', currentUser.uid, 'config', 'event');
+            const docSnap = await getDoc(configRef);
+
+            if (docSnap.exists()) {
+                currentConfig = docSnap.data();
+            } else {
+                // Se não existir, define um padrão e salva
+                currentConfig = { type: 'casamento', ...eventDefinitions['casamento'] };
+                await setDoc(configRef, currentConfig);
+            }
+            
+            updateUI();
+            loadingState.classList.add('hidden');
+            pageContent.classList.remove('hidden');
+            eventTypeForm.addEventListener('submit', handleFormSubmit);
+        }
+
+        function updateUI() {
+            currentEventTypeEl.textContent = eventDefinitions[currentConfig.type]?.label || 'Não definido';
+            eventTypeSelect.value = currentConfig.type;
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const newType = eventTypeSelect.value;
+            if (newType === currentConfig.type) {
+                showToast("Nenhuma alteração foi feita.", "info");
+                return;
+            }
+
+            const warningMessage = "Mudar o tipo de evento irá redefinir os 'vínculos' de todos os seus convidados (Ex: 'Família da Noiva'). Você precisará ajustar os vínculos na Lista de Convidados novamente. Deseja continuar?";
+
+            showConfirmModal(warningMessage, async () => {
+                try {
+                    const newConfig = { type: newType, ...eventDefinitions[newType] };
+                    const configRef = doc(db, 'users', currentUser.uid, 'config', 'event');
+                    
+                    // Atualiza a configuração principal
+                    await setDoc(configRef, newConfig);
+
+                    // Redefine o vínculo dos convidados
+                    const familiesCollectionRef = collection(db, 'users', currentUser.uid, 'families');
+                    const familiesSnapshot = await getDocs(familiesCollectionRef);
+                    
+                    if (!familiesSnapshot.empty) {
+                        const batch = writeBatch(db);
+                        const defaultRelationship = newConfig.relations[0];
+                        familiesSnapshot.forEach((familyDoc) => {
+                            const familyRef = doc(db, 'users', currentUser.uid, 'families', familyDoc.id);
+                            batch.update(familyRef, { relationship: defaultRelationship });
+                        });
+                        await batch.commit();
+                    }
+
+                    currentConfig = newConfig;
+                    updateUI();
+                    showToast("Tipo de evento atualizado com sucesso!");
+
+                    // Recarrega o painel principal para refletir as mudanças em todo lugar
+                    if (window.parent) {
+                        window.parent.location.reload();
+                    }
+
+                } catch (error) {
+                    console.error("Erro ao atualizar tipo de evento:", error);
+                    showToast("Ocorreu um erro ao salvar.", "error");
+                }
+            });
+        }
+
+        function showConfirmModal(message, onConfirm) {
+            confirmModalContainer.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 modal-fade-in">
+                    <h3 class="text-lg font-semibold text-gray-900">Confirmar Ação</h3>
+                    <p class="mt-2 text-sm text-gray-600">${message}</p>
+                    <div class="mt-5 flex justify-end space-x-3">
+                        <button id="modal-cancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
+                        <button id="modal-confirm" class="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700">Confirmar</button>
+                    </div>
+                </div>`;
+            confirmModalContainer.classList.remove('hidden');
+            document.getElementById('modal-cancel').onclick = () => confirmModalContainer.classList.add('hidden');
+            document.getElementById('modal-confirm').onclick = () => {
+                onConfirm();
+                confirmModalContainer.classList.add('hidden');
+            };
+        }
+
+        function showToast(message, type = 'success') {
+            toastEl.textContent = message;
+            if (type === 'error') {
+                toastEl.style.backgroundColor = '#ef4444'; // red-500
+            } else if (type === 'info') {
+                toastEl.style.backgroundColor = '#3b82f6'; // blue-500
+            } else {
+                toastEl.style.backgroundColor = '#22c55e'; // green-500
+            }
+            
+            toastEl.classList.remove('hidden');
+            toastEl.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                toastEl.classList.remove('opacity-100');
+                toastEl.classList.add('hidden');
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>
