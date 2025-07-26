@@ -92,58 +92,51 @@
         }
 
 
-        /* Outros estilos */
+        /* --- ESTILOS DE TEMPLATE E TEMA --- */
         #event-page-preview {
-            --font-display: 'Playfair Display', serif;
-            --font-body: 'Cormorant Garamond', serif;
-            --font-special: 'Dancing Script', cursive;
+            transition: all 0.5s ease;
+             /* Variáveis padrão (Tema Claro) */
             --color-primary: #DB2777;
             --color-background: #FDF2F8;
             --color-text-main: #1F2937;
             --color-text-light: #4B5563;
-            transition: all 0.5s ease;
+            background-color: white;
         }
-        #event-page-preview .font-display { font-family: var(--font-display); }
-        #event-page-preview .font-body { font-family: var(--font-body); }
-        #event-page-preview .font-special { font-family: var(--font-special); }
-        #event-page-preview .text-primary { color: var(--color-primary); }
-        #event-page-preview .bg-primary-light { background-color: var(--color-background); }
-        #event-page-preview .border-primary { border-color: var(--color-primary); }
-        #event-page-preview .section-graphic { display: none; }
-        #event-page-preview.template-elegancia .section-graphic,
-        #event-page-preview.template-classic .section-graphic,
-        #event-page-preview.template-romantic .section-graphic { 
-            display: block; 
-            margin: 0 auto 1rem; 
-            color: var(--color-primary); 
+        #event-page-preview.theme-dark {
+            /* Variáveis do Tema Escuro */
+            --color-primary: #FFFFFF;
+            --color-background: #1F2937;
+            --color-text-main: #FFFFFF;
+            --color-text-light: #D1D5DB;
+            background-color: #111827;
         }
-        #event-page-preview.template-modern .section-graphic { display: none; }
-        #event-page-preview.template-elegancia #couple-names-preview { font-family: var(--font-display); }
-        #event-page-preview.template-elegancia .section-title { font-family: var(--font-body); font-weight: 600; }
-        
-        /* ALTERAÇÃO APLICADA AQUI */
-        #event-page-preview.template-classic { 
-            --font-display: 'Playfair Display', serif; 
-            --font-body: "'Cormorant Garamond', serif"; 
-            --color-primary: #FFFFFF; /* Branco para ícones e acentos */
-            --color-background: #1F2937; /* Cinza escuro para o fundo da seção */
-            --color-text-main: #FFFFFF; /* Branco para o texto principal */
-            --color-text-light: #D1D5DB; /* Cinza claro para parágrafos */
-            background-color: #111827; /* Cinza muito escuro para o fundo principal */
-        }
-        #event-page-preview.template-classic #rsvp-button-preview {
+        #event-page-preview.theme-dark #rsvp-button-preview {
             background-color: var(--color-primary);
             color: #111827;
         }
-        /* FIM DA ALTERAÇÃO */
+        
+        /* Definições de Fontes por Template */
+        #event-page-preview.template-classic { --font-display: 'Playfair Display', serif; --font-body: "'Cormorant Garamond', serif"; }
+        #event-page-preview.template-modern { --font-display: 'Inter', sans-serif; --font-body: "'Inter', sans-serif"; }
+        #event-page-preview.template-romantic { --font-display: "'Dancing Script', cursive"; --font-body: "'Cormorant Garamond', serif"; }
+        #event-page-preview.template-elegancia { --font-display: "'Dancing Script', cursive"; --font-body: "'Playfair Display', serif"; }
 
-        #event-page-preview.template-modern { --font-display: 'Inter', sans-serif; --font-body: "'Inter', sans-serif"; --color-primary: #111827; --color-background: #F9FAFB; --color-text-main: #1F2937; }
-        #event-page-preview.template-modern #header-section h1 { font-weight: 700; }
-        #event-page-preview.template-modern #story-section, #event-page-preview.template-modern #details-section { text-align: left; }
+        /* Aplicação das fontes */
+        #event-page-preview .font-display { font-family: var(--font-display); }
+        #event-page-preview .font-body { font-family: var(--font-body); }
+        #event-page-preview .text-primary { color: var(--color-primary); }
+        #event-page-preview .bg-primary-light { background-color: var(--color-background); }
+        
+        /* Regras específicas de layout por template */
+        #event-page-preview .section-graphic { display: none; margin: 0 auto 1rem; color: var(--color-primary); }
+        #event-page-preview.template-elegancia .section-graphic,
+        #event-page-preview.template-classic .section-graphic,
+        #event-page-preview.template-romantic .section-graphic { display: block; }
+        #event-page-preview.template-modern #story-section, 
+        #event-page-preview.template-modern #details-section { text-align: left; }
         #event-page-preview.template-modern .section-title { text-align: left; }
-        #event-page-preview.template-romantic { --font-display: "'Dancing Script', cursive"; --font-body: "'Cormorant Garamond', serif"; --color-primary: #DB2777; --color-background: #FFF1F2; --color-text-main: #881337; }
-        #event-page-preview.template-romantic #header-section { border-bottom: 4px solid var(--color-primary); }
-
+        
+        /* --- OUTROS ESTILOS --- */
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -157,15 +150,12 @@
         .modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 50rem; max-height: 90vh; overflow-y: auto; transform: scale(0.95); transition: transform 0.3s; }
         .modal.is-open .modal-content { transform: scale(1); }
 
-        .template-card, .icon-card { cursor: pointer; border: 2px solid #E5E7EB; border-radius: 0.5rem; overflow: hidden; transition: all 0.2s ease-in-out; }
-        .template-card:hover, .icon-card:hover { border-color: var(--color-primary); transform: translateY(-5px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        .template-card.active, .icon-card.active { border-color: var(--color-primary); border-width: 3px; background-color: #FDF2F8; }
+        .template-card, .icon-card, .theme-btn { cursor: pointer; border: 2px solid #E5E7EB; border-radius: 0.5rem; overflow: hidden; transition: all 0.2s ease-in-out; }
+        .template-card:hover, .icon-card:hover, .theme-btn:hover { border-color: #EC4899; transform: translateY(-2px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .template-card.active, .icon-card.active, .theme-btn.active { border-color: #EC4899; border-width: 3px; background-color: #FDF2F8; }
         .icon-card svg { width: 2.5rem; height: 2.5rem; margin: auto; color: #4B5563; }
-        .icon-card.active svg { color: var(--color-primary); }
+        .icon-card.active svg { color: #EC4899; }
 
-        .drop-zone { transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; }
-        .drop-zone.drag-over { background-color: #FCE7F3; border-color: #F472B6; }
-        
         #toast-notification {
             transition: transform 0.5s ease-in-out;
         }
@@ -184,7 +174,7 @@
                  <a id="view-public-page" href="#" target="_blank" class="text-sm text-pink-600 hover:underline font-semibold">Ver Página Pública</a>
                  <button id="open-template-modal" class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
-                    Templates
+                    Templates e Cores
                 </button>
                 <button id="open-icon-modal" class="bg-white border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
@@ -200,12 +190,9 @@
         <main class="p-4 sm:p-6 md:p-8 bg-gray-200">
             <div id="event-page-preview" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
                 
-                <!-- SEÇÃO DO CABEÇALHO/CARROSSEL UNIFICADA -->
                 <section id="header-section" class="editable-section relative text-center bg-gray-700 h-[60vh]">
                     <button class="edit-btn" data-modal="header-modal" title="Editar Cabeçalho e Fotos"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                    
                     <div id="header-content-wrapper" class="relative w-full h-full">
-                        <!-- O carrossel será inserido aqui pelo JS -->
                         <div id="header-text-overlay" class="absolute inset-0">
                             <div id="vertical-guide" class="alignment-guide"></div>
                             <div id="horizontal-guide" class="alignment-guide"></div>
@@ -216,13 +203,10 @@
                 </section>
 
                 <section id="story-section" class="editable-section p-8 md:p-16 text-center bg-primary-light">
-                    <!-- O conteúdo será renderizado aqui pelo JS -->
                 </section>
-                <section id="details-section" class="editable-section p-8 md:p-16">
-                    <!-- O conteúdo será renderizado aqui pelo JS -->
+                <section id="details-section" class="editable-section p-8 md:p-16 bg-primary-light">
                 </section>
-                <section id="rsvp-section" class="editable-section p-8 md:p-16 text-center">
-                    <!-- O conteúdo será renderizado aqui pelo JS -->
+                <section id="rsvp-section" class="editable-section p-8 md:p-16 text-center bg-primary-light">
                 </section>
             </div>
         </main>
@@ -248,13 +232,42 @@
     </div>
 
     <div id="modal-container">
-        <div id="icon-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Ícone para o seu Evento</h3><p class="text-gray-600 mb-6">Este ícone aparecerá como um detalhe gráfico nas seções da sua página.</p><div id="icon-selection-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4"></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-pink-500 text-white rounded-md">Confirmar</button></div></div></div>
-        <div id="template-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Template</h3><p class="text-gray-600 mb-6">Selecione um estilo visual para sua página. Todas as suas informações serão mantidas.</p><div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"><div class="template-card" data-template="classic"><div class="p-4 border-b text-center" style="background-color: #F8F7F5;"><h4 style="font-family: 'Playfair Display', serif; color: #831843; font-size: 1.5rem;">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div><div class="template-card" data-template="modern"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Inter', sans-serif; color: #111827; font-size: 1.5rem; font-weight: 700;">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div><div class="template-card" data-template="romantic"><div class="p-4 border-b text-center" style="background-color: #FFF1F2;"><h4 style="font-family: 'Dancing Script', cursive; color: #DB2777; font-size: 1.5rem;">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div><div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center" style="background-color: #F9FAFB;"><h4 style="font-family: 'Dancing Script', cursive; color: #374151; font-size: 1.5rem;">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button></div></div></div>
+        <div id="icon-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Escolha um Ícone</h3><p class="text-gray-600 mb-6">Este ícone aparecerá como um detalhe gráfico nas seções.</p><div id="icon-selection-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4"></div><div class="flex justify-end gap-2 mt-8"><button type="button" class="modal-close-btn px-6 py-2 bg-pink-500 text-white rounded-md">Confirmar</button></div></div></div>
+        
+        <div id="template-modal" class="modal"><div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">Templates e Cores</h3>
+            
+            <div class="mb-8">
+                <h4 class="font-semibold text-gray-800 mb-3">1. Escolha o Tom</h4>
+                <div id="theme-selection-container" class="grid grid-cols-2 gap-4">
+                    <button class="theme-btn p-4 text-center" data-theme="light">
+                        <span class="font-semibold">Claro</span>
+                    </button>
+                    <button class="theme-btn p-4 text-center" data-theme="dark">
+                        <span class="font-semibold">Escuro</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="border-t pt-8">
+                <h4 class="font-semibold text-gray-800 mb-3">2. Escolha o Estilo</h4>
+                 <div id="template-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="template-card" data-template="classic"><div class="p-4 border-b text-center"><h4 class="font-display text-xl">Clássico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Elegante e atemporal.</p></div></div>
+                    <div class="template-card" data-template="modern"><div class="p-4 border-b text-center"><h4 class="font-display text-xl font-bold">Moderno</h4></div><div class="p-4"><p class="text-sm text-gray-500">Minimalista e limpo.</p></div></div>
+                    <div class="template-card" data-template="romantic"><div class="p-4 border-b text-center"><h4 class="font-display text-xl">Romântico</h4></div><div class="p-4"><p class="text-sm text-gray-500">Delicado e sonhador.</p></div></div>
+                    <div class="template-card" data-template="elegancia"><div class="p-4 border-b text-center"><h4 class="font-display text-xl">Elegância</h4></div><div class="p-4"><p class="text-sm text-gray-500">Sofisticado e refinado.</p></div></div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-8">
+                <button type="button" class="modal-close-btn px-6 py-2 bg-gray-200 rounded-md">Fechar</button>
+            </div>
+        </div></div>
         
         <div id="header-modal" class="modal"><div class="modal-content">
             <h3 class="text-xl font-bold mb-6">Editar Cabeçalho e Carrossel</h3>
             <form id="header-form" class="space-y-6">
-                <div>
+                 <div>
                     <label for="couple-names-input" class="block text-sm font-medium text-gray-700 mb-1">Nomes (separados por vírgula)</label>
                     <input type="text" id="couple-names-input" class="w-full p-2 border border-gray-300 rounded-md">
                 </div>
@@ -292,7 +305,9 @@
             </form>
         </div></div>
 
-        <div id="story-modal" class="modal"><div class="modal-content"><h3 class="text-xl font-bold mb-4">Editar História</h3><form id="story-form" class="space-y-4"><div><label for="story-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="story-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="story-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da História</label><textarea id="story-text-input" rows="8" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form></div></div>
+        <div id="story-modal" class="modal"><div class="modal-content">
+             <h3 class="text-xl font-bold mb-4">Editar História</h3><form id="story-form" class="space-y-4"><div><label for="story-title-input" class="block text-sm font-medium text-gray-700 mb-1">Título da Seção</label><input type="text" id="story-title-input" class="w-full p-2 border border-gray-300 rounded-md"></div><div><label for="story-text-input" class="block text-sm font-medium text-gray-700 mb-1">Texto da História</label><textarea id="story-text-input" rows="8" class="w-full p-2 border border-gray-300 rounded-md"></textarea></div><div class="flex justify-end gap-2 mt-6"><button type="button" class="modal-close-btn px-4 py-2 bg-gray-200 rounded-md">Cancelar</button><button type="submit" class="modal-save-btn px-4 py-2 bg-pink-500 text-white rounded-md">Salvar</button></div></form>
+        </div></div>
         
         <div id="details-modal" class="modal"><div class="modal-content">
             <h3 class="text-xl font-bold mb-4">Editar Detalhes do Evento</h3>
@@ -372,7 +387,8 @@
         let headerSwiper = null;
 
         const defaultData = {
-            template: 'classic', // Alterado para 'classic' para aplicar o tema escuro por padrão
+            template: 'classic',
+            theme: 'light', // Nova propriedade para o tema
             icon: iconLibrary.find(i => i.id === 'flower-2').svg,
             header: { 
                 coupleNames: ["Noiva & Noivo"], 
@@ -388,7 +404,7 @@
                 duration: 5 
             },
             details: { 
-                receptionEnabled: true, // NOVO: Flag para controlar a recepção
+                receptionEnabled: true,
                 sameLocation: false,
                 ceremony: { title: "Cerimónia", name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "" }, 
                 reception: { title: "Recepção", name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "" } 
@@ -558,24 +574,25 @@
 
         // --- RENDERIZAÇÃO E PRÉ-VISUALIZAÇÃO ---
         function renderAllPreviews() {
-            const { header, story, details, gallery, rsvp, icon, template } = pageData;
+            const { header, story, details, gallery, rsvp, icon, template, theme } = pageData;
             
             const preview = document.getElementById('event-page-preview');
-            preview.className = 'max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden';
+            // Limpa classes antigas e aplica as novas de template e tema
+            preview.className = 'max-w-4xl mx-auto shadow-lg rounded-lg overflow-hidden';
             preview.classList.add(`template-${template}`);
+            if (theme === 'dark') {
+                preview.classList.add('theme-dark');
+            }
 
             const allPhotos = [header.imageUrl, ...(gallery.photos || []).map(p => p.url)];
             const slidesHtml = allPhotos.filter(Boolean).map(url => `<div class="swiper-slide"><img src="${url}" onerror="this.src='https://placehold.co/800x600/FCE7F3/DB2777?text=Inválida'"/></div>`).join('');
             headerContentWrapper.innerHTML = `
                 <div class="swiper header-swiper">
                     <div class="swiper-wrapper">${slidesHtml}</div>
-                    <div class="swiper-pagination"></div>
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div><div class="swiper-button-next"></div><div class="swiper-button-prev"></div>
                 </div>
                 <div id="header-text-overlay" class="absolute inset-0">
-                    <div id="vertical-guide" class="alignment-guide"></div>
-                    <div id="horizontal-guide" class="alignment-guide"></div>
+                    <div id="vertical-guide" class="alignment-guide"></div><div id="horizontal-guide" class="alignment-guide"></div>
                     <h1 id="couple-names-preview" class="draggable-text text-white text-6xl" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"></h1>
                     <p id="event-date-preview" class="draggable-text text-white text-lg" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);"></p>
                 </div>`;
@@ -593,21 +610,16 @@
             const storySection = document.getElementById('story-section');
             storySection.innerHTML = `<button class="edit-btn" data-modal="story-modal" title="Editar Título e História"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="story-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${story.title}</h2> <p id="story-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${story.text}</p>`;
             
-            // NOVO: Lógica de renderização da seção de detalhes
             const detailsSection = document.getElementById('details-section');
             const { ceremony, reception, receptionEnabled } = details;
             const isReceptionVisible = receptionEnabled !== false;
-            
             const ceremonyHtml = `<div id="ceremony-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">${ceremony.title}</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${ceremony.name || ''}</p><p style="color: var(--color-text-light);">${ceremony.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${ceremony.time || ''}</p><a href="${ceremony.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div>`;
-
             const receptionHtml = isReceptionVisible ? `<div id="reception-details-preview" class="text-center"><h3 class="font-display text-2xl text-primary">${reception.title}</h3><p class="mt-2 font-semibold text-lg" style="color: var(--color-text-main);">${reception.name || ''}</p><p style="color: var(--color-text-light);">${reception.address || ''}</p><p class="mt-1" style="color: var(--color-text-light);">${reception.time || ''}</p><a href="${reception.mapUrl || '#'}" target="_blank" class="mt-2 inline-block font-semibold text-primary hover:underline">Ver no mapa</a></div>` : '';
-
             const gridClasses = isReceptionVisible ? 'md:grid-cols-2' : 'md:grid-cols-1 justify-center';
-
             detailsSection.innerHTML = `<button class="edit-btn" data-modal="details-modal" title="Editar Detalhes do Evento"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 class="section-title font-display text-3xl md:text-4xl text-primary text-center mb-12">Detalhes do Evento</h2> <div class="grid grid-cols-1 ${gridClasses} gap-12 max-w-4xl mx-auto">${ceremonyHtml}${receptionHtml}</div>`;
 
             const rsvpSection = document.getElementById('rsvp-section');
-            rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${rsvp.title}</h2> <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${rsvp.text}</p> <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity" style="background-color: var(--color-primary);">${rsvp.buttonText}</a>`;
+            rsvpSection.innerHTML = `<button class="edit-btn" data-modal="rsvp-modal" title="Editar Confirmação de Presença"><svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button> <div class="section-graphic w-16 h-10">${icon || ''}</div> <h2 id="rsvp-title-preview" class="section-title font-display text-3xl md:text-4xl text-primary">${rsvp.title}</h2> <p id="rsvp-text-preview" class="font-body text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style="color: var(--color-text-light);">${rsvp.text}</p> <a id="rsvp-button-preview" href="${rsvp.buttonLink || '#'}" target="_blank" class="inline-block mt-8 px-8 py-3 font-bold rounded-lg shadow-md hover:opacity-90 transition-opacity">${rsvp.buttonText}</a>`;
         }
         
         function initializeHeaderCarousel() {
@@ -641,14 +653,20 @@
             document.getElementById('open-template-modal').addEventListener('click', () => openModal('template-modal'));
             document.getElementById('open-icon-modal').addEventListener('click', () => openModal('icon-modal'));
 
+            document.getElementById('theme-selection-container').addEventListener('click', (e) => {
+                const btn = e.target.closest('.theme-btn');
+                if (!btn) return;
+                pageData.theme = btn.dataset.theme;
+                renderAllPreviews();
+                updateActiveStatesInModal();
+            });
+
             document.getElementById('template-selection-container').addEventListener('click', (e) => {
                 const card = e.target.closest('.template-card');
                 if (!card) return;
-                const templateId = card.dataset.template;
-                pageData.template = templateId;
+                pageData.template = card.dataset.template;
                 renderAllPreviews();
-                document.querySelectorAll('#template-selection-container .template-card').forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
+                updateActiveStatesInModal();
             });
 
             document.body.addEventListener('click', function(e) {
@@ -685,7 +703,9 @@
             const modal = document.getElementById(modalId);
             if (!modal) return;
 
-            if (modalId === 'header-modal') {
+            if (modalId === 'template-modal') {
+                updateActiveStatesInModal();
+            } else if (modalId === 'header-modal') {
                 document.getElementById('couple-names-input').value = pageData.header.coupleNames.join(', ');
                 document.getElementById('event-date-input').value = pageData.header.eventDate;
                 setupImageUploader('header-image-uploader', pageData.header.imageUrl);
@@ -722,7 +742,6 @@
                 sameLocationCheckbox.addEventListener('change', toggleReceptionFields);
                 toggleReceptionFields();
 
-                // NOVO: Lógica para mostrar/esconder a recepção no modal
                 const receptionFieldset = document.getElementById('reception-fieldset');
                 const addReceptionContainer = document.getElementById('add-reception-container');
                 const isReceptionVisible = receptionEnabled !== false;
@@ -744,9 +763,9 @@
                 document.getElementById('rsvp-text-input').value = pageData.rsvp.text;
                 document.getElementById('rsvp-button-text-input').value = pageData.rsvp.buttonText;
                 document.getElementById('rsvp-button-link-input').value = pageData.rsvp.buttonLink === '#' ? '' : pageData.rsvp.buttonLink;
-            } else if (modalId === 'template-modal') {
-                document.querySelectorAll('#template-selection-container .template-card').forEach(card => {
-                    card.classList.toggle('active', card.dataset.template === pageData.template);
+            } else if (modalId === 'icon-modal') {
+                 document.querySelectorAll('#icon-selection-container .icon-card').forEach(card => {
+                    card.classList.toggle('active', card.innerHTML === pageData.icon);
                 });
             }
             
@@ -756,11 +775,20 @@
         function closeModal(modal) {
             if (modal) modal.classList.remove('is-open');
         }
-
+        
         function toggleReceptionFields() {
             const isChecked = document.getElementById('same-location-checkbox').checked;
             const container = document.getElementById('reception-fields-container');
             container.style.display = isChecked ? 'none' : 'block';
+        }
+
+        function updateActiveStatesInModal() {
+            document.querySelectorAll('#theme-selection-container .theme-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === pageData.theme);
+            });
+            document.querySelectorAll('#template-selection-container .template-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.template === pageData.template);
+            });
         }
 
         function populateIconModal() {
