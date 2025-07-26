@@ -294,7 +294,8 @@
                             <div><label for="ceremony-time" class="block text-sm font-medium text-gray-700 mb-1">Data e Hora</label><input type="text" id="ceremony-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Sábado, 25 de Outubro de 2025, às 16:00"></div>
                         </div>
                         <div><label for="ceremony-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="ceremony-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="text" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://maps.app.goo.gl/exemplo"></div>
+                        <!-- CORREÇÃO: type="url" para validação correta -->
+                        <div><label for="ceremony-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="ceremony-map" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://maps.app.goo.gl/exemplo"></div>
                     </div>
                 </fieldset>
                 
@@ -313,7 +314,8 @@
                             <div><label for="reception-time" class="block text-sm font-medium text-gray-700 mb-1">Hora</label><input type="text" id="reception-time" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Logo após a cerimónia"></div>
                         </div>
                         <div><label for="reception-address" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label><input type="text" id="reception-address" class="w-full p-2 border border-gray-300 rounded-md"></div>
-                        <div><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="text" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://maps.app.goo.gl/exemplo"></div>
+                        <!-- CORREÇÃO: type="url" para validação correta -->
+                        <div><label for="reception-map" class="block text-sm font-medium text-gray-700 mb-1">URL do Google Maps (Opcional)</label><input type="url" id="reception-map" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://maps.app.goo.gl/exemplo"></div>
                     </div>
                 </fieldset>
 
@@ -370,7 +372,8 @@
                 ceremony: { title: "Cerimónia", name: "Local da Cerimônia", address: "Endereço, 123", time: "Sábado, 25 de Outubro de 2025, às 16:00", mapUrl: "" }, 
                 reception: { title: "Recepção", name: "Local da Recepção", address: "Endereço, 456", time: "Logo após a cerimónia", mapUrl: "" } 
             },
-            rsvp: { title: "Confirme sua Presença", text: "Sua presença é o nosso maior presente!", buttonText: "Confirmar Presença", buttonLink: "#" }
+            // CORREÇÃO: Removido o "#" do link padrão
+            rsvp: { title: "Confirme sua Presença", text: "Sua presença é o nosso maior presente!", buttonText: "Confirmar Presença", buttonLink: "" }
         };
 
         // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
@@ -673,12 +676,14 @@
                 document.getElementById('ceremony-name').value = ceremony.name;
                 document.getElementById('ceremony-time').value = ceremony.time;
                 document.getElementById('ceremony-address').value = ceremony.address;
-                document.getElementById('ceremony-map').value = ceremony.mapUrl;
+                // CORREÇÃO: Limpa o campo se o valor for "#"
+                document.getElementById('ceremony-map').value = ceremony.mapUrl === '#' ? '' : ceremony.mapUrl;
                 document.getElementById('reception-title').value = reception.title;
                 document.getElementById('reception-name').value = reception.name;
                 document.getElementById('reception-time').value = reception.time;
                 document.getElementById('reception-address').value = reception.address;
-                document.getElementById('reception-map').value = reception.mapUrl;
+                // CORREÇÃO: Limpa o campo se o valor for "#"
+                document.getElementById('reception-map').value = reception.mapUrl === '#' ? '' : reception.mapUrl;
                 
                 const sameLocationCheckbox = document.getElementById('same-location-checkbox');
                 sameLocationCheckbox.checked = sameLocation || false;
@@ -689,7 +694,8 @@
                 document.getElementById('rsvp-title-input').value = pageData.rsvp.title;
                 document.getElementById('rsvp-text-input').value = pageData.rsvp.text;
                 document.getElementById('rsvp-button-text-input').value = pageData.rsvp.buttonText;
-                document.getElementById('rsvp-button-link-input').value = pageData.rsvp.buttonLink;
+                // CORREÇÃO: Limpa o campo se o valor for "#"
+                document.getElementById('rsvp-button-link-input').value = pageData.rsvp.buttonLink === '#' ? '' : pageData.rsvp.buttonLink;
             } else if (modalId === 'template-modal') {
                 document.querySelectorAll('#template-selection-container .template-card').forEach(card => {
                     card.classList.toggle('active', card.dataset.template === pageData.template);
