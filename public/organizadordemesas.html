@@ -42,10 +42,11 @@
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Convidados a Alocar (<span id="unassigned-count">0</span>)</h3>
                 <input type="text" id="guest-search" placeholder="Buscar convidado..." class="w-full p-2 border border-gray-300 rounded-md mb-4">
                 
-                <!-- MENSAGEM MELHORADA: Mostra se não houver convidados confirmados -->
-                <div id="no-confirmed-guests-message" class="hidden text-center py-6 px-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg">
-                    <p class="font-bold">Apenas convidados confirmados</p>
-                    <p class="text-sm mt-1">Para organizar as mesas, primeiro vá para a <a href="#" id="link-to-guest-list" class="font-bold underline hover:text-yellow-900">Lista de Convidados</a> e marque quem já confirmou presença (✓).</p>
+                <!-- MENSAGEM ATUALIZADA: Mostra se não houver convidados elegíveis -->
+                <div id="no-eligible-guests-message" class="hidden text-center py-6 px-4 bg-blue-50 border-l-4 border-blue-400 text-blue-800 rounded-r-lg">
+                    <p class="font-bold">Nenhum convidado a alocar</p>
+                    <p class="text-sm mt-1">Esta lista mostra convidados com status "Confirmado" ou "Pendente".</p>
+                    <p class="text-sm mt-1">Adicione ou atualize convidados na <a href="#" id="link-to-guest-list" class="font-bold underline hover:text-blue-900">Lista de Convidados</a> para começar.</p>
                 </div>
 
                 <div id="unassigned-guests-list" class="space-y-2">
@@ -56,7 +57,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <h4 class="mt-2 text-sm font-medium text-gray-900">Tudo certo!</h4>
-                    <p class="mt-1 text-sm text-gray-500">Todos os seus convidados confirmados foram alocados em mesas.</p>
+                    <p class="mt-1 text-sm text-gray-500">Todos os seus convidados foram alocados em mesas.</p>
                 </div>
             </aside>
 
@@ -86,7 +87,7 @@
         const unassignedGuestsList = document.getElementById('unassigned-guests-list');
         const unassignedCountEl = document.getElementById('unassigned-count');
         const noUnassignedMessage = document.getElementById('no-unassigned-message');
-        const noConfirmedGuestsMessage = document.getElementById('no-confirmed-guests-message');
+        const noEligibleGuestsMessage = document.getElementById('no-eligible-guests-message');
         const tablesContainer = document.getElementById('tables-container');
         const noTablesMessage = document.getElementById('no-tables-message');
         const addTableButton = document.getElementById('add-table-button');
@@ -94,7 +95,7 @@
 
         // --- ESTADO DA APLICAÇÃO ---
         let currentUser;
-        let allGuests = []; // Lista de todos os convidados confirmados
+        let allGuests = []; // Lista de todos os convidados confirmados ou pendentes
         let allTables = []; // Lista de todas as mesas
         let unassignedGuests = [];
         let totalGuestCountInSystem = 0; // Contagem de todos os convidados (qualquer status)
@@ -121,7 +122,7 @@
             // Ouvinte para as famílias (convidados)
             const familiesQuery = query(collection(db, 'users', currentUser.uid, 'families'));
             onSnapshot(familiesQuery, (snapshot) => {
-                const confirmedGuests = [];
+                const eligibleGuests = [];
                 let totalGuestsInSystemCounter = 0;
 
                 snapshot.forEach(doc => {
@@ -129,21 +130,22 @@
                     if (family.members && Array.isArray(family.members)) {
                         family.members.forEach(member => {
                             totalGuestsInSystemCounter++; // Conta todos os membros
-                            // Apenas convidados confirmados podem ser alocados
-                            if (member.status === 'confirmado') {
-                                confirmedGuests.push({
+                            // ATUALIZADO: Apenas convidados que NÃO recusaram podem ser alocados
+                            if (member.status !== 'recusado') {
+                                eligibleGuests.push({
                                     id: `${doc.id}-${member.name.replace(/\s+/g, '-')}`, // ID único para o convidado
                                     familyId: doc.id,
                                     familyName: family.name,
                                     name: member.name,
-                                    type: member.type
+                                    type: member.type,
+                                    status: member.status // Adiciona status para estilização
                                 });
                             }
                         });
                     }
                 });
                 
-                allGuests = confirmedGuests; // Lista apenas com confirmados
+                allGuests = eligibleGuests; // Lista com confirmados e pendentes
                 totalGuestCountInSystem = totalGuestsInSystemCounter; // Contagem total
 
                 renderContent();
@@ -246,29 +248,37 @@
 
             unassignedGuestsList.innerHTML = '';
             noUnassignedMessage.classList.add('hidden');
-            noConfirmedGuestsMessage.classList.add('hidden');
+            noEligibleGuestsMessage.classList.add('hidden');
 
             if (allGuests.length === 0 && totalGuestCountInSystem > 0) {
-                // Caso 1: Existem convidados no sistema, mas nenhum confirmado.
-                noConfirmedGuestsMessage.classList.remove('hidden');
+                // Caso 1: Existem convidados no sistema, mas nenhum está 'confirmado' ou 'pendente'.
+                noEligibleGuestsMessage.classList.remove('hidden');
                 unassignedCountEl.textContent = 0;
-            } else if (filteredUnassignedGuests.length === 0) {
-                // Caso 2: Todos os confirmados foram alocados (ou a busca não encontrou ninguém).
+            } else if (filteredUnassignedGuests.length === 0 && allGuests.length > 0) {
+                // Caso 2: Todos os convidados elegíveis foram alocados (ou a busca não encontrou ninguém).
                 noUnassignedMessage.classList.remove('hidden');
                 unassignedCountEl.textContent = 0;
-            } else {
+            } else if (filteredUnassignedGuests.length > 0) {
                 // Caso 3: Renderiza a lista de convidados a alocar.
                 filteredUnassignedGuests.forEach(guest => {
                     const guestEl = document.createElement('div');
                     guestEl.className = 'guest-list-item bg-gray-100 p-3 rounded-md border flex justify-between items-center';
                     guestEl.setAttribute('draggable', true);
                     guestEl.dataset.guestId = guest.id;
+                    
+                    const statusHtml = guest.status === 'confirmado'
+                        ? `<span class="text-xs font-semibold text-green-700 flex items-center gap-1">✓ Confirmado</span>`
+                        : `<span class="text-xs font-semibold text-yellow-700 flex items-center gap-1">? Pendente</span>`;
+
                     guestEl.innerHTML = `
                         <div>
                             <p class="font-semibold text-gray-800">${guest.name}</p>
                             <p class="text-xs text-gray-500">Família ${guest.familyName}</p>
                         </div>
-                        <span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800">${guest.type}</span>
+                        <div class="flex flex-col items-end text-right gap-1">
+                             <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">${guest.type}</span>
+                             ${statusHtml}
+                        </div>
                     `;
                     guestEl.addEventListener('dragstart', e => {
                         e.dataTransfer.setData('text/plain', guest.id);
@@ -280,6 +290,9 @@
                     unassignedGuestsList.appendChild(guestEl);
                 });
                 unassignedCountEl.textContent = filteredUnassignedGuests.length;
+            } else {
+                 noEligibleGuestsMessage.classList.remove('hidden');
+                 unassignedCountEl.textContent = 0;
             }
         }
 
