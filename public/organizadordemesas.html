@@ -41,6 +41,13 @@
             <aside class="w-full md:w-1/3 lg:w-1/4 bg-white p-4 border-r overflow-y-auto">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Convidados a Alocar (<span id="unassigned-count">0</span>)</h3>
                 <input type="text" id="guest-search" placeholder="Buscar convidado..." class="w-full p-2 border border-gray-300 rounded-md mb-4">
+                
+                <!-- MENSAGEM MELHORADA: Mostra se não houver convidados confirmados -->
+                <div id="no-confirmed-guests-message" class="hidden text-center py-6 px-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg">
+                    <p class="font-bold">Apenas convidados confirmados</p>
+                    <p class="text-sm mt-1">Para organizar as mesas, primeiro vá para a <a href="#" id="link-to-guest-list" class="font-bold underline hover:text-yellow-900">Lista de Convidados</a> e marque quem já confirmou presença (✓).</p>
+                </div>
+
                 <div id="unassigned-guests-list" class="space-y-2">
                     <!-- Convidados não alocados serão inseridos aqui -->
                 </div>
@@ -49,7 +56,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <h4 class="mt-2 text-sm font-medium text-gray-900">Tudo certo!</h4>
-                    <p class="mt-1 text-sm text-gray-500">Todos os seus convidados foram alocados em mesas.</p>
+                    <p class="mt-1 text-sm text-gray-500">Todos os seus convidados confirmados foram alocados em mesas.</p>
                 </div>
             </aside>
 
@@ -79,6 +86,7 @@
         const unassignedGuestsList = document.getElementById('unassigned-guests-list');
         const unassignedCountEl = document.getElementById('unassigned-count');
         const noUnassignedMessage = document.getElementById('no-unassigned-message');
+        const noConfirmedGuestsMessage = document.getElementById('no-confirmed-guests-message');
         const tablesContainer = document.getElementById('tables-container');
         const noTablesMessage = document.getElementById('no-tables-message');
         const addTableButton = document.getElementById('add-table-button');
@@ -89,6 +97,7 @@
         let allGuests = []; // Lista de todos os convidados confirmados
         let allTables = []; // Lista de todas as mesas
         let unassignedGuests = [];
+        let totalGuestCountInSystem = 0; // Contagem de todos os convidados (qualquer status)
 
         // --- INICIALIZAÇÃO ---
         onAuthStateChanged(auth, (user) => {
@@ -112,22 +121,31 @@
             // Ouvinte para as famílias (convidados)
             const familiesQuery = query(collection(db, 'users', currentUser.uid, 'families'));
             onSnapshot(familiesQuery, (snapshot) => {
-                allGuests = [];
+                const confirmedGuests = [];
+                let totalGuestsInSystemCounter = 0;
+
                 snapshot.forEach(doc => {
                     const family = doc.data();
-                    family.members.forEach(member => {
-                        // Apenas convidados confirmados podem ser alocados
-                        if (member.status === 'confirmado') {
-                            allGuests.push({
-                                id: `${doc.id}-${member.name.replace(/\s+/g, '-')}`, // ID único para o convidado
-                                familyId: doc.id,
-                                familyName: family.name,
-                                name: member.name,
-                                type: member.type
-                            });
-                        }
-                    });
+                    if (family.members && Array.isArray(family.members)) {
+                        family.members.forEach(member => {
+                            totalGuestsInSystemCounter++; // Conta todos os membros
+                            // Apenas convidados confirmados podem ser alocados
+                            if (member.status === 'confirmado') {
+                                confirmedGuests.push({
+                                    id: `${doc.id}-${member.name.replace(/\s+/g, '-')}`, // ID único para o convidado
+                                    familyId: doc.id,
+                                    familyName: family.name,
+                                    name: member.name,
+                                    type: member.type
+                                });
+                            }
+                        });
+                    }
                 });
+                
+                allGuests = confirmedGuests; // Lista apenas com confirmados
+                totalGuestCountInSystem = totalGuestsInSystemCounter; // Contagem total
+
                 renderContent();
             });
 
@@ -143,6 +161,22 @@
         function setupEventListeners() {
             addTableButton.addEventListener('click', createNewTable);
             guestSearchInput.addEventListener('input', renderUnassignedGuests);
+            
+            // Listener para o novo link
+            const linkToGuestList = document.getElementById('link-to-guest-list');
+            if (linkToGuestList) {
+                linkToGuestList.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.parent) {
+                        const guestListLink = window.parent.document.querySelector('a[href="listadeconvidados.html"]');
+                        if (guestListLink) {
+                            guestListLink.click();
+                        } else {
+                            alert("Por favor, clique em 'Lista de Convidados' no menu à esquerda.");
+                        }
+                    }
+                });
+            }
 
             // Event listeners para drag and drop
             tablesContainer.addEventListener('dragover', e => {
@@ -170,13 +204,12 @@
                 const guestId = e.dataTransfer.getData('text/plain');
                 const tableId = targetTableEl.dataset.tableId;
 
-                const guest = allGuests.find(g => g.id === guestId);
+                const guest = unassignedGuests.find(g => g.id === guestId);
                 const table = allTables.find(t => t.id === tableId);
 
                 if (guest && table && table.guests.length < table.capacity) {
                     const guestData = { id: guest.id, name: guest.name, familyName: guest.familyName };
                     
-                    // Verifica se o convidado já está na mesa
                     if (!table.guests.some(g => g.id === guestData.id)) {
                         const updatedGuests = [...table.guests, guestData];
                         const tableRef = doc(db, 'users', currentUser.uid, 'tables', tableId);
@@ -194,8 +227,6 @@
 
         // --- LÓGICA DE RENDERIZAÇÃO ---
         function renderContent() {
-            if (!allGuests.length && !allTables.length) return;
-            
             const assignedGuestIds = new Set();
             allTables.forEach(table => {
                 table.guests.forEach(guest => {
@@ -211,39 +242,53 @@
 
         function renderUnassignedGuests() {
             const searchTerm = guestSearchInput.value.toLowerCase();
-            const filteredGuests = unassignedGuests.filter(g => g.name.toLowerCase().includes(searchTerm));
+            const filteredUnassignedGuests = unassignedGuests.filter(g => g.name.toLowerCase().includes(searchTerm));
 
             unassignedGuestsList.innerHTML = '';
-            filteredGuests.forEach(guest => {
-                const guestEl = document.createElement('div');
-                guestEl.className = 'guest-list-item bg-gray-100 p-3 rounded-md border flex justify-between items-center';
-                guestEl.setAttribute('draggable', true);
-                guestEl.dataset.guestId = guest.id;
-                guestEl.innerHTML = `
-                    <div>
-                        <p class="font-semibold text-gray-800">${guest.name}</p>
-                        <p class="text-xs text-gray-500">Família ${guest.familyName}</p>
-                    </div>
-                    <span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800">${guest.type}</span>
-                `;
-                guestEl.addEventListener('dragstart', e => {
-                    e.dataTransfer.setData('text/plain', guest.id);
-                    e.target.classList.add('dragging');
-                });
-                guestEl.addEventListener('dragend', e => {
-                    e.target.classList.remove('dragging');
-                });
-                unassignedGuestsList.appendChild(guestEl);
-            });
+            noUnassignedMessage.classList.add('hidden');
+            noConfirmedGuestsMessage.classList.add('hidden');
 
-            unassignedCountEl.textContent = filteredGuests.length;
-            noUnassignedMessage.classList.toggle('hidden', filteredGuests.length > 0);
+            if (allGuests.length === 0 && totalGuestCountInSystem > 0) {
+                // Caso 1: Existem convidados no sistema, mas nenhum confirmado.
+                noConfirmedGuestsMessage.classList.remove('hidden');
+                unassignedCountEl.textContent = 0;
+            } else if (filteredUnassignedGuests.length === 0) {
+                // Caso 2: Todos os confirmados foram alocados (ou a busca não encontrou ninguém).
+                noUnassignedMessage.classList.remove('hidden');
+                unassignedCountEl.textContent = 0;
+            } else {
+                // Caso 3: Renderiza a lista de convidados a alocar.
+                filteredUnassignedGuests.forEach(guest => {
+                    const guestEl = document.createElement('div');
+                    guestEl.className = 'guest-list-item bg-gray-100 p-3 rounded-md border flex justify-between items-center';
+                    guestEl.setAttribute('draggable', true);
+                    guestEl.dataset.guestId = guest.id;
+                    guestEl.innerHTML = `
+                        <div>
+                            <p class="font-semibold text-gray-800">${guest.name}</p>
+                            <p class="text-xs text-gray-500">Família ${guest.familyName}</p>
+                        </div>
+                        <span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800">${guest.type}</span>
+                    `;
+                    guestEl.addEventListener('dragstart', e => {
+                        e.dataTransfer.setData('text/plain', guest.id);
+                        e.target.classList.add('dragging');
+                    });
+                    guestEl.addEventListener('dragend', e => {
+                        e.target.classList.remove('dragging');
+                    });
+                    unassignedGuestsList.appendChild(guestEl);
+                });
+                unassignedCountEl.textContent = filteredUnassignedGuests.length;
+            }
         }
 
         function renderTables() {
             tablesContainer.innerHTML = '';
             noTablesMessage.classList.toggle('hidden', allTables.length > 0);
-            if (allTables.length === 0) tablesContainer.appendChild(noTablesMessage);
+            if (allTables.length === 0) {
+                tablesContainer.appendChild(noTablesMessage);
+            }
 
             allTables.forEach(table => {
                 const tableCard = document.createElement('div');
