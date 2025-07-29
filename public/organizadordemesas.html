@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador de Mesas - Sim, Perfeito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Estilos para arrastar e soltar */
+        .guest-list-item { cursor: grab; }
+        .guest-list-item:active { cursor: grabbing; }
+        .table-card.drag-over { border-style: solid; border-color: #EC4899; background-color: #FDF2F8; }
+        .dragging { opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+    <!-- Tela de Carregamento -->
+    <div id="loading-state" class="min-h-screen flex items-center justify-center">
+        <p class="text-lg text-gray-500">A carregar o organizador de mesas...</p>
+    </div>
+
+    <!-- Conteúdo da Página (inicialmente oculto) -->
+    <div id="page-content" class="hidden">
+        <header class="flex items-center justify-between h-16 px-6 bg-white border-b sticky top-0 z-20">
+            <span class="text-xl font-bold text-gray-800 font-display">Organizador de Mesas</span>
+            <button id="add-table-button" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                Adicionar Mesa
+            </button>
+        </header>
+
+        <main class="flex flex-col md:flex-row h-[calc(100vh-4rem)]">
+            <!-- Coluna de Convidados Não Alocados -->
+            <aside class="w-full md:w-1/3 lg:w-1/4 bg-white p-4 border-r overflow-y-auto">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Convidados a Alocar (<span id="unassigned-count">0</span>)</h3>
+                <input type="text" id="guest-search" placeholder="Buscar convidado..." class="w-full p-2 border border-gray-300 rounded-md mb-4">
+                <div id="unassigned-guests-list" class="space-y-2">
+                    <!-- Convidados não alocados serão inseridos aqui -->
+                </div>
+                 <div id="no-unassigned-message" class="hidden text-center py-10 px-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h4 class="mt-2 text-sm font-medium text-gray-900">Tudo certo!</h4>
+                    <p class="mt-1 text-sm text-gray-500">Todos os seus convidados foram alocados em mesas.</p>
+                </div>
+            </aside>
+
+            <!-- Área das Mesas -->
+            <div id="tables-container" class="flex-1 p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-y-auto content-start">
+                <!-- Mesas serão inseridas aqui -->
+                <div id="no-tables-message" class="hidden text-center py-10 px-6 bg-white rounded-lg shadow-sm border md:col-span-2 lg:col-span-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma mesa criada</h3>
+                    <p class="mt-1 text-sm text-gray-500">Clique em "Adicionar Mesa" para começar a organizar seus convidados.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-50 flex items-center justify-center p-4"></div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { auth, onAuthStateChanged, db } from './auth.js';
+        import { collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, query } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // --- ELEMENTOS DA UI ---
+        const loadingState = document.getElementById('loading-state');
+        const pageContent = document.getElementById('page-content');
+        const unassignedGuestsList = document.getElementById('unassigned-guests-list');
+        const unassignedCountEl = document.getElementById('unassigned-count');
+        const noUnassignedMessage = document.getElementById('no-unassigned-message');
+        const tablesContainer = document.getElementById('tables-container');
+        const noTablesMessage = document.getElementById('no-tables-message');
+        const addTableButton = document.getElementById('add-table-button');
+        const guestSearchInput = document.getElementById('guest-search');
+
+        // --- ESTADO DA APLICAÇÃO ---
+        let currentUser;
+        let allGuests = []; // Lista de todos os convidados confirmados
+        let allTables = []; // Lista de todas as mesas
+        let unassignedGuests = [];
+
+        // --- INICIALIZAÇÃO ---
+        onAuthStateChanged(auth, (user) => {
+            if (user && !user.isAnonymous) {
+                currentUser = user;
+                initializePage();
+            } else {
+                loadingState.innerHTML = '<p class="text-lg text-red-500">Acesso negado. Faça login para continuar.</p>';
+            }
+        });
+
+        function initializePage() {
+            loadingState.classList.add('hidden');
+            pageContent.classList.remove('hidden');
+            
+            listenForData();
+            setupEventListeners();
+        }
+
+        function listenForData() {
+            // Ouvinte para as famílias (convidados)
+            const familiesQuery = query(collection(db, 'users', currentUser.uid, 'families'));
+            onSnapshot(familiesQuery, (snapshot) => {
+                allGuests = [];
+                snapshot.forEach(doc => {
+                    const family = doc.data();
+                    family.members.forEach(member => {
+                        // Apenas convidados confirmados podem ser alocados
+                        if (member.status === 'confirmado') {
+                            allGuests.push({
+                                id: `${doc.id}-${member.name.replace(/\s+/g, '-')}`, // ID único para o convidado
+                                familyId: doc.id,
+                                familyName: family.name,
+                                name: member.name,
+                                type: member.type
+                            });
+                        }
+                    });
+                });
+                renderContent();
+            });
+
+            // Ouvinte para as mesas
+            const tablesQuery = query(collection(db, 'users', currentUser.uid, 'tables'));
+            onSnapshot(tablesQuery, (snapshot) => {
+                allTables = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allTables.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate());
+                renderContent();
+            });
+        }
+        
+        function setupEventListeners() {
+            addTableButton.addEventListener('click', createNewTable);
+            guestSearchInput.addEventListener('input', renderUnassignedGuests);
+
+            // Event listeners para drag and drop
+            tablesContainer.addEventListener('dragover', e => {
+                e.preventDefault();
+                const targetTable = e.target.closest('.table-card');
+                if (targetTable) {
+                    document.querySelectorAll('.table-card').forEach(t => t.classList.remove('drag-over'));
+                    targetTable.classList.add('drag-over');
+                }
+            });
+
+            tablesContainer.addEventListener('dragleave', e => {
+                const targetTable = e.target.closest('.table-card');
+                if (targetTable) {
+                    targetTable.classList.remove('drag-over');
+                }
+            });
+
+            tablesContainer.addEventListener('drop', async e => {
+                e.preventDefault();
+                const targetTableEl = e.target.closest('.table-card');
+                if (!targetTableEl) return;
+
+                targetTableEl.classList.remove('drag-over');
+                const guestId = e.dataTransfer.getData('text/plain');
+                const tableId = targetTableEl.dataset.tableId;
+
+                const guest = allGuests.find(g => g.id === guestId);
+                const table = allTables.find(t => t.id === tableId);
+
+                if (guest && table && table.guests.length < table.capacity) {
+                    const guestData = { id: guest.id, name: guest.name, familyName: guest.familyName };
+                    
+                    // Verifica se o convidado já está na mesa
+                    if (!table.guests.some(g => g.id === guestData.id)) {
+                        const updatedGuests = [...table.guests, guestData];
+                        const tableRef = doc(db, 'users', currentUser.uid, 'tables', tableId);
+                        await updateDoc(tableRef, { guests: updatedGuests });
+                    }
+                } else if (table && table.guests.length >= table.capacity) {
+                    alert(`A mesa "${table.name}" está cheia!`);
+                }
+            });
+
+            // Eventos nos inputs das mesas e botões de apagar
+            tablesContainer.addEventListener('change', handleTableInputChange);
+            tablesContainer.addEventListener('click', handleTableButtonClick);
+        }
+
+        // --- LÓGICA DE RENDERIZAÇÃO ---
+        function renderContent() {
+            if (!allGuests.length && !allTables.length) return;
+            
+            const assignedGuestIds = new Set();
+            allTables.forEach(table => {
+                table.guests.forEach(guest => {
+                    assignedGuestIds.add(guest.id);
+                });
+            });
+
+            unassignedGuests = allGuests.filter(guest => !assignedGuestIds.has(guest.id));
+            
+            renderUnassignedGuests();
+            renderTables();
+        }
+
+        function renderUnassignedGuests() {
+            const searchTerm = guestSearchInput.value.toLowerCase();
+            const filteredGuests = unassignedGuests.filter(g => g.name.toLowerCase().includes(searchTerm));
+
+            unassignedGuestsList.innerHTML = '';
+            filteredGuests.forEach(guest => {
+                const guestEl = document.createElement('div');
+                guestEl.className = 'guest-list-item bg-gray-100 p-3 rounded-md border flex justify-between items-center';
+                guestEl.setAttribute('draggable', true);
+                guestEl.dataset.guestId = guest.id;
+                guestEl.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-gray-800">${guest.name}</p>
+                        <p class="text-xs text-gray-500">Família ${guest.familyName}</p>
+                    </div>
+                    <span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800">${guest.type}</span>
+                `;
+                guestEl.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', guest.id);
+                    e.target.classList.add('dragging');
+                });
+                guestEl.addEventListener('dragend', e => {
+                    e.target.classList.remove('dragging');
+                });
+                unassignedGuestsList.appendChild(guestEl);
+            });
+
+            unassignedCountEl.textContent = filteredGuests.length;
+            noUnassignedMessage.classList.toggle('hidden', filteredGuests.length > 0);
+        }
+
+        function renderTables() {
+            tablesContainer.innerHTML = '';
+            noTablesMessage.classList.toggle('hidden', allTables.length > 0);
+            if (allTables.length === 0) tablesContainer.appendChild(noTablesMessage);
+
+            allTables.forEach(table => {
+                const tableCard = document.createElement('div');
+                tableCard.className = 'table-card bg-white p-4 rounded-lg shadow-sm border-2 border-dashed border-gray-300 flex flex-col h-fit fade-in';
+                tableCard.dataset.tableId = table.id;
+
+                const seatedGuestsHtml = table.guests.map(guest => `
+                    <li class="flex justify-between items-center text-sm py-1">
+                        <span>${guest.name}</span>
+                        <button class="remove-guest-btn text-red-400 hover:text-red-600" data-guest-id="${guest.id}" title="Remover da mesa">&times;</button>
+                    </li>
+                `).join('');
+
+                tableCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <input type="text" value="${table.name}" class="table-name-input text-lg font-bold text-gray-800 w-2/3 p-1 rounded-md border border-transparent hover:border-gray-300 focus:border-pink-500 focus:ring-0" placeholder="Nome da Mesa">
+                        <button class="delete-table-btn text-gray-400 hover:text-red-600 p-1" title="Apagar mesa">
+                            <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2 mb-3 text-sm text-gray-600">
+                        <span>Capacidade:</span>
+                        <input type="number" value="${table.capacity}" min="1" class="table-capacity-input w-16 p-1 rounded-md border border-gray-300">
+                        <span>lugares</span>
+                    </div>
+                    <div class="bg-gray-50 p-2 rounded-md flex-grow min-h-[80px]">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Lugares: ${table.guests.length} / ${table.capacity}</p>
+                        <ul class="space-y-1">${seatedGuestsHtml}</ul>
+                    </div>
+                `;
+                tablesContainer.appendChild(tableCard);
+            });
+        }
+
+        // --- LÓGICA DE MANIPULAÇÃO DE DADOS ---
+        async function createNewTable() {
+            try {
+                await addDoc(collection(db, 'users', currentUser.uid, 'tables'), {
+                    name: `Mesa ${allTables.length + 1}`,
+                    capacity: 8,
+                    guests: [],
+                    createdAt: new Date()
+                });
+            } catch (error) {
+                console.error("Erro ao adicionar mesa:", error);
+            }
+        }
+
+        async function handleTableInputChange(e) {
+            const tableCard = e.target.closest('.table-card');
+            if (!tableCard) return;
+
+            const tableId = tableCard.dataset.tableId;
+            const tableRef = doc(db, 'users', currentUser.uid, 'tables', tableId);
+
+            if (e.target.classList.contains('table-name-input')) {
+                await updateDoc(tableRef, { name: e.target.value });
+            }
+            if (e.target.classList.contains('table-capacity-input')) {
+                await updateDoc(tableRef, { capacity: parseInt(e.target.value, 10) || 1 });
+            }
+        }
+
+        async function handleTableButtonClick(e) {
+            const tableCard = e.target.closest('.table-card');
+            if (!tableCard) return;
+            
+            const tableId = tableCard.dataset.tableId;
+
+            // Botão de apagar mesa
+            if (e.target.closest('.delete-table-btn')) {
+                showConfirmModal('Tem a certeza que quer apagar esta mesa? Os convidados voltarão para a lista "A Alocar".', async () => {
+                    await deleteDoc(doc(db, 'users', currentUser.uid, 'tables', tableId));
+                });
+            }
+
+            // Botão de remover convidado da mesa
+            if (e.target.closest('.remove-guest-btn')) {
+                const guestIdToRemove = e.target.closest('.remove-guest-btn').dataset.guestId;
+                const table = allTables.find(t => t.id === tableId);
+                if (table) {
+                    const updatedGuests = table.guests.filter(g => g.id !== guestIdToRemove);
+                    const tableRef = doc(db, 'users', currentUser.uid, 'tables', tableId);
+                    await updateDoc(tableRef, { guests: updatedGuests });
+                }
+            }
+        }
+        
+        // --- FUNÇÕES AUXILIARES ---
+        function showConfirmModal(message, onConfirm) {
+            const confirmModalEl = document.getElementById('confirm-modal');
+            confirmModalEl.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-auto">
+                    <h3 class="text-lg font-medium text-gray-900">Confirmar Ação</h3>
+                    <p class="mt-2 text-sm text-gray-600">${message}</p>
+                    <div class="mt-4 flex justify-end space-x-2">
+                        <button id="modal-cancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
+                        <button id="modal-confirm" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar</button>
+                    </div>
+                </div>`;
+            confirmModalEl.classList.remove('hidden');
+            document.getElementById('modal-cancel').onclick = () => confirmModalEl.classList.add('hidden');
+            document.getElementById('modal-confirm').onclick = () => {
+                onConfirm();
+                confirmModalEl.classList.add('hidden');
+            };
+        }
+
+    </script>
+</body>
+</html>
