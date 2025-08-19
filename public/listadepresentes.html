@@ -126,33 +126,31 @@
 
     <!-- Scripts -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        // CORREÇÃO: Importar do ficheiro auth.js central
+        import { 
+            auth, 
+            onAuthStateChanged, 
+            db,
+            collection,
+            addDoc,
+            onSnapshot,
+            query,
+            doc,
+            deleteDoc,
+            updateDoc
+        } from './auth.js';
 
         // --- ELEMENTOS DA UI ---
         const loadingState = document.getElementById('loading-state');
         const pageContent = document.getElementById('page-content');
         const summaryCards = document.getElementById('summary-cards');
-        
-        // Abas
         const myListTab = document.getElementById('my-list-tab');
         const catalogTab = document.getElementById('catalog-tab');
         const myListContent = document.getElementById('my-list-content');
         const catalogContent = document.getElementById('catalog-content');
-
-        // Contentores de Listas
         const userGiftListContainer = document.getElementById('user-gift-list-container');
         const catalogListContainer = document.getElementById('catalog-list-container');
         const noGiftsMessage = document.getElementById('no-gifts-message');
-        
-        // Modal
         const openAddGiftModalButton = document.getElementById('open-add-gift-modal-button');
         const giftModal = document.getElementById('gift-modal');
         const giftForm = document.getElementById('gift-form');
@@ -164,12 +162,11 @@
         const giftImageInput = document.getElementById('gift-image');
         const formErrorMessage = document.getElementById('form-error-message');
         const modalCancelButton = document.getElementById('modal-cancel-button');
-        
-        // Cards de Resumo
         const totalRaisedEl = document.getElementById('total-raised');
         const totalGiftsEl = document.getElementById('total-gifts');
         const availableGiftsEl = document.getElementById('available-gifts');
 
+        let currentUser;
         let userGifts = [];
         let unsubscribe;
 
@@ -276,18 +273,13 @@
 
         // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
         onAuthStateChanged(auth, (user) => {
-            if (user) {
+            // CORREÇÃO: Adicionar verificação para utilizador não anónimo
+            if (user && !user.isAnonymous) {
+                currentUser = user;
                 initializePage();
             } else {
-                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (token) {
-                    signInWithCustomToken(auth, token).catch(error => {
-                        console.error("Erro no login com token:", error);
-                        signInAnonymously(auth).catch(e => console.error("Erro no login anónimo:", e));
-                    });
-                } else {
-                    signInAnonymously(auth).catch(e => console.error("Erro no login anónimo:", e));
-                }
+                // Se não houver utilizador ou for anónimo, não deve estar aqui.
+                loadingState.innerHTML = '<p class="text-lg text-red-500">Erro de autenticação. Por favor, aceda através do seu painel.</p>';
             }
         });
 
@@ -300,16 +292,11 @@
         }
         
         function setupEventListeners() {
-            // Navegação por Abas
             myListTab.addEventListener('click', () => switchTab('my-list'));
             catalogTab.addEventListener('click', () => switchTab('catalog'));
-
-            // Modal
             openAddGiftModalButton.addEventListener('click', openModalForCreate);
             modalCancelButton.addEventListener('click', closeModal);
             giftForm.addEventListener('submit', handleFormSubmit);
-
-            // Ações nos cartões
             userGiftListContainer.addEventListener('click', handleUserListActions);
             catalogListContainer.addEventListener('click', handleCatalogActions);
         }
@@ -330,7 +317,6 @@
             }
         }
 
-        // --- LÓGICA DO MODAL ---
         function openModalForCreate() {
             giftForm.reset();
             modalTitle.textContent = 'Criar Novo Presente Personalizado';
@@ -355,7 +341,6 @@
             giftModal.classList.add('hidden');
         }
 
-        // --- LÓGICA DO FORMULÁRIO (CRIAR/EDITAR) ---
         async function handleFormSubmit(e) {
             e.preventDefault();
             const giftData = {
@@ -372,7 +357,8 @@
             }
 
             const giftId = giftIdInput.value;
-            const giftCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'gifts');
+            // CORREÇÃO: Usar o caminho correto da coleção
+            const giftCollectionRef = collection(db, 'users', currentUser.uid, 'gifts');
 
             try {
                 if (giftId) {
@@ -389,7 +375,6 @@
             }
         }
 
-        // --- AÇÕES NOS CARTÕES ---
         function handleUserListActions(e) {
             const editBtn = e.target.closest('.edit-gift-button');
             const deleteBtn = e.target.closest('.delete-gift-button');
@@ -402,7 +387,8 @@
                 const giftId = deleteBtn.dataset.giftId;
                 showConfirmModal('Tem a certeza de que quer remover este presente da sua lista?', async () => {
                     try {
-                        const giftRef = doc(db, 'artifacts', appId, 'public', 'data', 'gifts', giftId);
+                        // CORREÇÃO: Usar o caminho correto do documento
+                        const giftRef = doc(db, 'users', currentUser.uid, 'gifts', giftId);
                         await deleteDoc(giftRef);
                     } catch (error) {
                         console.error("Erro ao apagar presente: ", error);
@@ -417,7 +403,6 @@
                 const giftIndex = parseInt(addBtn.dataset.giftIndex, 10);
                 const giftData = catalogGifts[giftIndex];
                 addGiftToUserList(giftData);
-                // Feedback visual
                 addBtn.textContent = 'Adicionado!';
                 addBtn.classList.remove('bg-pink-500', 'hover:bg-pink-600');
                 addBtn.classList.add('bg-green-500');
@@ -431,7 +416,8 @@
 
         async function addGiftToUserList(giftData) {
             try {
-                const giftCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'gifts');
+                // CORREÇÃO: Usar o caminho correto da coleção
+                const giftCollectionRef = collection(db, 'users', currentUser.uid, 'gifts');
                 await addDoc(giftCollectionRef, {
                     ...giftData,
                     isPurchased: false,
@@ -444,17 +430,19 @@
             }
         }
 
-        // --- RENDERIZAÇÃO E DADOS ---
         function listenForUserGifts() {
-            const giftCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'gifts');
+            // CORREÇÃO: Usar o caminho correto da coleção
+            const giftCollectionRef = collection(db, 'users', currentUser.uid, 'gifts');
             const q = query(giftCollectionRef);
             if (unsubscribe) unsubscribe();
             unsubscribe = onSnapshot(q, (snapshot) => {
                 userGifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                userGifts.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate());
+                // Garante que createdAt existe e é um objeto de data antes de ordenar
+                userGifts.sort((a, b) => (a.createdAt?.toDate() || 0) - (b.createdAt?.toDate() || 0));
                 renderUserGiftList();
             }, error => {
                 console.error("Erro ao buscar presentes do utilizador:", error);
+                loadingState.innerHTML = '<p class="text-lg text-red-500">Não foi possível carregar os presentes. Tente recarregar.</p>';
             });
         }
 
