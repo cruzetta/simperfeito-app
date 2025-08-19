@@ -15,6 +15,23 @@
         .font-display {
             font-family: 'Playfair Display', serif;
         }
+        /* Adicionado para garantir que o vídeo não ultrapasse a seção */
+        .hero-section {
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -100;
+            transform: translateX(-50%) translateY(-50%);
+            background-size: cover;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -43,8 +60,15 @@
     </header>
 
     <main>
-        <!-- Seção Hero -->
-        <section style="background-image: url('https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center;" class="text-white">
+        <!-- Seção Hero com Vídeo -->
+        <section class="hero-section text-white relative">
+            <!-- Vídeo de fundo -->
+            <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover -z-10">
+                <source src="https://firebasestorage.googleapis.com/v0/b/simperfeito.firebasestorage.app/o/imagens%20e%20videos%20da%20pagina%20inicial%2FVideo%20sim%20perfeito%20entrada.mp4?alt=media&token=8cea2018-ea31-4196-b2a0-7a7ef10ba695" type="video/mp4">
+                Seu navegador não suporta a tag de vídeo.
+            </video>
+            
+            <!-- Overlay para garantir a legibilidade do texto -->
             <div class="bg-black/50 min-h-[70vh] flex items-center">
                 <div class="container mx-auto px-6 text-center">
                     <h1 class="text-4xl md:text-6xl font-bold font-display mb-4 leading-tight">Seu casamento, <span class="text-pink-300">perfeitamente</span> planejado.</h1>
