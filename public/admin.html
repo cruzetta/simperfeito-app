@@ -23,7 +23,7 @@
         </svg>
         <p id="loading-text" class="text-gray-600">A verificar autenticação...</p>
     </div>
-
+    
     <!-- Conteúdo principal do painel, inicialmente oculto -->
     <div id="page-wrapper" class="hidden">
         <header class="bg-white shadow-md">
@@ -75,28 +75,23 @@
     <script type="module">
         import { auth, onAuthStateChanged, signOut, db, collection, addDoc, onSnapshot, query, doc, getDoc, deleteDoc, updateDoc, orderBy } from './auth.js';
 
-        // --- LÓGICA DE GUARDA DE AUTENTICAÇÃO ---
+        // --- LÓGICA DE GUARDA DE AUTENTICAÇÃO SIMPLIFICADA ---
         const loadingScreen = document.getElementById('loading-screen');
         const pageWrapper = document.getElementById('page-wrapper');
 
-        // Este listener verifica o status do login assim que a página carrega
-        const unsubscribe = onAuthStateChanged(auth, user => {
-            unsubscribe(); // Executa esta verificação apenas uma vez para evitar loops
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe(); 
             
             if (user) {
-                // SUCESSO: O Firebase confirmou que há um usuário logado.
-                // Agora podemos inicializar o painel com segurança.
+                // SUCESSO: O usuário está logado. Não importa quem seja.
                 initializeAdminPanel();
             } else {
-                // FALHA: O Firebase confirmou que NÃO há um usuário logado.
-                // Redireciona de volta para a tela de login.
+                // FALHA: Não há usuário logado. Redireciona para o login.
                 window.location.href = '/admin-login.html';
             }
         });
 
-        // Esta função só será chamada se o usuário estiver logado com sucesso
         function initializeAdminPanel() {
-            const adminContainer = document.getElementById('admin-container');
             const logoutBtn = document.getElementById('logout-btn');
             const form = document.getElementById('admin-gift-form');
             const formTitle = document.getElementById('form-title');
@@ -117,7 +112,6 @@
             pageWrapper.classList.remove('hidden');
             loadingScreen.style.display = 'none';
 
-            // Funções de Gerenciamento do Catálogo
             function listenForCatalogChanges() {
                 const q = query(catalogCollectionRef, orderBy("name"));
                 onSnapshot(q, (snapshot) => {
@@ -206,7 +200,6 @@
                 }
             }
 
-            // Listeners de Eventos
             form.addEventListener('submit', handleFormSubmit);
             cancelEditBtn.addEventListener('click', resetFormState);
             catalogList.addEventListener('click', (e) => {
@@ -219,7 +212,6 @@
                 signOut(auth).catch(error => console.error("Erro ao fazer logout:", error));
             });
 
-            // Inicia o carregamento dos dados do catálogo
             listenForCatalogChanges();
         }
     </script>
