@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Administração</title>
-    <!-- Tailwind CSS para estilização rápida -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Esconde o conteúdo principal por defeito */
@@ -20,7 +19,6 @@
 </head>
 <body class="bg-gray-100 font-sans">
 
-    <!-- Ecrã de Carregamento (visível por defeito) -->
     <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col items-center justify-center z-50">
         <svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -29,9 +27,7 @@
         <p id="loading-text" class="text-gray-600">A verificar autenticação...</p>
     </div>
 
-    <!-- Wrapper para todo o conteúdo da página -->
     <div id="page-wrapper">
-        <!-- Cabeçalho da página -->
         <header class="bg-white shadow-md">
             <div class="max-w-5xl mx-auto py-4 px-6 flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-gray-800">Gerenciador de Catálogo de Presentes</h1>
@@ -39,18 +35,14 @@
             </div>
         </header>
 
-        <!-- Conteúdo principal -->
         <main class="max-w-5xl mx-auto p-6">
             
-            <!-- Mensagem de Acesso Negado (inicialmente oculta) -->
             <div id="access-denied" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
                 <p class="font-bold">Acesso Negado</p>
                 <p>Você não tem permissão para acessar esta página. Apenas administradores autorizados.</p>
             </div>
 
-            <!-- Container do Admin (inicialmente oculto) -->
             <div id="admin-container" class="hidden">
-                <!-- Seção do Formulário para Adicionar/Editar -->
                 <div class="bg-white p-6 rounded-lg shadow-md mb-8">
                     <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Adicionar Novo Produto</h2>
                     <form id="admin-gift-form" class="space-y-4">
@@ -78,7 +70,6 @@
                     </form>
                 </div>
 
-                <!-- Seção da Lista de Produtos -->
                 <div>
                     <h2 class="text-xl font-semibold mb-4 text-gray-700">Produtos no Catálogo</h2>
                     <div id="catalog-list" class="space-y-3">
@@ -127,7 +118,7 @@
             const loadingMessage = document.getElementById('loading-message');
             const cancelEditBtn = document.getElementById('cancel-edit-btn');
 
-            const catalogCollectionRef = collection(db, 'catalog');
+            const catalogCollectionRef = collection(db, 'gift_catalog_master');
 
             // --- FUNÇÃO PARA MOSTRAR O CONTEÚDO ---
             function showPageContent() {
@@ -137,20 +128,16 @@
 
             // --- AUTENTICAÇÃO E SEGURANÇA ---
             onAuthStateChanged(auth, user => {
+                // *** ALTERAÇÃO PRINCIPAL AQUI ***
+                // Se um usuário estiver logado, consideramos ele um admin.
+                // A verificação de UID foi removida.
                 if (user) {
-                    const adminUID = "COLOQUE_SEU_UID_DE_ADMIN_AQUI"; 
-
-                    if (user.uid === adminUID) {
-                        adminContainer.classList.remove('hidden');
-                        logoutBtn.classList.remove('hidden');
-                        listenForCatalogChanges();
-                        showPageContent();
-                    } else {
-                        accessDeniedMessage.classList.remove('hidden');
-                        showPageContent();
-                        signOut(auth);
-                    }
+                    adminContainer.classList.remove('hidden');
+                    logoutBtn.classList.remove('hidden');
+                    listenForCatalogChanges();
+                    showPageContent();
                 } else {
+                    // Se não houver usuário, redireciona para a página de login.
                     window.location.href = '/admin-login.html'; 
                 }
             });
