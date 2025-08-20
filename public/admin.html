@@ -15,6 +15,7 @@
 </head>
 <body class="bg-gray-100 font-sans">
 
+    <!-- Tela de Carregamento que espera a verificação do Firebase -->
     <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col items-center justify-center z-50">
         <svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -23,6 +24,7 @@
         <p id="loading-text" class="text-gray-600">A verificar autenticação...</p>
     </div>
 
+    <!-- Conteúdo principal do painel, inicialmente oculto -->
     <div id="page-wrapper" class="hidden">
         <header class="bg-white shadow-md">
             <div class="max-w-5xl mx-auto py-4 px-6 flex justify-between items-center">
@@ -77,19 +79,23 @@
         const loadingScreen = document.getElementById('loading-screen');
         const pageWrapper = document.getElementById('page-wrapper');
 
+        // Este listener verifica o status do login assim que a página carrega
         const unsubscribe = onAuthStateChanged(auth, user => {
-            unsubscribe(); // Executa esta verificação apenas uma vez no carregamento da página
+            unsubscribe(); // Executa esta verificação apenas uma vez para evitar loops
+            
             if (user) {
-                // O Firebase confirmou que há um usuário logado.
+                // SUCESSO: O Firebase confirmou que há um usuário logado.
+                // Agora podemos inicializar o painel com segurança.
                 initializeAdminPanel();
             } else {
-                // O Firebase confirmou que NÃO há um usuário logado.
+                // FALHA: O Firebase confirmou que NÃO há um usuário logado.
+                // Redireciona de volta para a tela de login.
                 window.location.href = '/admin-login.html';
             }
         });
 
+        // Esta função só será chamada se o usuário estiver logado com sucesso
         function initializeAdminPanel() {
-            // Todos os elementos e lógicas que dependem do login vão aqui dentro
             const adminContainer = document.getElementById('admin-container');
             const logoutBtn = document.getElementById('logout-btn');
             const form = document.getElementById('admin-gift-form');
@@ -107,11 +113,11 @@
             const catalogCollectionName = 'gift_catalog_master';
             const catalogCollectionRef = collection(db, catalogCollectionName);
 
-            // Mostra o conteúdo da página e esconde o carregamento
+            // Mostra o conteúdo da página e esconde a tela de carregamento
             pageWrapper.classList.remove('hidden');
             loadingScreen.style.display = 'none';
 
-            // Funções de Gerenciamento
+            // Funções de Gerenciamento do Catálogo
             function listenForCatalogChanges() {
                 const q = query(catalogCollectionRef, orderBy("name"));
                 onSnapshot(q, (snapshot) => {
