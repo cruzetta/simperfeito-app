@@ -175,7 +175,7 @@
                 userGifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 userGifts.sort((a, b) => (a.createdAt?.toDate() || 0) - (b.createdAt?.toDate() || 0));
                 renderUserGiftList();
-                renderCatalog(); // Re-renderiza o catálogo para atualizar o status "Adicionado"
+                renderCatalog(); 
             }, error => console.error("Erro ao buscar presentes do utilizador:", error));
         }
 
@@ -190,20 +190,30 @@
             }, error => console.error("Erro ao buscar catálogo mestre:", error));
         }
 
-        async function addGiftToUserList(giftData) {
+        async function addGiftToUserList(giftData, openForEdit = false) {
             const isAlreadyAdded = userGifts.some(gift => gift.name === giftData.name);
-            if (isAlreadyAdded) return;
+            if (isAlreadyAdded) {
+                const existingGift = userGifts.find(gift => gift.name === giftData.name);
+                if(existingGift && openForEdit) {
+                    openModalForEdit(existingGift);
+                }
+                return;
+            };
 
             try {
                 const giftCollectionRef = collection(db, 'users', currentUser.uid, 'gifts');
-                await addDoc(giftCollectionRef, {
+                const newGift = {
                     ...giftData,
                     isPurchased: false,
                     purchasedBy: null,
                     purchasedAt: null,
                     createdAt: new Date(),
-                    fromCatalog: true // Identifica que veio do catálogo
-                });
+                    fromCatalog: true 
+                };
+                const docRef = await addDoc(giftCollectionRef, newGift);
+                if (openForEdit) {
+                    openModalForEdit({ id: docRef.id, ...newGift });
+                }
             } catch (error) {
                 console.error("Erro ao adicionar presente:", error);
             }
@@ -231,9 +241,6 @@
             });
         }
         
-        // ... (o resto do ficheiro permanece igual: switchTab, modais, handleFormSubmit, etc.)
-        // Nenhuma alteração é necessária no resto do ficheiro a partir daqui.
-        
         function switchTab(tabName) {
             if (tabName === 'my-list') {
                 myListContent.classList.remove('hidden');
@@ -260,7 +267,7 @@
 
         function openModalForEdit(gift) {
             giftForm.reset();
-            modalTitle.textContent = 'Editar Presente Personalizado';
+            modalTitle.textContent = 'Editar Presente';
             giftIdInput.value = gift.id;
             giftNameInput.value = gift.name;
             giftDescriptionInput.value = gift.description || '';
@@ -293,17 +300,17 @@
             const giftCollectionRef = collection(db, 'users', currentUser.uid, 'gifts');
 
             try {
-                if (giftId) { // Editando um presente existente
+                if (giftId) { 
                     const giftRef = doc(giftCollectionRef, giftId);
                     await updateDoc(giftRef, giftData);
-                } else { // Criando um novo presente personalizado
+                } else { 
                     await addDoc(giftCollectionRef, {
                         ...giftData,
                         isPurchased: false,
                         purchasedBy: null,
                         purchasedAt: null,
                         createdAt: new Date(),
-                        fromCatalog: false // Marca como não sendo do catálogo
+                        fromCatalog: false 
                     });
                 }
                 closeModal();
@@ -336,14 +343,25 @@
 
         function handleCatalogActions(e) {
             const addBtn = e.target.closest('.add-gift-button');
+            const editBtn = e.target.closest('.edit-catalog-gift-button');
+
             if (addBtn) {
                 addBtn.disabled = true;
                 addBtn.textContent = 'A adicionar...';
                 const giftId = addBtn.dataset.giftId;
                 const giftData = masterCatalogGifts.find(g => g.id === giftId);
                 if (giftData) {
-                    const { id, ...dataToAdd } = giftData; // Remove o ID do mestre
-                    addGiftToUserList(dataToAdd);
+                    const { id, ...dataToAdd } = giftData;
+                    addGiftToUserList(dataToAdd, false);
+                }
+            }
+
+            if (editBtn) {
+                const giftId = editBtn.dataset.giftId;
+                const giftData = masterCatalogGifts.find(g => g.id === giftId);
+                if (giftData) {
+                    const { id, ...dataToAdd } = giftData;
+                    addGiftToUserList(dataToAdd, true);
                 }
             }
         }
@@ -358,27 +376,28 @@
 
             let headerContent = '';
             let footerContent = '';
+            const giftId = type === 'user-list' ? gift.id : gift.id;
+
+            const editButtonHtml = `<button data-gift-id="${giftId}" class="${type === 'user-list' ? 'edit-gift-button' : 'edit-catalog-gift-button'} bg-white/80 backdrop-blur-sm text-gray-600 hover:text-blue-600 p-2 rounded-full shadow transition-colors" title="Editar este presente na sua lista"><svg class="h-4 w-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>`;
+            const deleteButtonHtml = `<button data-gift-id="${giftId}" class="delete-gift-button bg-white/80 backdrop-blur-sm text-gray-600 hover:text-red-600 p-2 rounded-full shadow transition-colors" title="Remover da sua lista"><svg class="h-4 w-4 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>`;
 
             if (type === 'user-list') {
                 let statusBadge = gift.isPurchased
                     ? `<div class="absolute top-2 left-2 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">COMPRADO</div>`
                     : `<div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">DISPONÍVEL</div>`;
                 
-                headerContent = `${statusBadge}`;
-
-                // Apenas presentes personalizados (não do catálogo) podem ser editados pelo utilizador
-                if (gift.fromCatalog === false) {
-                    headerContent += `
+                headerContent = `${statusBadge}
                     <div class="absolute top-2 right-2 flex items-center space-x-1">
-                        <button data-gift-id="${gift.id}" class="edit-gift-button bg-white/80 backdrop-blur-sm text-gray-600 hover:text-blue-600 p-2 rounded-full shadow transition-colors"><svg class="h-4 w-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                        ${editButtonHtml}
+                        ${deleteButtonHtml}
                     </div>`;
-                }
 
                 footerContent = `
                     <button class="w-full bg-gray-200 text-gray-500 font-bold py-2 px-4 rounded-lg cursor-not-allowed" disabled>
                         ${gift.isPurchased ? 'Presente Comprado' : 'A Aguardar Convidado'}
                     </button>`;
             } else { // type === 'catalog'
+                headerContent = `<div class="absolute top-2 right-2">${editButtonHtml}</div>`;
                 if (isAlreadyAdded) {
                     footerContent = `<button class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg cursor-not-allowed flex items-center justify-center gap-2" disabled><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>Adicionado</button>`;
                 } else {
@@ -390,7 +409,6 @@
                 <div class="relative">
                     <img src="${imageSrc}" alt="${gift.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='${placeholderImg}';">
                     ${headerContent}
-                    <div class="absolute bottom-0 right-0 m-2"><button data-gift-id="${gift.id}" class="delete-gift-button bg-white/80 backdrop-blur-sm text-gray-600 hover:text-red-600 p-2 rounded-full shadow transition-colors"><svg class="h-4 w-4 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button></div>
                 </div>
                 <div class="p-4 flex flex-col flex-grow">
                     <h4 class="text-base font-bold text-gray-800">${gift.name}</h4>
