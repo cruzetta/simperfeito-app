@@ -20,6 +20,10 @@
             color: #ec4899;
             font-weight: 600;
         }
+        .drag-over {
+            border-color: #ec4899; /* pink-500 */
+            background-color: #fdf2f8; /* pink-50 */
+        }
     </style>
 </head>
 <body>
@@ -86,11 +90,36 @@
             <form id="gift-form">
                 <h3 id="modal-title" class="text-lg font-semibold text-gray-800 mb-4">Criar Novo Presente Personalizado</h3>
                 <input type="hidden" id="gift-id">
+                <input type="hidden" id="gift-image-url">
                 <div class="space-y-4">
                     <div><label for="gift-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Presente</label><input type="text" id="gift-name" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Cota para a Lua de Mel" required></div>
                     <div><label for="gift-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><textarea id="gift-description" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Ajude-nos a realizar a viagem dos nossos sonhos!" required></textarea></div>
                     <div><label for="gift-price" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label><input type="number" id="gift-price" step="0.01" min="0" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: 200.00" required></div>
-                    <div><label for="gift-image" class="block text-sm font-medium text-gray-700 mb-1">URL da Imagem (Opcional)</label><input type="url" id="gift-image" class="w-full p-2 border border-gray-300 rounded-md" placeholder="https://exemplo.com/imagem.jpg"></div>
+                    
+                    <!-- NOVO: Uploader de Imagem -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Imagem do Presente</label>
+                        <div id="image-drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                            <div id="image-upload-prompt" class="space-y-1 text-center cursor-pointer">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 pointer-events-none" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600 justify-center pointer-events-none">
+                                    <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-pink-600 hover:text-pink-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-pink-500">
+                                        <span>Carregue um ficheiro</span>
+                                        <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/png, image/jpeg, image/webp">
+                                    </label>
+                                    <p class="pl-1">ou arraste e solte</p>
+                                </div>
+                                <p class="text-xs text-gray-500 pointer-events-none">PNG, JPG, WEBP até 2MB</p>
+                            </div>
+                            <div id="image-preview-container" class="hidden text-center">
+                                <img id="image-preview" src="" alt="Pré-visualização da imagem" class="mx-auto max-h-40 rounded-md">
+                                <p id="image-filename" class="mt-2 text-sm text-gray-500"></p>
+                                <button type="button" id="remove-image-btn" class="mt-2 text-sm text-red-600 hover:text-red-800 font-semibold">Remover imagem</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div id="form-error-message" class="hidden bg-red-100 text-red-700 p-3 rounded-lg text-center my-4 text-sm"></div>
                 <div class="mt-6 flex justify-end space-x-2">
@@ -104,7 +133,7 @@
     <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-50 flex items-center justify-center"></div>
 
     <script type="module">
-        import { auth, onAuthStateChanged, db, collection, addDoc, onSnapshot, query, doc, deleteDoc, updateDoc } from './auth.js';
+        import { auth, onAuthStateChanged, db, storage, ref, uploadBytes, getDownloadURL, collection, addDoc, onSnapshot, query, doc, deleteDoc, updateDoc } from './auth.js';
 
         // --- ELEMENTOS DA UI ---
         const loadingState = document.getElementById('loading-state');
@@ -125,18 +154,28 @@
         const giftNameInput = document.getElementById('gift-name');
         const giftDescriptionInput = document.getElementById('gift-description');
         const giftPriceInput = document.getElementById('gift-price');
-        const giftImageInput = document.getElementById('gift-image');
         const formErrorMessage = document.getElementById('form-error-message');
         const modalCancelButton = document.getElementById('modal-cancel-button');
         const totalRaisedEl = document.getElementById('total-raised');
         const totalGiftsEl = document.getElementById('total-gifts');
         const availableGiftsEl = document.getElementById('available-gifts');
 
+        // --- NOVO: Elementos do Uploader de Imagem ---
+        const giftImageUrlInput = document.getElementById('gift-image-url');
+        const imageDropZone = document.getElementById('image-drop-zone');
+        const imageUploadPrompt = document.getElementById('image-upload-prompt');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const imageFilename = document.getElementById('image-filename');
+        const fileUploadInput = document.getElementById('file-upload');
+        const removeImageBtn = document.getElementById('remove-image-btn');
+
         let currentUser;
-        let userGifts = []; // Lista pessoal do utilizador
-        let masterCatalogGifts = []; // Catálogo mestre
+        let userGifts = [];
+        let masterCatalogGifts = [];
         let unsubscribeUserGifts;
         let unsubscribeCatalog;
+        let selectedFile = null; // --- NOVO: Estado para o ficheiro selecionado
 
         // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
         onAuthStateChanged(auth, (user) => {
@@ -164,6 +203,21 @@
             giftForm.addEventListener('submit', handleFormSubmit);
             userGiftListContainer.addEventListener('click', handleUserListActions);
             catalogListContainer.addEventListener('click', handleCatalogActions);
+            
+            // --- NOVO: Event Listeners para o Uploader ---
+            imageUploadPrompt.addEventListener('click', () => fileUploadInput.click());
+            fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                imageDropZone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
+            });
+            ['dragenter', 'dragover'].forEach(eventName => {
+                imageDropZone.addEventListener(eventName, () => imageDropZone.classList.add('drag-over'));
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                imageDropZone.addEventListener(eventName, () => imageDropZone.classList.remove('drag-over'));
+            });
+            imageDropZone.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
+            removeImageBtn.addEventListener('click', resetUploader);
         }
 
         // --- LÓGICA DE DADOS ---
@@ -191,9 +245,9 @@
         }
 
         async function addGiftToUserList(giftData, openForEdit = false) {
-            const isAlreadyAdded = userGifts.some(gift => gift.name === giftData.name);
+            const isAlreadyAdded = userGifts.some(gift => gift.name === giftData.name && gift.fromCatalog);
             if (isAlreadyAdded) {
-                const existingGift = userGifts.find(gift => gift.name === giftData.name);
+                const existingGift = userGifts.find(gift => gift.name === giftData.name && gift.fromCatalog);
                 if(existingGift && openForEdit) {
                     openModalForEdit(existingGift);
                 }
@@ -232,10 +286,10 @@
 
         function renderCatalog() {
             catalogListContainer.innerHTML = '';
-            const userGiftNames = new Set(userGifts.map(g => g.name));
+            const userGiftNamesFromCatalog = new Set(userGifts.filter(g => g.fromCatalog).map(g => g.name));
 
             masterCatalogGifts.forEach(gift => {
-                const isAlreadyAdded = userGiftNames.has(gift.name);
+                const isAlreadyAdded = userGiftNamesFromCatalog.has(gift.name);
                 const card = createGiftCard(gift, 'catalog', isAlreadyAdded);
                 catalogListContainer.appendChild(card);
             });
@@ -257,10 +311,12 @@
             }
         }
 
+        // --- LÓGICA DO MODAL E FORMULÁRIO ---
         function openModalForCreate() {
             giftForm.reset();
             modalTitle.textContent = 'Criar Novo Presente Personalizado';
             giftIdInput.value = '';
+            resetUploader();
             formErrorMessage.classList.add('hidden');
             giftModal.classList.remove('hidden');
         }
@@ -272,7 +328,16 @@
             giftNameInput.value = gift.name;
             giftDescriptionInput.value = gift.description || '';
             giftPriceInput.value = gift.price;
-            giftImageInput.value = gift.imageUrl || '';
+            
+            resetUploader();
+            if (gift.imageUrl) {
+                giftImageUrlInput.value = gift.imageUrl;
+                imagePreview.src = gift.imageUrl;
+                imageFilename.textContent = 'Imagem atual';
+                imageUploadPrompt.classList.add('hidden');
+                imagePreviewContainer.classList.remove('hidden');
+            }
+
             formErrorMessage.classList.add('hidden');
             giftModal.classList.remove('hidden');
         }
@@ -283,23 +348,33 @@
 
         async function handleFormSubmit(e) {
             e.preventDefault();
-            const giftData = {
-                name: giftNameInput.value.trim(),
-                description: giftDescriptionInput.value.trim(),
-                price: parseFloat(giftPriceInput.value),
-                imageUrl: giftImageInput.value.trim(),
-            };
-
-            if (!giftData.name || !giftData.description || isNaN(giftData.price) || giftData.price <= 0) {
-                formErrorMessage.textContent = 'Por favor, preencha todos os campos com valores válidos.';
-                formErrorMessage.classList.remove('hidden');
-                return;
-            }
-
-            const giftId = giftIdInput.value;
-            const giftCollectionRef = collection(db, 'users', currentUser.uid, 'gifts');
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'A salvar...';
 
             try {
+                let imageUrl = giftImageUrlInput.value; // Começa com a URL existente (se houver)
+
+                if (selectedFile) {
+                    const storageRef = ref(storage, `users/${currentUser.uid}/gift_images/${Date.now()}_${selectedFile.name}`);
+                    const snapshot = await uploadBytes(storageRef, selectedFile);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                }
+
+                const giftData = {
+                    name: giftNameInput.value.trim(),
+                    description: giftDescriptionInput.value.trim(),
+                    price: parseFloat(giftPriceInput.value),
+                    imageUrl: imageUrl || "",
+                };
+
+                if (!giftData.name || !giftData.description || isNaN(giftData.price) || giftData.price <= 0) {
+                    throw new Error('Por favor, preencha todos os campos com valores válidos.');
+                }
+
+                const giftId = giftIdInput.value;
+                const giftCollectionRef = collection(db, 'users', currentUser.uid, 'gifts');
+
                 if (giftId) { 
                     const giftRef = doc(giftCollectionRef, giftId);
                     await updateDoc(giftRef, giftData);
@@ -316,11 +391,44 @@
                 closeModal();
             } catch (error) {
                 console.error("Erro ao salvar presente:", error);
-                formErrorMessage.textContent = 'Ocorreu um erro ao salvar o presente.';
+                formErrorMessage.textContent = error.message || 'Ocorreu um erro ao salvar o presente.';
                 formErrorMessage.classList.remove('hidden');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Salvar';
             }
         }
 
+        // --- LÓGICA DO UPLOADER ---
+        function handleFileSelect(file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor, selecione um ficheiro de imagem (PNG, JPG, WEBP).');
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                alert('O ficheiro é muito grande. O limite é de 2MB.');
+                return;
+            }
+            selectedFile = file;
+            imagePreview.src = URL.createObjectURL(file);
+            imageFilename.textContent = file.name;
+            imageUploadPrompt.classList.add('hidden');
+            imagePreviewContainer.classList.remove('hidden');
+            giftImageUrlInput.value = ''; // Limpa a URL antiga se um novo ficheiro for selecionado
+        }
+
+        function resetUploader() {
+            selectedFile = null;
+            fileUploadInput.value = '';
+            giftImageUrlInput.value = '';
+            imagePreview.src = '';
+            imageFilename.textContent = '';
+            imageUploadPrompt.classList.remove('hidden');
+            imagePreviewContainer.classList.add('hidden');
+        }
+
+        // --- LÓGICA DE AÇÕES NOS CARDS ---
         function handleUserListActions(e) {
             const editBtn = e.target.closest('.edit-gift-button');
             const deleteBtn = e.target.closest('.delete-gift-button');
