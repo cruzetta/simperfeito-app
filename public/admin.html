@@ -11,11 +11,15 @@
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
             transition: all 0.3s ease-in-out;
         }
+        /* Estilo para a área de arrastar e soltar quando um ficheiro está sobre ela */
+        .drag-over {
+            border-color: #3b82f6; /* blue-500 */
+            background-color: #eff6ff; /* blue-50 */
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
 
-    <!-- Tela de Carregamento que espera a verificação do Firebase -->
     <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col items-center justify-center z-50">
         <svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -23,8 +27,7 @@
         </svg>
         <p id="loading-text" class="text-gray-600">A verificar autenticação...</p>
     </div>
-    
-    <!-- Conteúdo principal do painel, inicialmente oculto -->
+
     <div id="page-wrapper" class="hidden">
         <header class="bg-white shadow-md">
             <div class="max-w-5xl mx-auto py-4 px-6 flex justify-between items-center">
@@ -39,6 +42,7 @@
                     <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Adicionar Novo Produto</h2>
                     <form id="admin-gift-form" class="space-y-4">
                         <input type="hidden" id="gift-id">
+                        <input type="hidden" id="gift-image-url"> <!-- Campo oculto para guardar o URL da imagem -->
                         <div>
                             <label for="gift-name" class="block text-sm font-medium text-gray-700">Nome do Produto</label>
                             <input type="text" id="gift-name" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
@@ -51,10 +55,32 @@
                             <label for="gift-price" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
                             <input type="number" id="gift-price" step="0.01" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
                         </div>
+                        
+                        <!-- NOVO UPLOADER DE IMAGEM -->
                         <div>
-                            <label for="gift-image" class="block text-sm font-medium text-gray-700">URL da Imagem (Opcional)</label>
-                            <input type="url" id="gift-image" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="https://exemplo.com/imagem.jpg">
+                            <label class="block text-sm font-medium text-gray-700">Imagem do Produto</label>
+                            <div id="image-drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                <div id="image-upload-prompt" class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                            <span>Carregue um ficheiro</span>
+                                            <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/png, image/jpeg, image/webp">
+                                        </label>
+                                        <p class="pl-1">ou arraste e solte</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PNG, JPG, WEBP até 2MB</p>
+                                </div>
+                                <div id="image-preview-container" class="hidden text-center">
+                                    <img id="image-preview" src="" alt="Pré-visualização da imagem" class="mx-auto max-h-40 rounded-md">
+                                    <p id="image-filename" class="mt-2 text-sm text-gray-500"></p>
+                                    <button type="button" id="remove-image-btn" class="mt-2 text-sm text-red-600 hover:text-red-800 font-semibold">Remover imagem</button>
+                                </div>
+                            </div>
                         </div>
+
                         <div class="flex justify-end space-x-3 pt-2">
                             <button type="button" id="cancel-edit-btn" class="hidden px-5 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">Cancelar Edição</button>
                             <button type="submit" id="submit-btn" class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors">Salvar Produto</button>
@@ -73,38 +99,30 @@
     </div>
 
     <script type="module">
-        import { auth, onAuthStateChanged, signOut, db, collection, addDoc, onSnapshot, query, doc, getDoc, deleteDoc, updateDoc, orderBy } from './auth.js';
+        // Importa todas as funções necessárias, incluindo as do Storage
+        import { auth, onAuthStateChanged, signOut, db, storage, ref, uploadBytes, getDownloadURL, collection, addDoc, onSnapshot, query, doc, getDoc, deleteDoc, updateDoc, orderBy } from './auth.js';
 
-        // --- LÓGICA DE GUARDA DE AUTENTICAÇÃO ROBUSTA ---
         const loadingScreen = document.getElementById('loading-screen');
         const pageWrapper = document.getElementById('page-wrapper');
 
-        // Esta função cria uma "Promessa" que só é resolvida quando o Firebase
-        // dá uma resposta definitiva sobre o status do login.
-        const getCurrentUser = () => {
+        const waitForAuthInit = () => {
             return new Promise((resolve, reject) => {
                 const unsubscribe = onAuthStateChanged(auth, user => {
-                    unsubscribe(); // Para de ouvir após a primeira resposta
+                    unsubscribe();
                     resolve(user);
                 }, reject);
             });
         };
 
-        // Função principal que espera pela resposta antes de fazer qualquer coisa
         (async () => {
             try {
-                // Espera a Promessa ser resolvida
-                const user = await getCurrentUser();
-                
+                const user = await waitForAuthInit();
                 if (user) {
-                    // SUCESSO: O usuário está logado. O painel pode ser inicializado.
                     initializeAdminPanel();
                 } else {
-                    // FALHA: Não há usuário logado. Redireciona para o login.
                     window.location.href = '/admin-login.html';
                 }
             } catch (error) {
-                // Em caso de qualquer erro na verificação, redireciona para o login por segurança.
                 console.error('Erro durante a verificação de autenticação:', error);
                 window.location.href = '/admin-login.html';
             }
@@ -112,6 +130,7 @@
 
 
         function initializeAdminPanel() {
+            // Seletores de elementos existentes
             const logoutBtn = document.getElementById('logout-btn');
             const form = document.getElementById('admin-gift-form');
             const formTitle = document.getElementById('form-title');
@@ -120,18 +139,170 @@
             const giftNameInput = document.getElementById('gift-name');
             const giftDescriptionInput = document.getElementById('gift-description');
             const giftPriceInput = document.getElementById('gift-price');
-            const giftImageInput = document.getElementById('gift-image');
             const catalogList = document.getElementById('catalog-list');
             const loadingMessage = document.getElementById('loading-message');
             const cancelEditBtn = document.getElementById('cancel-edit-btn');
             
+            // Novos seletores para o uploader de imagem
+            const imageDropZone = document.getElementById('image-drop-zone');
+            const imageUploadPrompt = document.getElementById('image-upload-prompt');
+            const imagePreviewContainer = document.getElementById('image-preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const imageFilename = document.getElementById('image-filename');
+            const fileUploadInput = document.getElementById('file-upload');
+            const removeImageBtn = document.getElementById('remove-image-btn');
+            const giftImageUrlInput = document.getElementById('gift-image-url');
+
+            let selectedFile = null; // Variável para guardar o ficheiro selecionado
+
             const catalogCollectionName = 'gift_catalog_master';
             const catalogCollectionRef = collection(db, catalogCollectionName);
 
-            // Mostra o conteúdo da página e esconde a tela de carregamento
             pageWrapper.classList.remove('hidden');
             loadingScreen.style.display = 'none';
 
+            // --- LÓGICA DO UPLOADER DE IMAGEM ---
+            const handleFileSelect = (file) => {
+                if (!file) return;
+                if (!file.type.startsWith('image/')) {
+                    alert('Por favor, selecione um ficheiro de imagem (PNG, JPG, WEBP).');
+                    return;
+                }
+                if (file.size > 2 * 1024 * 1024) { // Limite de 2MB
+                    alert('O ficheiro é muito grande. O limite é de 2MB.');
+                    return;
+                }
+                selectedFile = file;
+                imagePreview.src = URL.createObjectURL(file);
+                imageFilename.textContent = file.name;
+                imageUploadPrompt.classList.add('hidden');
+                imagePreviewContainer.classList.remove('hidden');
+                giftImageUrlInput.value = ''; // Limpa o URL antigo se um novo ficheiro for selecionado
+            };
+
+            imageDropZone.addEventListener('click', () => fileUploadInput.click());
+            fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                imageDropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                imageDropZone.addEventListener(eventName, () => imageDropZone.classList.add('drag-over'));
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                imageDropZone.addEventListener(eventName, () => imageDropZone.classList.remove('drag-over'));
+            });
+
+            imageDropZone.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
+
+            removeImageBtn.addEventListener('click', () => {
+                selectedFile = null;
+                fileUploadInput.value = '';
+                giftImageUrlInput.value = '';
+                imagePreview.src = '';
+                imageFilename.textContent = '';
+                imageUploadPrompt.classList.remove('hidden');
+                imagePreviewContainer.classList.add('hidden');
+            });
+
+            // --- LÓGICA DO FORMULÁRIO (ATUALIZADA) ---
+            async function handleFormSubmit(e) {
+                e.preventDefault();
+                const giftId = giftIdInput.value;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'A guardar...';
+
+                let imageUrl = giftImageUrlInput.value; // Começa com o URL existente (se houver)
+
+                try {
+                    // 1. Faz o upload da nova imagem, se uma foi selecionada
+                    if (selectedFile) {
+                        const storageRef = ref(storage, `catalog_images/${Date.now()}_${selectedFile.name}`);
+                        const snapshot = await uploadBytes(storageRef, selectedFile);
+                        imageUrl = await getDownloadURL(snapshot.ref);
+                    }
+
+                    // 2. Prepara os dados para o Firestore
+                    const giftData = { 
+                        name: giftNameInput.value.trim(), 
+                        description: giftDescriptionInput.value.trim(), 
+                        price: parseFloat(giftPriceInput.value), 
+                        imageUrl: imageUrl || "" 
+                    };
+
+                    if (!giftData.name || isNaN(giftData.price) || giftData.price < 0) {
+                        alert("Por favor, preencha o nome e um valor válido.");
+                        return;
+                    }
+
+                    // 3. Guarda os dados no Firestore
+                    if (giftId) { 
+                        await updateDoc(doc(db, catalogCollectionName, giftId), giftData); 
+                        alert("Produto atualizado com sucesso!"); 
+                    } else { 
+                        await addDoc(catalogCollectionRef, giftData); 
+                        alert("Produto adicionado com sucesso!"); 
+                    }
+                    resetFormState();
+
+                } catch (error) { 
+                    console.error("Erro ao salvar produto: ", error); 
+                    alert("Ocorreu um erro ao salvar o produto."); 
+                } finally { 
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = giftId ? 'Atualizar Produto' : 'Salvar Produto';
+                }
+            }
+            
+            // --- PREPARAR FORMULÁRIO PARA EDIÇÃO (ATUALIZADO) ---
+            async function prepareFormForEdit(id) {
+                try {
+                    const docSnap = await getDoc(doc(db, catalogCollectionName, id));
+                    if (docSnap.exists()) {
+                        resetFormState(); // Limpa o formulário antes de preencher
+                        const gift = docSnap.data();
+                        formTitle.textContent = 'Editar Produto';
+                        submitBtn.textContent = 'Atualizar Produto';
+                        giftIdInput.value = id;
+                        giftNameInput.value = gift.name;
+                        giftDescriptionInput.value = gift.description;
+                        giftPriceInput.value = gift.price;
+                        
+                        if (gift.imageUrl) {
+                            giftImageUrlInput.value = gift.imageUrl;
+                            imagePreview.src = gift.imageUrl;
+                            imageFilename.textContent = 'Imagem atual';
+                            imageUploadPrompt.classList.add('hidden');
+                            imagePreviewContainer.classList.remove('hidden');
+                        }
+                        
+                        cancelEditBtn.classList.remove('hidden');
+                        form.classList.add('form-highlight');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else { alert("Produto não encontrado."); }
+                } catch (error) { console.error("Erro ao buscar produto para edição: ", error); }
+            }
+
+            // --- LIMPAR ESTADO DO FORMULÁRIO (ATUALIZADO) ---
+            function resetFormState() {
+                formTitle.textContent = 'Adicionar Novo Produto';
+                submitBtn.textContent = 'Salvar Produto';
+                form.reset();
+                giftIdInput.value = '';
+                
+                // Limpa o uploader de imagem
+                removeImageBtn.click(); 
+                
+                cancelEditBtn.classList.add('hidden');
+                form.classList.remove('form-highlight');
+            }
+
+            // --- FUNÇÕES RESTANTES (INALTERADAS) ---
             function listenForCatalogChanges() {
                 const q = query(catalogCollectionRef, orderBy("name"));
                 onSnapshot(q, (snapshot) => {
@@ -161,53 +332,6 @@
                         catalogList.appendChild(giftElement);
                     });
                 });
-            }
-
-            async function handleFormSubmit(e) {
-                e.preventDefault();
-                const giftData = { name: giftNameInput.value.trim(), description: giftDescriptionInput.value.trim(), price: parseFloat(giftPriceInput.value), imageUrl: giftImageInput.value.trim() || "" };
-                if (!giftData.name || isNaN(giftData.price) || giftData.price < 0) { alert("Por favor, preencha o nome e um valor válido."); return; }
-                const giftId = giftIdInput.value;
-                submitBtn.disabled = true;
-                try {
-                    if (giftId) { 
-                        await updateDoc(doc(db, catalogCollectionName, giftId), giftData); 
-                        alert("Produto atualizado com sucesso!"); 
-                    } else { 
-                        await addDoc(catalogCollectionRef, giftData); 
-                        alert("Produto adicionado com sucesso!"); 
-                    }
-                    resetFormState();
-                } catch (error) { console.error("Erro ao salvar produto: ", error); alert("Ocorreu um erro ao salvar o produto."); } 
-                finally { submitBtn.disabled = false; }
-            }
-
-            async function prepareFormForEdit(id) {
-                try {
-                    const docSnap = await getDoc(doc(db, catalogCollectionName, id));
-                    if (docSnap.exists()) {
-                        const gift = docSnap.data();
-                        formTitle.textContent = 'Editar Produto';
-                        submitBtn.textContent = 'Atualizar Produto';
-                        giftIdInput.value = id;
-                        giftNameInput.value = gift.name;
-                        giftDescriptionInput.value = gift.description;
-                        giftPriceInput.value = gift.price;
-                        giftImageInput.value = gift.imageUrl;
-                        cancelEditBtn.classList.remove('hidden');
-                        form.classList.add('form-highlight');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    } else { alert("Produto não encontrado."); }
-                } catch (error) { console.error("Erro ao buscar produto para edição: ", error); }
-            }
-
-            function resetFormState() {
-                formTitle.textContent = 'Adicionar Novo Produto';
-                submitBtn.textContent = 'Salvar Produto';
-                giftIdInput.value = '';
-                form.reset();
-                cancelEditBtn.classList.add('hidden');
-                form.classList.remove('form-highlight');
             }
 
             async function deleteGift(id) {
