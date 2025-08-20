@@ -73,7 +73,6 @@
                 </nav>
             </div>
 
-            <!-- NOVO: Controles de Filtro e Ordenação -->
             <div id="filter-controls" class="bg-white p-4 rounded-lg shadow-sm border mb-8 space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="md:col-span-2">
@@ -89,7 +88,6 @@
                     </div>
                 </div>
                 <div id="category-filters-container" class="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
-                    <!-- Botões de categoria serão inseridos aqui -->
                 </div>
             </div>
 
@@ -123,7 +121,15 @@
                 <div class="space-y-4">
                     <div><label for="gift-name" class="block text-sm font-medium text-gray-700 mb-1">Nome do Presente</label><input type="text" id="gift-name" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Cota para a Lua de Mel" required></div>
                     <div><label for="gift-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><textarea id="gift-description" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Ajude-nos a realizar a viagem dos nossos sonhos!" required></textarea></div>
-                    <div><label for="gift-price" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label><input type="number" id="gift-price" step="0.01" min="0" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: 200.00" required></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="gift-price" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label><input type="number" id="gift-price" step="0.01" min="0" class="w-full p-2 border border-gray-300 rounded-md" placeholder="200.00" required></div>
+                        <div>
+                            <label for="gift-category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                            <select id="gift-category" class="w-full p-2 border border-gray-300 rounded-md" required>
+                                <!-- Opções de categoria serão inseridas aqui -->
+                            </select>
+                        </div>
+                    </div>
                     
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Imagem do Presente</label>
@@ -183,6 +189,7 @@
         const giftNameInput = document.getElementById('gift-name');
         const giftDescriptionInput = document.getElementById('gift-description');
         const giftPriceInput = document.getElementById('gift-price');
+        const giftCategorySelect = document.getElementById('gift-category');
         const formErrorMessage = document.getElementById('form-error-message');
         const modalCancelButton = document.getElementById('modal-cancel-button');
         const totalRaisedEl = document.getElementById('total-raised');
@@ -196,8 +203,6 @@
         const imageFilename = document.getElementById('image-filename');
         const fileUploadInput = document.getElementById('file-upload');
         const removeImageBtn = document.getElementById('remove-image-btn');
-        
-        // --- NOVO: Elementos de Filtro ---
         const searchInput = document.getElementById('search-input');
         const sortSelect = document.getElementById('sort-select');
         const categoryFiltersContainer = document.getElementById('category-filters-container');
@@ -208,14 +213,9 @@
         let unsubscribeUserGifts;
         let unsubscribeCatalog;
         let selectedFile = null;
-
-        // --- NOVO: Estado dos Filtros ---
-        let filterState = {
-            searchTerm: '',
-            category: 'todos',
-            sort: 'default'
-        };
-        let activeTab = 'my-list'; // my-list ou catalog
+        let filterState = { searchTerm: '', category: 'todos', sort: 'default' };
+        let activeTab = 'my-list';
+        const categories = ['Cozinha & Bar', 'Casa & Decoração', 'Tecnologia & Eletrônicos', 'Experiências & Lazer', 'Moda & Acessórios', 'Engraçados & Divertidos', 'Cotas & Contribuições', 'Outros'];
 
         // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
         onAuthStateChanged(auth, (user) => {
@@ -228,6 +228,7 @@
         });
 
         function initializePage() {
+            populateCategorySelect();
             listenForUserGifts();
             listenForMasterCatalog();
             setupEventListeners();
@@ -243,13 +244,9 @@
             giftForm.addEventListener('submit', handleFormSubmit);
             userGiftListContainer.addEventListener('click', handleUserListActions);
             catalogListContainer.addEventListener('click', handleCatalogActions);
-            
-            // --- NOVO: Event Listeners para Filtros ---
             searchInput.addEventListener('input', handleFilterChange);
             sortSelect.addEventListener('change', handleFilterChange);
             categoryFiltersContainer.addEventListener('click', handleCategoryClick);
-
-            // Uploader
             imageUploadPrompt.addEventListener('click', () => fileUploadInput.click());
             fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -282,18 +279,7 @@
             const q = query(catalogRef);
             if(unsubscribeCatalog) unsubscribeCatalog();
             unsubscribeCatalog = onSnapshot(q, (snapshot) => {
-                masterCatalogGifts = snapshot.docs.map(doc => {
-                    const data = doc.data();
-                    // Adicionando tags para demonstração
-                    const nameLower = data.name.toLowerCase();
-                    let tags = [];
-                    if (nameLower.includes('panela') || nameLower.includes('cozinha') || nameLower.includes('jantar') || nameLower.includes('fondue') || nameLower.includes('batedeira') || nameLower.includes('liquidificador')) tags.push('Cozinha');
-                    if (nameLower.includes('tv') || nameLower.includes('som') || nameLower.includes('robô') || nameLower.includes('tecnologia') || nameLower.includes('câmara') || nameLower.includes('assistente')) tags.push('Tecnologia');
-                    if (nameLower.includes('edredom') || nameLower.includes('toalha') || nameLower.includes('cama') || nameLower.includes('vaso') || nameLower.includes('almofada') || nameLower.includes('tapete')) tags.push('Decoração');
-                    if (nameLower.includes('jantar') || nameLower.includes('viagem') || nameLower.includes('lua de mel') || nameLower.includes('show') || nameLower.includes('curso')) tags.push('Experiências');
-                    if (nameLower.includes('jogo') || nameLower.includes('engraçado') || nameLower.includes('kit sobrevivência') || nameLower.includes('game over')) tags.push('Divertido');
-                    return { id: doc.id, ...data, tags: tags.length > 0 ? tags : ['Outros'] };
-                });
+                masterCatalogGifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderCatalog();
                 generateCategoryFilters();
             }, error => console.error("Erro ao buscar catálogo mestre:", error));
@@ -329,7 +315,6 @@
         }
         
         // --- LÓGICA DE FILTROS E RENDERIZAÇÃO ---
-
         function handleFilterChange() {
             filterState.searchTerm = searchInput.value.toLowerCase();
             filterState.sort = sortSelect.value;
@@ -353,7 +338,6 @@
         function applyFiltersAndSort(list) {
             let filteredList = [...list];
 
-            // 1. Filtrar por busca
             if (filterState.searchTerm) {
                 filteredList = filteredList.filter(gift => 
                     gift.name.toLowerCase().includes(filterState.searchTerm) ||
@@ -361,12 +345,10 @@
                 );
             }
 
-            // 2. Filtrar por categoria
             if (filterState.category !== 'todos') {
-                filteredList = filteredList.filter(gift => gift.tags && gift.tags.includes(filterState.category));
+                filteredList = filteredList.filter(gift => gift.category === filterState.category);
             }
 
-            // 3. Ordenar
             switch (filterState.sort) {
                 case 'name-asc':
                     filteredList.sort((a, b) => a.name.localeCompare(b.name));
@@ -416,19 +398,16 @@
         }
         
         function generateCategoryFilters() {
-            const allTags = new Set();
-            masterCatalogGifts.forEach(gift => {
-                if(gift.tags) {
-                    gift.tags.forEach(tag => allTags.add(tag));
-                }
-            });
-
-            const sortedTags = ['Todos', ...Array.from(allTags).sort()];
+            const sortedTags = ['Todos', ...categories];
             categoryFiltersContainer.innerHTML = sortedTags.map(tag => {
                 const value = tag === 'Todos' ? 'todos' : tag;
                 const isActive = value === filterState.category ? 'filter-button-active' : '';
                 return `<button data-category="${value}" class="px-3 py-1 border rounded-full text-sm font-medium transition-colors hover:bg-gray-200 ${isActive}">${tag}</button>`;
             }).join('');
+        }
+
+        function populateCategorySelect() {
+            giftCategorySelect.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
         }
         
         function renderCurrentTab() {
@@ -441,6 +420,12 @@
 
         function switchTab(tabName) {
             activeTab = tabName;
+            // Reset filters when switching tabs
+            filterState = { searchTerm: '', category: 'todos', sort: 'default' };
+            searchInput.value = '';
+            sortSelect.value = 'default';
+            generateCategoryFilters(); // Regenerate to reset active state
+
             if (tabName === 'my-list') {
                 myListContent.classList.remove('hidden');
                 catalogContent.classList.add('hidden');
@@ -474,6 +459,7 @@
             giftNameInput.value = gift.name;
             giftDescriptionInput.value = gift.description || '';
             giftPriceInput.value = gift.price;
+            giftCategorySelect.value = gift.category || 'Outros';
             
             resetUploader();
             if (gift.imageUrl) {
@@ -511,6 +497,7 @@
                     name: giftNameInput.value.trim(),
                     description: giftDescriptionInput.value.trim(),
                     price: parseFloat(giftPriceInput.value),
+                    category: giftCategorySelect.value,
                     imageUrl: imageUrl || "",
                 };
 
