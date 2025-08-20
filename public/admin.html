@@ -7,7 +7,11 @@
     <!-- Tailwind CSS para estilização rápida -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos personalizados para feedback visual */
+        /* Adicionado: Esconde o corpo da página por defeito para evitar o "piscar" */
+        body {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
         .form-highlight {
             border: 2px solid #3b82f6;
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
@@ -16,6 +20,11 @@
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
+
+    <!-- Ecrã de Carregamento -->
+    <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
+        <p class="text-gray-600">A verificar autenticação...</p>
+    </div>
 
     <!-- Cabeçalho da página -->
     <header class="bg-white shadow-md">
@@ -94,6 +103,7 @@
         } from './auth.js';
 
         // --- ELEMENTOS DA UI ---
+        const loadingScreen = document.getElementById('loading-screen');
         const adminContainer = document.getElementById('admin-container');
         const accessDeniedMessage = document.getElementById('access-denied');
         const logoutBtn = document.getElementById('logout-btn');
@@ -112,6 +122,12 @@
         // Referência à coleção 'catalog' no Firestore
         const catalogCollectionRef = collection(db, 'catalog');
 
+        // --- FUNÇÃO PARA MOSTRAR O CONTEÚDO ---
+        function showPageContent() {
+            loadingScreen.style.display = 'none';
+            document.body.style.opacity = '1';
+        }
+
         // --- AUTENTICAÇÃO E SEGURANÇA ---
         onAuthStateChanged(auth, user => {
             if (user) {
@@ -123,14 +139,16 @@
                     adminContainer.classList.remove('hidden');
                     logoutBtn.classList.remove('hidden');
                     listenForCatalogChanges();
+                    showPageContent(); // Mostra o conteúdo da página
                 } else {
                     console.error("Acesso negado. Este usuário não é um administrador.");
                     accessDeniedMessage.classList.remove('hidden');
+                    showPageContent(); // Mostra a mensagem de acesso negado
                     // Desloga o usuário não-admin para segurança
                     signOut(auth);
                 }
             } else {
-                // ALTERAÇÃO: Se não houver usuário logado, redireciona para a página de login do admin.
+                // Se não houver usuário logado, redireciona para a página de login do admin.
                 console.log("Nenhum administrador logado. Redirecionando para a página de login...");
                 window.location.href = '/admin-login.html'; 
             }
