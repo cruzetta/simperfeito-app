@@ -23,21 +23,21 @@ import {
     setDoc,
     deleteDoc,
     updateDoc,
-    orderBy
+    orderBy // Adicionado para consistência, já que é usado em admin.html
 } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 // IMPORTAÇÕES DO STORAGE (ARMAZENAMENTO DE ARQUIVOS)
 import { 
     getStorage, 
     ref, 
     uploadBytes, 
-    getDownloadURL,
-    deleteObject // <-- ADICIONADO AQUI
+    getDownloadURL 
 } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
 
 
 // A configuração do seu projeto Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY",
+  // *** CORREÇÃO CRÍTICA AQUI ***
   authDomain: "simperfeito.firebaseapp.com",
   projectId: "simperfeito",
   storageBucket: "simperfeito.appspot.com",
@@ -60,8 +60,9 @@ const storage = getStorage(app);
 
 // Função para traduzir os erros do Firebase para mensagens mais fáceis de entender
 const getFriendlyErrorMessage = (code) => {
-    console.log("Firebase Auth Error Code:", code);
+    console.log("Firebase Auth Error Code:", code); // Adicionado para depuração
 
+    // Trata o erro específico de domínio não autorizado
     if (code.includes('auth/requests-from-referer')) {
         return 'Este site (domínio) não está autorizado para realizar operações de login. Verifique as configurações no painel do Firebase.';
     }
@@ -121,6 +122,5 @@ export {
     storage,
     ref,
     uploadBytes,
-    getDownloadURL,
-    deleteObject // <-- EXPORTADO AQUI
+    getDownloadURL
 };
