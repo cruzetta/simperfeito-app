@@ -24,6 +24,11 @@
             border-color: #ec4899; /* pink-500 */
             background-color: #fdf2f8; /* pink-50 */
         }
+        .filter-button-active {
+            background-color: #ec4899; /* pink-500 */
+            color: white;
+            border-color: #ec4899;
+        }
     </style>
 </head>
 <body>
@@ -68,6 +73,26 @@
                 </nav>
             </div>
 
+            <!-- NOVO: Controles de Filtro e Ordenação -->
+            <div id="filter-controls" class="bg-white p-4 rounded-lg shadow-sm border mb-8 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <input type="text" id="search-input" placeholder="Buscar por nome do presente..." class="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500">
+                    </div>
+                    <div>
+                        <select id="sort-select" class="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500">
+                            <option value="default">Ordenar por: Padrão</option>
+                            <option value="name-asc">Nome (A-Z)</option>
+                            <option value="price-asc">Preço (Menor para Maior)</option>
+                            <option value="price-desc">Preço (Maior para Menor)</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="category-filters-container" class="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+                    <!-- Botões de categoria serão inseridos aqui -->
+                </div>
+            </div>
+
             <div id="tab-content">
                 <div id="my-list-content">
                     <div id="user-gift-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
@@ -75,6 +100,10 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                         <h3 class="mt-2 text-sm font-medium text-gray-900">A sua lista está vazia</h3>
                         <p class="mt-1 text-sm text-gray-500">Navegue pelo Catálogo para adicionar presentes ou crie um novo.</p>
+                    </div>
+                     <div id="no-filter-results-message" class="hidden text-center py-10 px-6 bg-white rounded-lg shadow-sm border">
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum presente encontrado</h3>
+                        <p class="mt-1 text-sm text-gray-500">Tente ajustar a sua busca ou filtros.</p>
                     </div>
                 </div>
 
@@ -96,7 +125,6 @@
                     <div><label for="gift-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label><textarea id="gift-description" rows="3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: Ajude-nos a realizar a viagem dos nossos sonhos!" required></textarea></div>
                     <div><label for="gift-price" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label><input type="number" id="gift-price" step="0.01" min="0" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Ex: 200.00" required></div>
                     
-                    <!-- NOVO: Uploader de Imagem -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Imagem do Presente</label>
                         <div id="image-drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
@@ -146,6 +174,7 @@
         const userGiftListContainer = document.getElementById('user-gift-list-container');
         const catalogListContainer = document.getElementById('catalog-list-container');
         const noGiftsMessage = document.getElementById('no-gifts-message');
+        const noFilterResultsMessage = document.getElementById('no-filter-results-message');
         const openAddGiftModalButton = document.getElementById('open-add-gift-modal-button');
         const giftModal = document.getElementById('gift-modal');
         const giftForm = document.getElementById('gift-form');
@@ -159,8 +188,6 @@
         const totalRaisedEl = document.getElementById('total-raised');
         const totalGiftsEl = document.getElementById('total-gifts');
         const availableGiftsEl = document.getElementById('available-gifts');
-
-        // --- NOVO: Elementos do Uploader de Imagem ---
         const giftImageUrlInput = document.getElementById('gift-image-url');
         const imageDropZone = document.getElementById('image-drop-zone');
         const imageUploadPrompt = document.getElementById('image-upload-prompt');
@@ -169,13 +196,26 @@
         const imageFilename = document.getElementById('image-filename');
         const fileUploadInput = document.getElementById('file-upload');
         const removeImageBtn = document.getElementById('remove-image-btn');
+        
+        // --- NOVO: Elementos de Filtro ---
+        const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
+        const categoryFiltersContainer = document.getElementById('category-filters-container');
 
         let currentUser;
         let userGifts = [];
         let masterCatalogGifts = [];
         let unsubscribeUserGifts;
         let unsubscribeCatalog;
-        let selectedFile = null; // --- NOVO: Estado para o ficheiro selecionado
+        let selectedFile = null;
+
+        // --- NOVO: Estado dos Filtros ---
+        let filterState = {
+            searchTerm: '',
+            category: 'todos',
+            sort: 'default'
+        };
+        let activeTab = 'my-list'; // my-list ou catalog
 
         // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
         onAuthStateChanged(auth, (user) => {
@@ -204,7 +244,12 @@
             userGiftListContainer.addEventListener('click', handleUserListActions);
             catalogListContainer.addEventListener('click', handleCatalogActions);
             
-            // --- NOVO: Event Listeners para o Uploader ---
+            // --- NOVO: Event Listeners para Filtros ---
+            searchInput.addEventListener('input', handleFilterChange);
+            sortSelect.addEventListener('change', handleFilterChange);
+            categoryFiltersContainer.addEventListener('click', handleCategoryClick);
+
+            // Uploader
             imageUploadPrompt.addEventListener('click', () => fileUploadInput.click());
             fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -227,7 +272,6 @@
             if (unsubscribeUserGifts) unsubscribeUserGifts();
             unsubscribeUserGifts = onSnapshot(q, (snapshot) => {
                 userGifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                userGifts.sort((a, b) => (a.createdAt?.toDate() || 0) - (b.createdAt?.toDate() || 0));
                 renderUserGiftList();
                 renderCatalog(); 
             }, error => console.error("Erro ao buscar presentes do utilizador:", error));
@@ -238,9 +282,20 @@
             const q = query(catalogRef);
             if(unsubscribeCatalog) unsubscribeCatalog();
             unsubscribeCatalog = onSnapshot(q, (snapshot) => {
-                masterCatalogGifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                masterCatalogGifts.sort((a,b) => a.name.localeCompare(b.name));
+                masterCatalogGifts = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    // Adicionando tags para demonstração
+                    const nameLower = data.name.toLowerCase();
+                    let tags = [];
+                    if (nameLower.includes('panela') || nameLower.includes('cozinha') || nameLower.includes('jantar') || nameLower.includes('fondue') || nameLower.includes('batedeira') || nameLower.includes('liquidificador')) tags.push('Cozinha');
+                    if (nameLower.includes('tv') || nameLower.includes('som') || nameLower.includes('robô') || nameLower.includes('tecnologia') || nameLower.includes('câmara') || nameLower.includes('assistente')) tags.push('Tecnologia');
+                    if (nameLower.includes('edredom') || nameLower.includes('toalha') || nameLower.includes('cama') || nameLower.includes('vaso') || nameLower.includes('almofada') || nameLower.includes('tapete')) tags.push('Decoração');
+                    if (nameLower.includes('jantar') || nameLower.includes('viagem') || nameLower.includes('lua de mel') || nameLower.includes('show') || nameLower.includes('curso')) tags.push('Experiências');
+                    if (nameLower.includes('jogo') || nameLower.includes('engraçado') || nameLower.includes('kit sobrevivência') || nameLower.includes('game over')) tags.push('Divertido');
+                    return { id: doc.id, ...data, tags: tags.length > 0 ? tags : ['Outros'] };
+                });
                 renderCatalog();
+                generateCategoryFilters();
             }, error => console.error("Erro ao buscar catálogo mestre:", error));
         }
 
@@ -273,11 +328,74 @@
             }
         }
         
-        // --- LÓGICA DE RENDERIZAÇÃO ---
+        // --- LÓGICA DE FILTROS E RENDERIZAÇÃO ---
+
+        function handleFilterChange() {
+            filterState.searchTerm = searchInput.value.toLowerCase();
+            filterState.sort = sortSelect.value;
+            renderCurrentTab();
+        }
+
+        function handleCategoryClick(e) {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            filterState.category = button.dataset.category;
+            
+            document.querySelectorAll('#category-filters-container button').forEach(btn => {
+                btn.classList.remove('filter-button-active');
+            });
+            button.classList.add('filter-button-active');
+            
+            renderCurrentTab();
+        }
+
+        function applyFiltersAndSort(list) {
+            let filteredList = [...list];
+
+            // 1. Filtrar por busca
+            if (filterState.searchTerm) {
+                filteredList = filteredList.filter(gift => 
+                    gift.name.toLowerCase().includes(filterState.searchTerm) ||
+                    (gift.description && gift.description.toLowerCase().includes(filterState.searchTerm))
+                );
+            }
+
+            // 2. Filtrar por categoria
+            if (filterState.category !== 'todos') {
+                filteredList = filteredList.filter(gift => gift.tags && gift.tags.includes(filterState.category));
+            }
+
+            // 3. Ordenar
+            switch (filterState.sort) {
+                case 'name-asc':
+                    filteredList.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'price-asc':
+                    filteredList.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-desc':
+                    filteredList.sort((a, b) => b.price - a.price);
+                    break;
+                case 'default':
+                    if (activeTab === 'my-list') {
+                        filteredList.sort((a, b) => (a.createdAt?.toDate() || 0) - (b.createdAt?.toDate() || 0));
+                    } else {
+                        filteredList.sort((a, b) => a.name.localeCompare(b.name));
+                    }
+                    break;
+            }
+            return filteredList;
+        }
+
         function renderUserGiftList() {
+            const processedGifts = applyFiltersAndSort(userGifts);
             userGiftListContainer.innerHTML = '';
+            
             noGiftsMessage.classList.toggle('hidden', userGifts.length > 0);
-            userGifts.forEach(gift => {
+            noFilterResultsMessage.classList.toggle('hidden', processedGifts.length > 0 || userGifts.length === 0);
+
+            processedGifts.forEach(gift => {
                 const card = createGiftCard(gift, 'user-list');
                 userGiftListContainer.appendChild(card);
             });
@@ -285,17 +403,44 @@
         }
 
         function renderCatalog() {
+            const processedGifts = applyFiltersAndSort(masterCatalogGifts);
             catalogListContainer.innerHTML = '';
+            
             const userGiftNamesFromCatalog = new Set(userGifts.filter(g => g.fromCatalog).map(g => g.name));
 
-            masterCatalogGifts.forEach(gift => {
+            processedGifts.forEach(gift => {
                 const isAlreadyAdded = userGiftNamesFromCatalog.has(gift.name);
                 const card = createGiftCard(gift, 'catalog', isAlreadyAdded);
                 catalogListContainer.appendChild(card);
             });
         }
         
+        function generateCategoryFilters() {
+            const allTags = new Set();
+            masterCatalogGifts.forEach(gift => {
+                if(gift.tags) {
+                    gift.tags.forEach(tag => allTags.add(tag));
+                }
+            });
+
+            const sortedTags = ['Todos', ...Array.from(allTags).sort()];
+            categoryFiltersContainer.innerHTML = sortedTags.map(tag => {
+                const value = tag === 'Todos' ? 'todos' : tag;
+                const isActive = value === filterState.category ? 'filter-button-active' : '';
+                return `<button data-category="${value}" class="px-3 py-1 border rounded-full text-sm font-medium transition-colors hover:bg-gray-200 ${isActive}">${tag}</button>`;
+            }).join('');
+        }
+        
+        function renderCurrentTab() {
+            if (activeTab === 'my-list') {
+                renderUserGiftList();
+            } else {
+                renderCatalog();
+            }
+        }
+
         function switchTab(tabName) {
+            activeTab = tabName;
             if (tabName === 'my-list') {
                 myListContent.classList.remove('hidden');
                 catalogContent.classList.add('hidden');
@@ -309,6 +454,7 @@
                 myListTab.classList.remove('tab-active');
                 catalogTab.classList.add('tab-active');
             }
+            renderCurrentTab();
         }
 
         // --- LÓGICA DO MODAL E FORMULÁRIO ---
@@ -353,7 +499,7 @@
             submitButton.textContent = 'A salvar...';
 
             try {
-                let imageUrl = giftImageUrlInput.value; // Começa com a URL existente (se houver)
+                let imageUrl = giftImageUrlInput.value; 
 
                 if (selectedFile) {
                     const storageRef = ref(storage, `users/${currentUser.uid}/gift_images/${Date.now()}_${selectedFile.name}`);
@@ -415,7 +561,7 @@
             imageFilename.textContent = file.name;
             imageUploadPrompt.classList.add('hidden');
             imagePreviewContainer.classList.remove('hidden');
-            giftImageUrlInput.value = ''; // Limpa a URL antiga se um novo ficheiro for selecionado
+            giftImageUrlInput.value = '';
         }
 
         function resetUploader() {
