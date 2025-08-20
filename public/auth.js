@@ -22,7 +22,8 @@ import {
     getDoc,
     setDoc,
     deleteDoc,
-    updateDoc
+    updateDoc,
+    orderBy // Adicionado para consistência, já que é usado em admin.html
 } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 // IMPORTAÇÕES DO STORAGE (ARMAZENAMENTO DE ARQUIVOS)
 import { 
@@ -36,10 +37,10 @@ import {
 // A configuração do seu projeto Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY",
-  authDomain: "simperfeito.com",
+  // *** CORREÇÃO CRÍTICA AQUI ***
+  authDomain: "simperfeito.firebaseapp.com",
   projectId: "simperfeito",
-  // *** CORREÇÃO CRÍTICA AQUI: O endereço do bucket foi atualizado para corresponder ao seu projeto. ***
-  storageBucket: "simperfeito.firebasestorage.app",
+  storageBucket: "simperfeito.appspot.com",
   messagingSenderId: "276559476496",
   appId: "1:276559476496:web:c811781762486bb5001795",
   measurementId: "G-CB5X7JY7Y6"
@@ -116,6 +117,7 @@ export {
     setDoc,
     deleteDoc,
     updateDoc,
+    orderBy,
     // Funções do Storage (Armazenamento)
     storage,
     ref,
