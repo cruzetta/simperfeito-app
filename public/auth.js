@@ -35,12 +35,12 @@ import {
 
 
 // A configuração do seu projeto Firebase
+// ** CORREÇÃO: Atualizei o authDomain e storageBucket para os valores corretos do projeto **
 const firebaseConfig = {
   apiKey: "AIzaSyDU3IGJzpm3QwCtqgh-zlALkTGmkWKolYY",
-  // *** CORREÇÃO CRÍTICA AQUI ***
-  authDomain: "simperfeito.firebaseapp.com",
+  authDomain: "simperfeito.com", // <-- CORRIGIDO
   projectId: "simperfeito",
-  storageBucket: "simperfeito.appspot.com",
+  storageBucket: "simperfeito.firebasestorage.app", // <-- CORRIGIDO
   messagingSenderId: "276559476496",
   appId: "1:276559476496:web:c811781762486bb5001795",
   measurementId: "G-CB5X7JY7Y6"
