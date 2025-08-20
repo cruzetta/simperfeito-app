@@ -101,10 +101,8 @@
 
             // --- ELEMENTOS DA UI ---
             const loadingScreen = document.getElementById('loading-screen');
-            const loadingText = document.getElementById('loading-text');
             const pageWrapper = document.getElementById('page-wrapper');
             const adminContainer = document.getElementById('admin-container');
-            const accessDeniedMessage = document.getElementById('access-denied');
             const logoutBtn = document.getElementById('logout-btn');
             const form = document.getElementById('admin-gift-form');
             const formTitle = document.getElementById('form-title');
@@ -117,8 +115,10 @@
             const catalogList = document.getElementById('catalog-list');
             const loadingMessage = document.getElementById('loading-message');
             const cancelEditBtn = document.getElementById('cancel-edit-btn');
-
-            const catalogCollectionRef = collection(db, 'gift_catalog_master');
+            
+            // *** CORREÇÃO APLICADA AQUI ***
+            const catalogCollectionName = 'gift_catalog_master';
+            const catalogCollectionRef = collection(db, catalogCollectionName);
 
             // --- FUNÇÃO PARA MOSTRAR O CONTEÚDO ---
             function showPageContent() {
@@ -128,16 +128,12 @@
 
             // --- AUTENTICAÇÃO E SEGURANÇA ---
             onAuthStateChanged(auth, user => {
-                // *** ALTERAÇÃO PRINCIPAL AQUI ***
-                // Se um usuário estiver logado, consideramos ele um admin.
-                // A verificação de UID foi removida.
                 if (user) {
                     adminContainer.classList.remove('hidden');
                     logoutBtn.classList.remove('hidden');
                     listenForCatalogChanges();
                     showPageContent();
                 } else {
-                    // Se não houver usuário, redireciona para a página de login.
                     window.location.href = '/admin-login.html'; 
                 }
             });
@@ -184,8 +180,14 @@
                 const giftId = giftIdInput.value;
                 submitBtn.disabled = true;
                 try {
-                    if (giftId) { await updateDoc(doc(db, 'catalog', giftId), giftData); alert("Produto atualizado com sucesso!"); } 
-                    else { await addDoc(catalogCollectionRef, giftData); alert("Produto adicionado com sucesso!"); }
+                    if (giftId) { 
+                        // *** CORREÇÃO APLICADA AQUI ***
+                        await updateDoc(doc(db, catalogCollectionName, giftId), giftData); 
+                        alert("Produto atualizado com sucesso!"); 
+                    } else { 
+                        await addDoc(catalogCollectionRef, giftData); 
+                        alert("Produto adicionado com sucesso!"); 
+                    }
                     resetFormState();
                 } catch (error) { console.error("Erro ao salvar produto: ", error); alert("Ocorreu um erro ao salvar o produto."); } 
                 finally { submitBtn.disabled = false; }
@@ -193,7 +195,8 @@
 
             async function prepareFormForEdit(id) {
                 try {
-                    const docSnap = await getDoc(doc(db, 'catalog', id));
+                    // *** CORREÇÃO APLICADA AQUI ***
+                    const docSnap = await getDoc(doc(db, catalogCollectionName, id));
                     if (docSnap.exists()) {
                         const gift = docSnap.data();
                         formTitle.textContent = 'Editar Produto';
@@ -222,7 +225,8 @@
             async function deleteGift(id) {
                 if (confirm("Tem certeza que deseja apagar este produto do catálogo?")) {
                     try {
-                        await deleteDoc(doc(db, 'catalog', id));
+                        // *** CORREÇÃO APLICADA AQUI ***
+                        await deleteDoc(doc(db, catalogCollectionName, id));
                         alert("Produto apagado com sucesso!");
                         if (giftIdInput.value === id) resetFormState();
                     } catch (error) { console.error("Erro ao apagar produto: ", error); alert("Ocorreu um erro ao apagar o produto."); }
@@ -243,7 +247,6 @@
             });
 
         } catch (error) {
-            // Se a importação de 'auth.js' falhar, mostra um erro claro.
             console.error("Falha ao carregar o módulo de autenticação:", error);
             const loadingText = document.getElementById('loading-text');
             loadingText.textContent = "Erro Crítico: Não foi possível carregar 'auth.js'. Verifique o caminho do ficheiro e o console para mais detalhes.";
