@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Sim, Perfeito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .image-card { position: relative; }
+        .image-card:hover .overlay { opacity: 1; }
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0,0,0,0.6);
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .copy-url-btn {
+             position: absolute;
+             top: 0.5rem;
+             right: 0.5rem;
+             background-color: rgba(0,0,0,0.7);
+             color: white;
+             border-radius: 9999px;
+             padding: 0.5rem;
+             cursor: pointer;
+        }
+         .copy-url-btn:hover {
+            background-color: #EC4899;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-state" class="min-h-screen flex items-center justify-center">
+        <p class="text-lg text-gray-500">A carregar painel de administração...</p>
+    </div>
+
+    <div id="admin-content" class="hidden fade-in">
+        <header class="flex items-center justify-between h-16 px-6 bg-white border-b sticky top-0 z-20 shadow-sm">
+            <span class="text-xl font-bold text-gray-800 font-display">Painel Administrativo</span>
+            <button id="logout-button" class="bg-red-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">Sair</button>
+        </header>
+
+        <main class="p-4 sm:p-6 md:p-8">
+            <div class="max-w-7xl mx-auto space-y-8">
+
+                <section id="gift-photos-section" class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Banco de Imagens para Presentes</h3>
+                    <p class="text-sm text-gray-500 mb-4">Faça o upload das imagens aqui. Depois, copie a URL e cole no campo "URL da Imagem" ao criar ou editar um presente na <a href="/listadepresentes.html" target="_blank" class="text-pink-500 underline">Lista de Presentes</a>.</p>
+
+                    <div class="mb-6">
+                        <label for="gift-image-upload" class="block text-sm font-medium text-gray-700 mb-1">Adicionar Nova Imagem</label>
+                        <input type="file" id="gift-image-upload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" multiple>
+                        <button id="upload-gift-images-btn" class="mt-2 bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors">Enviar Imagens</button>
+                    </div>
+                     <div id="gift-images-gallery-loader" class="text-center py-4">A carregar imagens...</div>
+                    <div id="gift-images-gallery" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        </div>
+                </section>
+
+                <section id="event-photos-section" class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Fotos da Página do Evento</h3>
+                    <p class="text-sm text-gray-500 mb-4">Estas são as imagens que aparecem no carrossel da sua <a href="/pagina-evento.html" target="_blank" class="text-pink-500 underline">Página do Evento</a>.</p>
+                     <div id="event-images-gallery-loader" class="text-center py-4">A carregar imagens...</div>
+                    <div id="event-images-gallery" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="hidden fixed bottom-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg z-50"></div>
+
+    <script type="module">
+        import { auth, onAuthStateChanged, signOut, storage, db } from './auth.js';
+        import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        const loadingState = document.getElementById('loading-state');
+        const adminContent = document.getElementById('admin-content');
+        const logoutButton = document.getElementById('logout-button');
+        const toast = document.getElementById('toast');
+
+        // Seção de Presentes
+        const giftImageUpload = document.getElementById('gift-image-upload');
+        const uploadGiftImagesBtn = document.getElementById('upload-gift-images-btn');
+        const giftImagesGallery = document.getElementById('gift-images-gallery');
+        const giftImagesLoader = document.getElementById('gift-images-gallery-loader');
+
+        // Seção de Evento
+        const eventImagesGallery = document.getElementById('event-images-gallery');
+        const eventImagesLoader = document.getElementById('event-images-gallery-loader');
+
+        let currentUser;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user && !user.isAnonymous) {
+                currentUser = user;
+                initializeAdminPanel();
+            } else {
+                window.location.href = '/login.html';
+            }
+        });
+
+        function initializeAdminPanel() {
+            loadingState.classList.add('hidden');
+            adminContent.classList.remove('hidden');
+
+            loadGiftImages();
+            loadEventImages();
+
+            logoutButton.addEventListener('click', () => signOut(auth));
+            uploadGiftImagesBtn.addEventListener('click', handleGiftImageUpload);
+        }
+
+        // --- LÓGICA PARA IMAGENS DE PRESENTES ---
+
+        async function loadGiftImages() {
+            giftImagesLoader.style.display = 'block';
+            giftImagesGallery.innerHTML = '';
+            const imagesRef = ref(storage, `users/${currentUser.uid}/gift_images`);
+            try {
+                const res = await listAll(imagesRef);
+                if (res.items.length === 0) {
+                     giftImagesLoader.textContent = 'Nenhuma imagem encontrada. Comece por fazer o upload!';
+                     return;
+                }
+                const urls = await Promise.all(res.items.map(itemRef => getDownloadURL(itemRef)));
+                giftImagesGallery.innerHTML = urls.map((url, index) => createImageCard(url, res.items[index].fullPath, 'gift')).join('');
+                 giftImagesLoader.style.display = 'none';
+            } catch (error) {
+                console.error("Erro ao listar imagens de presentes:", error);
+                giftImagesLoader.textContent = 'Erro ao carregar imagens.';
+            }
+        }
+
+        async function handleGiftImageUpload() {
+            const files = giftImageUpload.files;
+            if (files.length === 0) {
+                showToast("Por favor, selecione pelo menos uma imagem.", true);
+                return;
+            }
+
+            showToast(`A enviar ${files.length} imagem(ns)...`, false, true); // keep open
+
+            const uploadPromises = Array.from(files).map(file => {
+                const imageRef = ref(storage, `users/${currentUser.uid}/gift_images/${Date.now()}-${file.name}`);
+                return uploadBytes(imageRef, file);
+            });
+
+            try {
+                await Promise.all(uploadPromises);
+                showToast("Imagens enviadas com sucesso!", false);
+                giftImageUpload.value = ''; // Limpa o input
+                loadGiftImages(); // Recarrega a galeria
+            } catch (error) {
+                console.error("Erro no upload:", error);
+                showToast("Ocorreu um erro no envio.", true);
+            }
+        }
+
+        // --- LÓGICA PARA IMAGENS DO EVENTO ---
+
+        async function loadEventImages() {
+             eventImagesLoader.style.display = 'block';
+            eventImagesGallery.innerHTML = '';
+            try {
+                const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
+                const docSnap = await getDoc(pageDataRef);
+
+                if (!docSnap.exists()) {
+                    eventImagesLoader.textContent = 'Dados da página do evento ainda não foram criados.';
+                    return;
+                }
+
+                const pageData = docSnap.data();
+                const headerImage = pageData.header?.imageUrl;
+                const galleryPhotos = pageData.gallery?.photos?.map(p => p.url) || [];
+
+                const allEventImages = [];
+                if (headerImage && !headerImage.includes('placehold.co')) {
+                    allEventImages.push(headerImage);
+                }
+                allEventImages.push(...galleryPhotos);
+
+                 if (allEventImages.length === 0) {
+                     eventImagesLoader.textContent = 'Nenhuma imagem configurada na página do evento.';
+                     return;
+                }
+
+                eventImagesGallery.innerHTML = allEventImages.map(url => createImageCard(url, null, 'event')).join('');
+                eventImagesLoader.style.display = 'none';
+
+            } catch (error) {
+                 console.error("Erro ao carregar imagens do evento:", error);
+                 eventImagesLoader.textContent = 'Erro ao carregar imagens.';
+            }
+        }
+
+
+        // --- FUNÇÕES AUXILIARES ---
+
+        function createImageCard(url, fullPath = null, type) {
+            const isEventPhoto = type === 'event';
+
+            return `
+                <div class="image-card aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                    <img src="${url}" alt="Imagem" class="w-full h-full object-cover">
+                     <button title="Copiar URL" class="copy-url-btn" onclick="copyToClipboard('${url}')">
+                        <svg class="w-4 h-4 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM5 11a1 1 0 100 2h4a1 1 0 100-2H5z" /></svg>
+                    </button>
+                    ${!isEventPhoto ? `
+                    <div class="overlay">
+                        <button title="Apagar Imagem" class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600" onclick="deleteImage('${fullPath}')">
+                            <svg class="w-5 h-5 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        window.copyToClipboard = (text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("URL copiada com sucesso!", false);
+            }, (err) => {
+                showToast("Falha ao copiar URL.", true);
+            });
+        }
+
+        window.deleteImage = async (fullPath) => {
+            if (!confirm("Tem a certeza de que quer apagar esta imagem? Esta ação não pode ser desfeita.")) {
+                return;
+            }
+            try {
+                const imageRef = ref(storage, fullPath);
+                await deleteObject(imageRef);
+                showToast("Imagem apagada com sucesso!", false);
+                loadGiftImages(); // Recarrega a galeria
+            } catch (error) {
+                console.error("Erro ao apagar imagem:", error);
+                showToast("Erro ao apagar a imagem.", true);
+            }
+        }
+
+        function showToast(message, isError = false, keepOpen = false) {
+            toast.textContent = message;
+            toast.classList.remove('hidden', 'bg-red-500', 'bg-green-500');
+            toast.classList.add(isError ? 'bg-red-500' : 'bg-green-500');
+            if (!keepOpen) {
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+    </script>
+
+</body>
+</html>
