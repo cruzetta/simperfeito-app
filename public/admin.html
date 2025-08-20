@@ -62,18 +62,18 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Imagem do Produto</label>
                             <div id="image-drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                                <div id="image-upload-prompt" class="space-y-1 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <div id="image-upload-prompt" class="space-y-1 text-center cursor-pointer">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 pointer-events-none" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                    <div class="flex text-sm text-gray-600 justify-center">
+                                    <div class="flex text-sm text-gray-600 justify-center pointer-events-none">
                                         <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                                             <span>Carregue um ficheiro</span>
                                             <input id="file-upload" name="file-upload" type="file" class="sr-only" accept="image/png, image/jpeg, image/webp">
                                         </label>
                                         <p class="pl-1">ou arraste e solte</p>
                                     </div>
-                                    <p class="text-xs text-gray-500">PNG, JPG, WEBP até 2MB</p>
+                                    <p class="text-xs text-gray-500 pointer-events-none">PNG, JPG, WEBP até 2MB</p>
                                 </div>
                                 <div id="image-preview-container" class="hidden text-center">
                                     <img id="image-preview" src="" alt="Pré-visualização da imagem" class="mx-auto max-h-40 rounded-md">
@@ -100,12 +100,10 @@
         </main>
     </div>
 
-    <!-- ** NOVO: Elementos para Notificações e Modais ** -->
     <div id="toast-notification" class="hidden fixed bottom-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform-gpu translate-x-full">
         <p id="toast-message"></p>
     </div>
     <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-50 flex items-center justify-center p-4">
-        <!-- O conteúdo do modal de confirmação será injetado aqui via JS -->
     </div>
 
 
@@ -169,14 +167,13 @@
             pageWrapper.classList.remove('hidden');
             loadingScreen.style.display = 'none';
 
-            // ** NOVO: Função para mostrar notificações (toast) **
             function showToast(message, isError = false) {
                 const toast = document.getElementById('toast-notification');
                 const toastMessage = document.getElementById('toast-message');
                 if (!toast || !toastMessage) return;
 
                 toastMessage.textContent = message;
-                toast.style.backgroundColor = isError ? '#ef4444' : '#22c55e'; // red-500 ou green-500
+                toast.style.backgroundColor = isError ? '#ef4444' : '#22c55e';
                 
                 toast.classList.remove('hidden', 'translate-x-full');
                 toast.classList.add('translate-x-0');
@@ -187,7 +184,6 @@
                 }, 4000);
             }
 
-            // ** NOVO: Função para mostrar modal de confirmação **
             function showConfirmModal(message, onConfirm) {
                 const confirmModalEl = document.getElementById('confirm-modal');
                 if (!confirmModalEl) return;
@@ -211,14 +207,13 @@
                 });
             }
 
-            // --- LÓGICA DO UPLOADER DE IMAGEM (ATUALIZADA com showToast) ---
             const handleFileSelect = (file) => {
                 if (!file) return;
                 if (!file.type.startsWith('image/')) {
                     showToast('Por favor, selecione um ficheiro de imagem (PNG, JPG, WEBP).', true);
                     return;
                 }
-                if (file.size > 2 * 1024 * 1024) { // Limite de 2MB
+                if (file.size > 2 * 1024 * 1024) {
                     showToast('O ficheiro é muito grande. O limite é de 2MB.', true);
                     return;
                 }
@@ -230,7 +225,9 @@
                 giftImageUrlInput.value = '';
             };
 
-            imageDropZone.addEventListener('click', () => fileUploadInput.click());
+            // ** CORREÇÃO: O clique para abrir a janela de ficheiros agora é mais específico **
+            // Apenas a área de "prompt" (antes de carregar a imagem) será clicável.
+            imageUploadPrompt.addEventListener('click', () => fileUploadInput.click());
             fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
             
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -254,7 +251,6 @@
                 imagePreviewContainer.classList.add('hidden');
             });
 
-            // ** CORRIGIDO: Lógica do formulário refatorada para maior robustez **
             async function handleFormSubmit(e) {
                 e.preventDefault();
                 const giftId = giftIdInput.value;
@@ -298,12 +294,10 @@
                     showToast(error.message || "Ocorreu um erro ao salvar o produto.", true);
                 } finally {
                     submitBtn.disabled = false;
-                    // Restaura o texto correto do botão, mesmo em caso de erro na edição
                     submitBtn.textContent = giftIdInput.value ? 'Atualizar Produto' : 'Salvar Produto';
                 }
             }
             
-            // --- PREPARAR FORMULÁRIO PARA EDIÇÃO (ATUALIZADO com showToast) ---
             async function prepareFormForEdit(id) {
                 try {
                     const docSnap = await getDoc(doc(db, catalogCollectionName, id));
@@ -378,7 +372,6 @@
                 });
             }
 
-            // ** CORRIGIDO: Função de apagar com modal de confirmação **
             async function deleteGift(id) {
                 showConfirmModal("Tem a certeza de que deseja apagar este produto?", async () => {
                     try {
