@@ -75,21 +75,41 @@
     <script type="module">
         import { auth, onAuthStateChanged, signOut, db, collection, addDoc, onSnapshot, query, doc, getDoc, deleteDoc, updateDoc, orderBy } from './auth.js';
 
-        // --- LÓGICA DE GUARDA DE AUTENTICAÇÃO SIMPLIFICADA ---
+        // --- LÓGICA DE GUARDA DE AUTENTICAÇÃO ROBUSTA ---
         const loadingScreen = document.getElementById('loading-screen');
         const pageWrapper = document.getElementById('page-wrapper');
 
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe(); 
-            
-            if (user) {
-                // SUCESSO: O usuário está logado. Não importa quem seja.
-                initializeAdminPanel();
-            } else {
-                // FALHA: Não há usuário logado. Redireciona para o login.
+        // Esta função cria uma "Promessa" que só é resolvida quando o Firebase
+        // dá uma resposta definitiva sobre o status do login.
+        const getCurrentUser = () => {
+            return new Promise((resolve, reject) => {
+                const unsubscribe = onAuthStateChanged(auth, user => {
+                    unsubscribe(); // Para de ouvir após a primeira resposta
+                    resolve(user);
+                }, reject);
+            });
+        };
+
+        // Função principal que espera pela resposta antes de fazer qualquer coisa
+        (async () => {
+            try {
+                // Espera a Promessa ser resolvida
+                const user = await getCurrentUser();
+                
+                if (user) {
+                    // SUCESSO: O usuário está logado. O painel pode ser inicializado.
+                    initializeAdminPanel();
+                } else {
+                    // FALHA: Não há usuário logado. Redireciona para o login.
+                    window.location.href = '/admin-login.html';
+                }
+            } catch (error) {
+                // Em caso de qualquer erro na verificação, redireciona para o login por segurança.
+                console.error('Erro durante a verificação de autenticação:', error);
                 window.location.href = '/admin-login.html';
             }
-        });
+        })();
+
 
         function initializeAdminPanel() {
             const logoutBtn = document.getElementById('logout-btn');
