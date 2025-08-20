@@ -11,10 +11,13 @@
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
             transition: all 0.3s ease-in-out;
         }
-        /* Estilo para a área de arrastar e soltar quando um ficheiro está sobre ela */
         .drag-over {
             border-color: #3b82f6; /* blue-500 */
             background-color: #eff6ff; /* blue-50 */
+        }
+        /* Estilo para a notificação (toast) */
+        #toast-notification {
+            transition: transform 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -42,7 +45,7 @@
                     <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Adicionar Novo Produto</h2>
                     <form id="admin-gift-form" class="space-y-4">
                         <input type="hidden" id="gift-id">
-                        <input type="hidden" id="gift-image-url"> <!-- Campo oculto para guardar o URL da imagem -->
+                        <input type="hidden" id="gift-image-url">
                         <div>
                             <label for="gift-name" class="block text-sm font-medium text-gray-700">Nome do Produto</label>
                             <input type="text" id="gift-name" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
@@ -56,7 +59,6 @@
                             <input type="number" id="gift-price" step="0.01" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
                         </div>
                         
-                        <!-- NOVO UPLOADER DE IMAGEM -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Imagem do Produto</label>
                             <div id="image-drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
@@ -98,8 +100,16 @@
         </main>
     </div>
 
+    <!-- ** NOVO: Elementos para Notificações e Modais ** -->
+    <div id="toast-notification" class="hidden fixed bottom-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform-gpu translate-x-full">
+        <p id="toast-message"></p>
+    </div>
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full z-50 flex items-center justify-center p-4">
+        <!-- O conteúdo do modal de confirmação será injetado aqui via JS -->
+    </div>
+
+
     <script type="module">
-        // Importa todas as funções necessárias, incluindo as do Storage
         import { auth, onAuthStateChanged, signOut, db, storage, ref, uploadBytes, getDownloadURL, collection, addDoc, onSnapshot, query, doc, getDoc, deleteDoc, updateDoc, orderBy } from './auth.js';
 
         const loadingScreen = document.getElementById('loading-screen');
@@ -130,7 +140,6 @@
 
 
         function initializeAdminPanel() {
-            // Seletores de elementos existentes
             const logoutBtn = document.getElementById('logout-btn');
             const form = document.getElementById('admin-gift-form');
             const formTitle = document.getElementById('form-title');
@@ -143,7 +152,6 @@
             const loadingMessage = document.getElementById('loading-message');
             const cancelEditBtn = document.getElementById('cancel-edit-btn');
             
-            // Novos seletores para o uploader de imagem
             const imageDropZone = document.getElementById('image-drop-zone');
             const imageUploadPrompt = document.getElementById('image-upload-prompt');
             const imagePreviewContainer = document.getElementById('image-preview-container');
@@ -153,7 +161,7 @@
             const removeImageBtn = document.getElementById('remove-image-btn');
             const giftImageUrlInput = document.getElementById('gift-image-url');
 
-            let selectedFile = null; // Variável para guardar o ficheiro selecionado
+            let selectedFile = null;
 
             const catalogCollectionName = 'gift_catalog_master';
             const catalogCollectionRef = collection(db, catalogCollectionName);
@@ -161,15 +169,57 @@
             pageWrapper.classList.remove('hidden');
             loadingScreen.style.display = 'none';
 
-            // --- LÓGICA DO UPLOADER DE IMAGEM ---
+            // ** NOVO: Função para mostrar notificações (toast) **
+            function showToast(message, isError = false) {
+                const toast = document.getElementById('toast-notification');
+                const toastMessage = document.getElementById('toast-message');
+                if (!toast || !toastMessage) return;
+
+                toastMessage.textContent = message;
+                toast.style.backgroundColor = isError ? '#ef4444' : '#22c55e'; // red-500 ou green-500
+                
+                toast.classList.remove('hidden', 'translate-x-full');
+                toast.classList.add('translate-x-0');
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-0');
+                    toast.classList.add('translate-x-full');
+                }, 4000);
+            }
+
+            // ** NOVO: Função para mostrar modal de confirmação **
+            function showConfirmModal(message, onConfirm) {
+                const confirmModalEl = document.getElementById('confirm-modal');
+                if (!confirmModalEl) return;
+
+                confirmModalEl.innerHTML = `
+                    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-auto">
+                        <h3 class="text-lg font-medium text-gray-900">Confirmar Ação</h3>
+                        <p class="mt-2 text-sm text-gray-600">${message}</p>
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <button id="modal-cancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
+                            <button id="modal-confirm" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar</button>
+                        </div>
+                    </div>`;
+
+                confirmModalEl.classList.remove('hidden');
+                const closeModal = () => confirmModalEl.classList.add('hidden');
+                document.getElementById('modal-cancel').addEventListener('click', closeModal);
+                document.getElementById('modal-confirm').addEventListener('click', () => {
+                    onConfirm();
+                    closeModal();
+                });
+            }
+
+            // --- LÓGICA DO UPLOADER DE IMAGEM (ATUALIZADA com showToast) ---
             const handleFileSelect = (file) => {
                 if (!file) return;
                 if (!file.type.startsWith('image/')) {
-                    alert('Por favor, selecione um ficheiro de imagem (PNG, JPG, WEBP).');
+                    showToast('Por favor, selecione um ficheiro de imagem (PNG, JPG, WEBP).', true);
                     return;
                 }
                 if (file.size > 2 * 1024 * 1024) { // Limite de 2MB
-                    alert('O ficheiro é muito grande. O limite é de 2MB.');
+                    showToast('O ficheiro é muito grande. O limite é de 2MB.', true);
                     return;
                 }
                 selectedFile = file;
@@ -177,27 +227,21 @@
                 imageFilename.textContent = file.name;
                 imageUploadPrompt.classList.add('hidden');
                 imagePreviewContainer.classList.remove('hidden');
-                giftImageUrlInput.value = ''; // Limpa o URL antigo se um novo ficheiro for selecionado
+                giftImageUrlInput.value = '';
             };
 
             imageDropZone.addEventListener('click', () => fileUploadInput.click());
             fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
             
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                imageDropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
+                imageDropZone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
             });
-
             ['dragenter', 'dragover'].forEach(eventName => {
                 imageDropZone.addEventListener(eventName, () => imageDropZone.classList.add('drag-over'));
             });
-
             ['dragleave', 'drop'].forEach(eventName => {
                 imageDropZone.addEventListener(eventName, () => imageDropZone.classList.remove('drag-over'));
             });
-
             imageDropZone.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
 
             removeImageBtn.addEventListener('click', () => {
@@ -210,61 +254,61 @@
                 imagePreviewContainer.classList.add('hidden');
             });
 
-            // --- LÓGICA DO FORMULÁRIO (ATUALIZADA) ---
+            // ** CORRIGIDO: Lógica do formulário refatorada para maior robustez **
             async function handleFormSubmit(e) {
                 e.preventDefault();
                 const giftId = giftIdInput.value;
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'A guardar...';
 
-                let imageUrl = giftImageUrlInput.value; // Começa com o URL existente (se houver)
-
                 try {
-                    // 1. Faz o upload da nova imagem, se uma foi selecionada
+                    const giftName = giftNameInput.value.trim();
+                    const giftPrice = parseFloat(giftPriceInput.value);
+                    const giftDescription = giftDescriptionInput.value.trim();
+                    let imageUrl = giftImageUrlInput.value;
+
+                    if (!giftName || isNaN(giftPrice) || giftPrice < 0) {
+                        throw new Error("Por favor, preencha o nome e um valor válido.");
+                    }
+
                     if (selectedFile) {
                         const storageRef = ref(storage, `catalog_images/${Date.now()}_${selectedFile.name}`);
                         const snapshot = await uploadBytes(storageRef, selectedFile);
                         imageUrl = await getDownloadURL(snapshot.ref);
                     }
 
-                    // 2. Prepara os dados para o Firestore
-                    const giftData = { 
-                        name: giftNameInput.value.trim(), 
-                        description: giftDescriptionInput.value.trim(), 
-                        price: parseFloat(giftPriceInput.value), 
-                        imageUrl: imageUrl || "" 
+                    const giftData = {
+                        name: giftName,
+                        description: giftDescription,
+                        price: giftPrice,
+                        imageUrl: imageUrl || ""
                     };
 
-                    if (!giftData.name || isNaN(giftData.price) || giftData.price < 0) {
-                        alert("Por favor, preencha o nome e um valor válido.");
-                        return;
-                    }
-
-                    // 3. Guarda os dados no Firestore
-                    if (giftId) { 
-                        await updateDoc(doc(db, catalogCollectionName, giftId), giftData); 
-                        alert("Produto atualizado com sucesso!"); 
-                    } else { 
-                        await addDoc(catalogCollectionRef, giftData); 
-                        alert("Produto adicionado com sucesso!"); 
+                    if (giftId) {
+                        await updateDoc(doc(db, catalogCollectionName, giftId), giftData);
+                        showToast("Produto atualizado com sucesso!");
+                    } else {
+                        await addDoc(catalogCollectionRef, giftData);
+                        showToast("Produto adicionado com sucesso!");
                     }
                     resetFormState();
 
-                } catch (error) { 
-                    console.error("Erro ao salvar produto: ", error); 
-                    alert("Ocorreu um erro ao salvar o produto."); 
-                } finally { 
+                } catch (error) {
+                    console.error("Erro ao salvar produto: ", error);
+                    showToast(error.message || "Ocorreu um erro ao salvar o produto.", true);
+                } finally {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = giftId ? 'Atualizar Produto' : 'Salvar Produto';
+                    // Restaura o texto correto do botão, mesmo em caso de erro na edição
+                    submitBtn.textContent = giftIdInput.value ? 'Atualizar Produto' : 'Salvar Produto';
                 }
             }
             
-            // --- PREPARAR FORMULÁRIO PARA EDIÇÃO (ATUALIZADO) ---
+            // --- PREPARAR FORMULÁRIO PARA EDIÇÃO (ATUALIZADO com showToast) ---
             async function prepareFormForEdit(id) {
                 try {
                     const docSnap = await getDoc(doc(db, catalogCollectionName, id));
                     if (docSnap.exists()) {
-                        resetFormState(); // Limpa o formulário antes de preencher
+                        resetFormState();
                         const gift = docSnap.data();
                         formTitle.textContent = 'Editar Produto';
                         submitBtn.textContent = 'Atualizar Produto';
@@ -284,25 +328,25 @@
                         cancelEditBtn.classList.remove('hidden');
                         form.classList.add('form-highlight');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                    } else { alert("Produto não encontrado."); }
-                } catch (error) { console.error("Erro ao buscar produto para edição: ", error); }
+                    } else { 
+                        showToast("Produto não encontrado.", true);
+                    }
+                } catch (error) { 
+                    console.error("Erro ao buscar produto para edição: ", error);
+                    showToast("Erro ao carregar dados para edição.", true);
+                }
             }
 
-            // --- LIMPAR ESTADO DO FORMULÁRIO (ATUALIZADO) ---
             function resetFormState() {
                 formTitle.textContent = 'Adicionar Novo Produto';
                 submitBtn.textContent = 'Salvar Produto';
                 form.reset();
                 giftIdInput.value = '';
-                
-                // Limpa o uploader de imagem
-                removeImageBtn.click(); 
-                
+                removeImageBtn.click();
                 cancelEditBtn.classList.add('hidden');
                 form.classList.remove('form-highlight');
             }
 
-            // --- FUNÇÕES RESTANTES (INALTERADAS) ---
             function listenForCatalogChanges() {
                 const q = query(catalogCollectionRef, orderBy("name"));
                 onSnapshot(q, (snapshot) => {
@@ -334,14 +378,18 @@
                 });
             }
 
+            // ** CORRIGIDO: Função de apagar com modal de confirmação **
             async function deleteGift(id) {
-                if (confirm("Tem certeza que deseja apagar este produto?")) {
+                showConfirmModal("Tem a certeza de que deseja apagar este produto?", async () => {
                     try {
                         await deleteDoc(doc(db, catalogCollectionName, id));
-                        alert("Produto apagado com sucesso!");
+                        showToast("Produto apagado com sucesso!");
                         if (giftIdInput.value === id) resetFormState();
-                    } catch (error) { console.error("Erro ao apagar produto: ", error); alert("Ocorreu um erro ao apagar o produto."); }
-                }
+                    } catch (error) {
+                        console.error("Erro ao apagar produto: ", error);
+                        showToast("Ocorreu um erro ao apagar o produto.", true);
+                    }
+                });
             }
 
             form.addEventListener('submit', handleFormSubmit);
