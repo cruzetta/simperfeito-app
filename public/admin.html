@@ -7,10 +7,9 @@
     <!-- Tailwind CSS para estilização rápida -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Adicionado: Esconde o corpo da página por defeito para evitar o "piscar" */
-        body {
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
+        /* Esconde o conteúdo principal por defeito */
+        #page-wrapper {
+            display: none;
         }
         .form-highlight {
             border: 2px solid #3b82f6;
@@ -21,272 +20,248 @@
 </head>
 <body class="bg-gray-100 font-sans">
 
-    <!-- Ecrã de Carregamento -->
-    <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
-        <p class="text-gray-600">A verificar autenticação...</p>
+    <!-- Ecrã de Carregamento (visível por defeito) -->
+    <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col items-center justify-center z-50">
+        <svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p id="loading-text" class="text-gray-600">A verificar autenticação...</p>
     </div>
 
-    <!-- Cabeçalho da página -->
-    <header class="bg-white shadow-md">
-        <div class="max-w-5xl mx-auto py-4 px-6 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-800">Gerenciador de Catálogo de Presentes</h1>
-            <button id="logout-btn" class="hidden px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition-colors">Sair</button>
-        </div>
-    </header>
+    <!-- Wrapper para todo o conteúdo da página -->
+    <div id="page-wrapper">
+        <!-- Cabeçalho da página -->
+        <header class="bg-white shadow-md">
+            <div class="max-w-5xl mx-auto py-4 px-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">Gerenciador de Catálogo de Presentes</h1>
+                <button id="logout-btn" class="hidden px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition-colors">Sair</button>
+            </div>
+        </header>
 
-    <!-- Conteúdo principal -->
-    <main class="max-w-5xl mx-auto p-6">
-        
-        <!-- Mensagem de Acesso Negado (inicialmente oculta) -->
-        <div id="access-denied" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
-            <p class="font-bold">Acesso Negado</p>
-            <p>Você não tem permissão para acessar esta página. Apenas administradores autorizados.</p>
-        </div>
-
-        <!-- Container do Admin (inicialmente oculto) -->
-        <div id="admin-container" class="hidden">
-            <!-- Seção do Formulário para Adicionar/Editar -->
-            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Adicionar Novo Produto</h2>
-                <form id="admin-gift-form" class="space-y-4">
-                    <input type="hidden" id="gift-id">
-                    <div>
-                        <label for="gift-name" class="block text-sm font-medium text-gray-700">Nome do Produto</label>
-                        <input type="text" id="gift-name" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="gift-description" class="block text-sm font-medium text-gray-700">Descrição</label>
-                        <textarea id="gift-description" rows="3" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required></textarea>
-                    </div>
-                    <div>
-                        <label for="gift-price" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
-                        <input type="number" id="gift-price" step="0.01" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="gift-image" class="block text-sm font-medium text-gray-700">URL da Imagem (Opcional)</label>
-                        <input type="url" id="gift-image" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="https://exemplo.com/imagem.jpg">
-                    </div>
-                    <div class="flex justify-end space-x-3 pt-2">
-                        <button type="button" id="cancel-edit-btn" class="hidden px-5 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">Cancelar Edição</button>
-                        <button type="submit" id="submit-btn" class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors">Salvar Produto</button>
-                    </div>
-                </form>
+        <!-- Conteúdo principal -->
+        <main class="max-w-5xl mx-auto p-6">
+            
+            <!-- Mensagem de Acesso Negado (inicialmente oculta) -->
+            <div id="access-denied" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                <p class="font-bold">Acesso Negado</p>
+                <p>Você não tem permissão para acessar esta página. Apenas administradores autorizados.</p>
             </div>
 
-            <!-- Seção da Lista de Produtos -->
-            <div>
-                <h2 class="text-xl font-semibold mb-4 text-gray-700">Produtos no Catálogo</h2>
-                <div id="catalog-list" class="space-y-3">
-                    <!-- Indicador de carregamento -->
-                    <p id="loading-message" class="text-gray-500">Carregando produtos...</p>
+            <!-- Container do Admin (inicialmente oculto) -->
+            <div id="admin-container" class="hidden">
+                <!-- Seção do Formulário para Adicionar/Editar -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                    <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Adicionar Novo Produto</h2>
+                    <form id="admin-gift-form" class="space-y-4">
+                        <input type="hidden" id="gift-id">
+                        <div>
+                            <label for="gift-name" class="block text-sm font-medium text-gray-700">Nome do Produto</label>
+                            <input type="text" id="gift-name" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="gift-description" class="block text-sm font-medium text-gray-700">Descrição</label>
+                            <textarea id="gift-description" rows="3" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required></textarea>
+                        </div>
+                        <div>
+                            <label for="gift-price" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
+                            <input type="number" id="gift-price" step="0.01" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label for="gift-image" class="block text-sm font-medium text-gray-700">URL da Imagem (Opcional)</label>
+                            <input type="url" id="gift-image" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="https://exemplo.com/imagem.jpg">
+                        </div>
+                        <div class="flex justify-end space-x-3 pt-2">
+                            <button type="button" id="cancel-edit-btn" class="hidden px-5 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">Cancelar Edição</button>
+                            <button type="submit" id="submit-btn" class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors">Salvar Produto</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Seção da Lista de Produtos -->
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Produtos no Catálogo</h2>
+                    <div id="catalog-list" class="space-y-3">
+                        <p id="loading-message" class="text-gray-500">A carregar produtos...</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <script type="module">
-        // Importa as funções do Firebase a partir do seu arquivo de configuração `auth.js`
-        import { 
-            auth, 
-            onAuthStateChanged,
-            signOut,
-            db,
-            collection,
-            addDoc,
-            onSnapshot,
-            query,
-            doc,
-            getDoc,
-            deleteDoc,
-            updateDoc,
-            orderBy 
-        } from './auth.js';
+        try {
+            // Tenta importar tudo o que é necessário
+            const { 
+                auth, 
+                onAuthStateChanged,
+                signOut,
+                db,
+                collection,
+                addDoc,
+                onSnapshot,
+                query,
+                doc,
+                getDoc,
+                deleteDoc,
+                updateDoc,
+                orderBy 
+            } = await import('./auth.js');
 
-        // --- ELEMENTOS DA UI ---
-        const loadingScreen = document.getElementById('loading-screen');
-        const adminContainer = document.getElementById('admin-container');
-        const accessDeniedMessage = document.getElementById('access-denied');
-        const logoutBtn = document.getElementById('logout-btn');
-        const form = document.getElementById('admin-gift-form');
-        const formTitle = document.getElementById('form-title');
-        const submitBtn = document.getElementById('submit-btn');
-        const giftIdInput = document.getElementById('gift-id');
-        const giftNameInput = document.getElementById('gift-name');
-        const giftDescriptionInput = document.getElementById('gift-description');
-        const giftPriceInput = document.getElementById('gift-price');
-        const giftImageInput = document.getElementById('gift-image');
-        const catalogList = document.getElementById('catalog-list');
-        const loadingMessage = document.getElementById('loading-message');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            // --- ELEMENTOS DA UI ---
+            const loadingScreen = document.getElementById('loading-screen');
+            const loadingText = document.getElementById('loading-text');
+            const pageWrapper = document.getElementById('page-wrapper');
+            const adminContainer = document.getElementById('admin-container');
+            const accessDeniedMessage = document.getElementById('access-denied');
+            const logoutBtn = document.getElementById('logout-btn');
+            const form = document.getElementById('admin-gift-form');
+            const formTitle = document.getElementById('form-title');
+            const submitBtn = document.getElementById('submit-btn');
+            const giftIdInput = document.getElementById('gift-id');
+            const giftNameInput = document.getElementById('gift-name');
+            const giftDescriptionInput = document.getElementById('gift-description');
+            const giftPriceInput = document.getElementById('gift-price');
+            const giftImageInput = document.getElementById('gift-image');
+            const catalogList = document.getElementById('catalog-list');
+            const loadingMessage = document.getElementById('loading-message');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
 
-        // Referência à coleção 'catalog' no Firestore
-        const catalogCollectionRef = collection(db, 'catalog');
+            const catalogCollectionRef = collection(db, 'catalog');
 
-        // --- FUNÇÃO PARA MOSTRAR O CONTEÚDO ---
-        function showPageContent() {
-            loadingScreen.style.display = 'none';
-            document.body.style.opacity = '1';
-        }
-
-        // --- AUTENTICAÇÃO E SEGURANÇA ---
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                // !!! IMPORTANTE: PASSO DE CONFIGURAÇÃO OBRIGATÓRIO !!!
-                const adminUID = "COLOQUE_SEU_UID_DE_ADMIN_AQUI"; 
-
-                if (user.uid === adminUID) {
-                    console.log("Admin autenticado. Carregando gerenciador.");
-                    adminContainer.classList.remove('hidden');
-                    logoutBtn.classList.remove('hidden');
-                    listenForCatalogChanges();
-                    showPageContent(); // Mostra o conteúdo da página
-                } else {
-                    console.error("Acesso negado. Este usuário não é um administrador.");
-                    accessDeniedMessage.classList.remove('hidden');
-                    showPageContent(); // Mostra a mensagem de acesso negado
-                    // Desloga o usuário não-admin para segurança
-                    signOut(auth);
-                }
-            } else {
-                // Se não houver usuário logado, redireciona para a página de login do admin.
-                console.log("Nenhum administrador logado. Redirecionando para a página de login...");
-                window.location.href = '/admin-login.html'; 
+            // --- FUNÇÃO PARA MOSTRAR O CONTEÚDO ---
+            function showPageContent() {
+                loadingScreen.style.display = 'none';
+                pageWrapper.style.display = 'block';
             }
-        });
 
-        // --- FUNÇÕES DE GERENCIAMENTO (CRUD) ---
-        function listenForCatalogChanges() {
-            const q = query(catalogCollectionRef, orderBy("name"));
-            onSnapshot(q, (snapshot) => {
-                loadingMessage.classList.add('hidden');
-                catalogList.innerHTML = ''; 
-                if (snapshot.empty) {
-                    catalogList.innerHTML = '<p class="text-gray-500">Nenhum produto no catálogo ainda. Adicione o primeiro no formulário acima.</p>';
-                    return;
-                }
-                snapshot.docs.forEach(doc => {
-                    const gift = { id: doc.id, ...doc.data() };
-                    const giftElement = document.createElement('div');
-                    giftElement.className = 'bg-white p-4 rounded-md shadow-sm flex justify-between items-center border';
-                    giftElement.innerHTML = `
-                        <div class="flex items-center gap-4">
-                            <img src="${gift.imageUrl || 'https://placehold.co/60x60/E0E7FF/3730A3?text=Img'}" alt="${gift.name}" class="w-12 h-12 object-cover rounded-md">
-                            <div>
-                                <p class="font-bold text-gray-800">${gift.name}</p>
-                                <p class="text-sm text-gray-600">R$ ${Number(gift.price).toFixed(2)}</p>
-                            </div>
-                        </div>
-                        <div class="space-x-3">
-                            <button data-id="${gift.id}" class="edit-btn text-blue-600 hover:text-blue-800 font-medium">Editar</button>
-                            <button data-id="${gift.id}" class="delete-btn text-red-600 hover:text-red-800 font-medium">Apagar</button>
-                        </div>
-                    `;
-                    catalogList.appendChild(giftElement);
-                });
-            }, error => {
-                console.error("Erro ao escutar por mudanças no catálogo: ", error);
-                catalogList.innerHTML = '<p class="text-red-500">Ocorreu um erro ao carregar os produtos.</p>';
-            });
-        }
+            // --- AUTENTICAÇÃO E SEGURANÇA ---
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    const adminUID = "COLOQUE_SEU_UID_DE_ADMIN_AQUI"; 
 
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const giftData = {
-                name: giftNameInput.value.trim(),
-                description: giftDescriptionInput.value.trim(),
-                price: parseFloat(giftPriceInput.value),
-                imageUrl: giftImageInput.value.trim() || ""
-            };
-            if (!giftData.name || isNaN(giftData.price) || giftData.price < 0) {
-                alert("Por favor, preencha o nome e um valor válido.");
-                return;
-            }
-            const giftId = giftIdInput.value;
-            submitBtn.disabled = true;
-            try {
-                if (giftId) {
-                    const giftRef = doc(db, 'catalog', giftId);
-                    await updateDoc(giftRef, giftData);
-                    alert("Produto atualizado com sucesso!");
-                } else {
-                    await addDoc(catalogCollectionRef, giftData);
-                    alert("Produto adicionado com sucesso!");
-                }
-                resetFormState();
-            } catch (error) {
-                console.error("Erro ao salvar produto: ", error);
-                alert("Ocorreu um erro ao salvar o produto. Verifique o console.");
-            } finally {
-                submitBtn.disabled = false;
-            }
-        }
-
-        async function prepareFormForEdit(id) {
-            try {
-                const giftRef = doc(db, 'catalog', id);
-                const docSnap = await getDoc(giftRef);
-                if (docSnap.exists()) {
-                    const gift = docSnap.data();
-                    formTitle.textContent = 'Editar Produto';
-                    submitBtn.textContent = 'Atualizar Produto';
-                    giftIdInput.value = id;
-                    giftNameInput.value = gift.name;
-                    giftDescriptionInput.value = gift.description;
-                    giftPriceInput.value = gift.price;
-                    giftImageInput.value = gift.imageUrl;
-                    cancelEditBtn.classList.remove('hidden');
-                    form.classList.add('form-highlight');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    console.error("Produto não encontrado para edição.");
-                    alert("Produto não encontrado. Pode ter sido apagado.");
-                }
-            } catch (error) {
-                console.error("Erro ao buscar produto para edição: ", error);
-            }
-        }
-
-        function resetFormState() {
-            formTitle.textContent = 'Adicionar Novo Produto';
-            submitBtn.textContent = 'Salvar Produto';
-            giftIdInput.value = '';
-            form.reset();
-            cancelEditBtn.classList.add('hidden');
-            form.classList.remove('form-highlight');
-        }
-
-        async function deleteGift(id) {
-            if (confirm("Tem certeza que deseja apagar este produto do catálogo? Esta ação não pode ser desfeita.")) {
-                try {
-                    const giftRef = doc(db, 'catalog', id);
-                    await deleteDoc(giftRef);
-                    alert("Produto apagado com sucesso!");
-                    if (giftIdInput.value === id) {
-                        resetFormState();
+                    if (user.uid === adminUID) {
+                        adminContainer.classList.remove('hidden');
+                        logoutBtn.classList.remove('hidden');
+                        listenForCatalogChanges();
+                        showPageContent();
+                    } else {
+                        accessDeniedMessage.classList.remove('hidden');
+                        showPageContent();
+                        signOut(auth);
                     }
-                } catch (error) {
-                    console.error("Erro ao apagar produto: ", error);
-                    alert("Ocorreu um erro ao apagar o produto.");
+                } else {
+                    window.location.href = '/admin-login.html'; 
+                }
+            });
+
+            // --- FUNÇÕES DE GERENCIAMENTO (CRUD) ---
+            function listenForCatalogChanges() {
+                const q = query(catalogCollectionRef, orderBy("name"));
+                onSnapshot(q, (snapshot) => {
+                    loadingMessage.style.display = 'none';
+                    catalogList.innerHTML = ''; 
+                    if (snapshot.empty) {
+                        catalogList.innerHTML = '<p class="text-gray-500">Nenhum produto no catálogo ainda. Adicione o primeiro no formulário acima.</p>';
+                        return;
+                    }
+                    snapshot.docs.forEach(doc => {
+                        const gift = { id: doc.id, ...doc.data() };
+                        const giftElement = document.createElement('div');
+                        giftElement.className = 'bg-white p-4 rounded-md shadow-sm flex justify-between items-center border';
+                        giftElement.innerHTML = `
+                            <div class="flex items-center gap-4">
+                                <img src="${gift.imageUrl || 'https://placehold.co/60x60/E0E7FF/3730A3?text=Img'}" alt="${gift.name}" class="w-12 h-12 object-cover rounded-md">
+                                <div>
+                                    <p class="font-bold text-gray-800">${gift.name}</p>
+                                    <p class="text-sm text-gray-600">R$ ${Number(gift.price).toFixed(2)}</p>
+                                </div>
+                            </div>
+                            <div class="space-x-3">
+                                <button data-id="${gift.id}" class="edit-btn text-blue-600 hover:text-blue-800 font-medium">Editar</button>
+                                <button data-id="${gift.id}" class="delete-btn text-red-600 hover:text-red-800 font-medium">Apagar</button>
+                            </div>
+                        `;
+                        catalogList.appendChild(giftElement);
+                    });
+                }, error => {
+                    console.error("Erro ao escutar por mudanças no catálogo: ", error);
+                    catalogList.innerHTML = '<p class="text-red-500">Ocorreu um erro ao carregar os produtos.</p>';
+                });
+            }
+
+            async function handleFormSubmit(e) {
+                e.preventDefault();
+                const giftData = { name: giftNameInput.value.trim(), description: giftDescriptionInput.value.trim(), price: parseFloat(giftPriceInput.value), imageUrl: giftImageInput.value.trim() || "" };
+                if (!giftData.name || isNaN(giftData.price) || giftData.price < 0) { alert("Por favor, preencha o nome e um valor válido."); return; }
+                const giftId = giftIdInput.value;
+                submitBtn.disabled = true;
+                try {
+                    if (giftId) { await updateDoc(doc(db, 'catalog', giftId), giftData); alert("Produto atualizado com sucesso!"); } 
+                    else { await addDoc(catalogCollectionRef, giftData); alert("Produto adicionado com sucesso!"); }
+                    resetFormState();
+                } catch (error) { console.error("Erro ao salvar produto: ", error); alert("Ocorreu um erro ao salvar o produto."); } 
+                finally { submitBtn.disabled = false; }
+            }
+
+            async function prepareFormForEdit(id) {
+                try {
+                    const docSnap = await getDoc(doc(db, 'catalog', id));
+                    if (docSnap.exists()) {
+                        const gift = docSnap.data();
+                        formTitle.textContent = 'Editar Produto';
+                        submitBtn.textContent = 'Atualizar Produto';
+                        giftIdInput.value = id;
+                        giftNameInput.value = gift.name;
+                        giftDescriptionInput.value = gift.description;
+                        giftPriceInput.value = gift.price;
+                        giftImageInput.value = gift.imageUrl;
+                        cancelEditBtn.classList.remove('hidden');
+                        form.classList.add('form-highlight');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else { alert("Produto não encontrado. Pode ter sido apagado."); }
+                } catch (error) { console.error("Erro ao buscar produto para edição: ", error); }
+            }
+
+            function resetFormState() {
+                formTitle.textContent = 'Adicionar Novo Produto';
+                submitBtn.textContent = 'Salvar Produto';
+                giftIdInput.value = '';
+                form.reset();
+                cancelEditBtn.classList.add('hidden');
+                form.classList.remove('form-highlight');
+            }
+
+            async function deleteGift(id) {
+                if (confirm("Tem certeza que deseja apagar este produto do catálogo?")) {
+                    try {
+                        await deleteDoc(doc(db, 'catalog', id));
+                        alert("Produto apagado com sucesso!");
+                        if (giftIdInput.value === id) resetFormState();
+                    } catch (error) { console.error("Erro ao apagar produto: ", error); alert("Ocorreu um erro ao apagar o produto."); }
                 }
             }
-        }
 
-        // --- EVENT LISTENERS ---
-        form.addEventListener('submit', handleFormSubmit);
-        cancelEditBtn.addEventListener('click', resetFormState);
-        catalogList.addEventListener('click', (e) => {
-            const target = e.target;
-            const id = target.dataset.id;
-            if (!id) return;
-            if (target.classList.contains('edit-btn')) {
-                prepareFormForEdit(id);
-            } else if (target.classList.contains('delete-btn')) {
-                deleteGift(id);
-            }
-        });
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth).catch(error => console.error("Erro ao fazer logout:", error));
-        });
+            // --- EVENT LISTENERS ---
+            form.addEventListener('submit', handleFormSubmit);
+            cancelEditBtn.addEventListener('click', resetFormState);
+            catalogList.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                if (!id) return;
+                if (e.target.classList.contains('edit-btn')) prepareFormForEdit(id);
+                else if (e.target.classList.contains('delete-btn')) deleteGift(id);
+            });
+            logoutBtn.addEventListener('click', () => {
+                signOut(auth).catch(error => console.error("Erro ao fazer logout:", error));
+            });
+
+        } catch (error) {
+            // Se a importação de 'auth.js' falhar, mostra um erro claro.
+            console.error("Falha ao carregar o módulo de autenticação:", error);
+            const loadingText = document.getElementById('loading-text');
+            loadingText.textContent = "Erro Crítico: Não foi possível carregar 'auth.js'. Verifique o caminho do ficheiro e o console para mais detalhes.";
+            loadingText.classList.add('text-red-500', 'font-semibold');
+        }
     </script>
 </body>
 </html>
