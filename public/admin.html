@@ -93,11 +93,11 @@
         <main class="p-4 sm:p-6 md:p-8">
             <div class="max-w-7xl mx-auto space-y-8">
 
-                <section id="manage-gifts-section" class="bg-white p-6 rounded-lg shadow-sm border">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Gerenciar Lista de Presentes</h3>
-                    <p class="text-sm text-gray-500 mb-4">Edite os presentes da sua lista, adicione ou altere as fotos diretamente aqui.</p>
-                    <div id="user-gift-list-loader" class="text-center py-4">A carregar a sua lista de presentes...</div>
-                    <div id="user-gift-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <section id="manage-catalog-section" class="bg-white p-6 rounded-lg shadow-sm border">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Gerenciar Catálogo de Presentes</h3>
+                    <p class="text-sm text-gray-500 mb-4">Edite as fotos dos presentes que aparecem no seu catálogo pessoal.</p>
+                    <div id="catalog-gift-list-loader" class="text-center py-4">A carregar o seu catálogo de presentes...</div>
+                    <div id="catalog-gift-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         </div>
                 </section>
 
@@ -128,7 +128,7 @@
 
     <div id="edit-gift-modal" class="modal">
         <div class="modal-content">
-            <h3 class="text-xl font-bold mb-4">Editar Foto do Presente</h3>
+            <h3 class="text-xl font-bold mb-4">Editar Foto do Presente do Catálogo</h3>
             <form id="edit-gift-form">
                 <input type="hidden" id="editing-gift-id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,8 +177,8 @@
         const adminContent = document.getElementById('admin-content');
         const logoutButton = document.getElementById('logout-button');
         const toast = document.getElementById('toast');
-        const userGiftListContainer = document.getElementById('user-gift-list');
-        const userGiftListLoader = document.getElementById('user-gift-list-loader');
+        const catalogGiftListContainer = document.getElementById('catalog-gift-list');
+        const catalogGiftListLoader = document.getElementById('catalog-gift-list-loader');
         const giftImageUpload = document.getElementById('gift-image-upload');
         const uploadGiftImagesBtn = document.getElementById('upload-gift-images-btn');
         const giftImagesGallery = document.getElementById('gift-images-gallery');
@@ -195,13 +195,12 @@
         const modalImageGallery = document.getElementById('modal-image-gallery');
 
         let currentUser;
-        let unsubscribeGiftsListener = null;
+        let unsubscribeCatalogListener = null;
 
         // --- Inicialização ---
         onAuthStateChanged(auth, (user) => {
             if (user && !user.isAnonymous) {
                 currentUser = user;
-                console.log("Admin autenticado:", currentUser.uid);
                 initializeAdminPanel();
             } else {
                 window.location.href = '/login.html';
@@ -212,7 +211,7 @@
             loadingState.classList.add('hidden');
             adminContent.classList.remove('hidden');
 
-            loadUserGifts();
+            loadUserCatalogGifts();
             loadGiftImages();
             loadEventImages();
             
@@ -222,41 +221,38 @@
             editGiftForm.addEventListener('submit', handleGiftUpdate);
         }
 
-        // --- Lógica para Gerenciar a Lista de Presentes do Usuário ---
-        function loadUserGifts() {
-            if (unsubscribeGiftsListener) unsubscribeGiftsListener();
+        // --- Lógica para Gerenciar o CATÁLOGO de Presentes do Usuário ---
+        function loadUserCatalogGifts() {
+            if (unsubscribeCatalogListener) unsubscribeCatalogListener();
 
-            const giftsRef = collection(db, 'users', currentUser.uid, 'gifts');
-            const q = query(giftsRef);
+            const catalogRef = collection(db, 'users', currentUser.uid, 'gift_catalog');
+            const q = query(catalogRef);
             
-            userGiftListLoader.style.display = 'block';
-            console.log("A carregar presentes de:", `users/${currentUser.uid}/gifts`);
+            catalogGiftListLoader.style.display = 'block';
 
-            unsubscribeGiftsListener = onSnapshot(q, (snapshot) => {
-                userGiftListLoader.style.display = 'none';
-                userGiftListContainer.innerHTML = '';
-                console.log(`Encontrados ${snapshot.size} presentes.`);
-
+            unsubscribeCatalogListener = onSnapshot(q, (snapshot) => {
+                catalogGiftListLoader.style.display = 'none';
+                catalogGiftListContainer.innerHTML = '';
+                
                 if (snapshot.empty) {
-                    userGiftListContainer.innerHTML = `<p class="text-gray-500 md:col-span-2 lg:col-span-4 text-center">Nenhum presente na lista ainda. Crie presentes na página "Lista de Presentes".</p>`;
+                    catalogGiftListContainer.innerHTML = `<p class="text-gray-500 md:col-span-2 lg:col-span-4 text-center">O seu catálogo pessoal está vazio. Visite a página da Lista de Presentes para o criar automaticamente.</p>`;
                     return;
                 }
                 snapshot.forEach(doc => {
                     const gift = { id: doc.id, ...doc.data() };
-                    const giftCard = createUserGiftCard(gift);
-                    userGiftListContainer.appendChild(giftCard);
+                    const giftCard = createCatalogGiftCard(gift);
+                    catalogGiftListContainer.appendChild(giftCard);
                 });
             }, error => {
-                console.error("Erro ao carregar lista de presentes:", error);
-                userGiftListLoader.textContent = 'Erro ao carregar presentes.';
+                console.error("Erro ao carregar catálogo de presentes:", error);
+                catalogGiftListLoader.textContent = 'Erro ao carregar o catálogo.';
             });
         }
 
-        function createUserGiftCard(gift) {
+        function createCatalogGiftCard(gift) {
             const card = document.createElement('div');
             card.className = 'bg-gray-50 rounded-lg shadow-sm border flex flex-col overflow-hidden';
             
-            // CORREÇÃO: Tratamento de dados potencialmente ausentes
             const name = gift.name || 'Presente sem nome';
             const description = gift.description || 'Sem descrição.';
             const price = gift.price || 0;
@@ -336,13 +332,13 @@
 
             if (!giftId) return;
 
-            const giftRef = doc(db, 'users', currentUser.uid, 'gifts', giftId);
+            const giftRef = doc(db, 'users', currentUser.uid, 'gift_catalog', giftId);
             try {
                 await updateDoc(giftRef, { imageUrl: newImageUrl });
-                showToast("Presente atualizado com sucesso!", false);
+                showToast("Presente do catálogo atualizado com sucesso!", false);
                 editGiftModal.classList.remove('is-open');
             } catch (error) {
-                console.error("Erro ao atualizar o presente:", error);
+                console.error("Erro ao atualizar o presente do catálogo:", error);
                 showToast("Erro ao atualizar o presente.", true);
             }
         }
