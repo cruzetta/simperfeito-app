@@ -163,14 +163,18 @@
         let unsubscribeUserGifts;
         let unsubscribeCatalogGifts;
 
-        // --- CATÁLOGO DE PRESENTES PADRÃO (FALLBACK) ---
+        // --- CATÁLOGO DE PRESENTES PADRÃO (FALLBACK COMPLETO) ---
         const defaultCatalogGifts = [
           { name: "Conjunto de Panelas", description: "Antiaderente, 5 peças para cozinhar com estilo.", price: 299.90, imageUrl: "https://placehold.co/600x400/E9D5FF/581C87?text=Panelas" },
           { name: "Fritadeira Elétrica (Air Fryer)", description: "Para refeições mais saudáveis e práticas no dia a dia.", price: 349.00, imageUrl: "https://placehold.co/600x400/D1FAE5/065F46?text=Air+Fryer" },
           { name: "Jogo de Jantar 20 Peças", description: "Elegância e sofisticação para servir os seus convidados.", price: 250.00, imageUrl: "https://placehold.co/600x400/FEF2F2/991B1B?text=Jantar" },
           { name: "Aspirador de Pó Robô", description: "Mantenha a casa limpa sem esforço.", price: 1200.00, imageUrl: "https://placehold.co/600x400/E0E7FF/3730A3?text=Robô" },
-          { name: "Cafeteira Expresso", description: "Para os amantes de um bom café a qualquer hora.", price: 450.00, imageUrl: "https://placehold.co/600x400/FEF9C3/854D0E?text=Cafeteira" }
-          // Adicione mais presentes padrão aqui se desejar
+          { name: "Cafeteira Expresso", description: "Para os amantes de um bom café a qualquer hora.", price: 450.00, imageUrl: "https://placehold.co/600x400/FEF9C3/854D0E?text=Cafeteira" },
+          { name: "Liquidificador Potente", description: "Ideal para vitaminas, sopas e massas leves.", price: 180.00, imageUrl: "https://placehold.co/600x400/FCE7F3/9D2667?text=Liquidificador" },
+          { name: "Micro-ondas", description: "Praticidade para aquecer e preparar alimentos.", price: 550.00, imageUrl: "https://placehold.co/600x400/F3F4F6/4B5563?text=Micro-ondas" },
+          { name: "Jogo de Toalhas de Banho", description: "4 peças, 100% algodão, maciez e absorção.", price: 150.00, imageUrl: "https://placehold.co/600x400/DBEAFE/1E40AF?text=Toalhas" },
+          { name: "Edredom Queen Size", description: "Conforto e aquecimento para noites tranquilas.", price: 220.00, imageUrl: "https://placehold.co/600x400/E5E7EB/1F2937?text=Edredom" },
+          { name: "Smart TV 4K 50\"", description: "Cinema em casa com imagem e som de alta qualidade.", price: 2500.00, imageUrl: "https://placehold.co/600x400/1F2937/F9FAFB?text=Smart+TV" }
         ];
 
         // --- INICIALIZAÇÃO E AUTENTICAÇÃO ---
@@ -184,15 +188,19 @@
         });
 
         async function initializePage() {
-            await setupUserCatalog(); // Garante que o catálogo do usuário existe
-            listenForUserGifts();
-            listenForCatalogGifts();
-            setupEventListeners();
-            loadingState.classList.add('hidden');
-            pageContent.classList.remove('hidden');
+            try {
+                await setupUserCatalog(); // Garante que o catálogo do usuário existe
+                listenForUserGifts();
+                listenForCatalogGifts();
+                setupEventListeners();
+                loadingState.classList.add('hidden');
+                pageContent.classList.remove('hidden');
+            } catch (error) {
+                console.error("Falha na inicialização da página:", error);
+                loadingState.innerHTML = `<p class="text-lg text-red-500">Ocorreu um erro ao carregar a página. Verifique as regras de segurança do seu Firebase e tente novamente.</p>`;
+            }
         }
 
-        // NOVO: Verifica e cria o catálogo do usuário se não existir
         async function setupUserCatalog() {
             const catalogCollectionRef = collection(db, 'users', currentUser.uid, 'gift_catalog');
             const snapshot = await getDocs(catalogCollectionRef);
@@ -200,7 +208,7 @@
                 console.log("Catálogo do usuário não encontrado. A criar a partir do padrão...");
                 const batch = writeBatch(db);
                 defaultCatalogGifts.forEach(gift => {
-                    const docRef = doc(catalogCollectionRef); // Cria um novo doc com ID automático
+                    const docRef = doc(catalogCollectionRef);
                     batch.set(docRef, gift);
                 });
                 await batch.commit();
@@ -320,7 +328,7 @@
                 const giftId = addBtn.dataset.giftId;
                 const giftData = catalogGifts.find(g => g.id === giftId);
                 if (giftData) {
-                    const { id, ...dataToAdd } = giftData; // Remove ID do objeto do catálogo
+                    const { id, ...dataToAdd } = giftData;
                     addGiftToUserList(dataToAdd);
                     addBtn.textContent = 'Adicionado!';
                     addBtn.classList.remove('bg-pink-500', 'hover:bg-pink-600');
@@ -364,7 +372,6 @@
             });
         }
         
-        // NOVO: Listener para o catálogo do usuário no Firestore
         function listenForCatalogGifts() {
             const catalogCollectionRef = collection(db, 'users', currentUser.uid, 'gift_catalog');
             const q = query(catalogCollectionRef);
