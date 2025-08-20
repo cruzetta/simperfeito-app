@@ -6,10 +6,6 @@
     <title>Painel de Administração</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Esconde o conteúdo principal por defeito */
-        #page-wrapper {
-            display: none;
-        }
         .form-highlight {
             border: 2px solid #3b82f6;
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
@@ -20,24 +16,23 @@
 <body class="bg-gray-100 font-sans">
 
     <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col items-center justify-center z-50">
-        <svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w.g/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
         <p id="loading-text" class="text-gray-600">A verificar autenticação...</p>
     </div>
 
-    <div id="page-wrapper">
+    <div id="page-wrapper" class="hidden">
         <header class="bg-white shadow-md">
             <div class="max-w-5xl mx-auto py-4 px-6 flex justify-between items-center">
                 <h1 class="text-2xl font-bold text-gray-800">Gerenciador de Catálogo de Presentes</h1>
-                <button id="logout-btn" class="hidden px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition-colors">Sair</button>
+                <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition-colors">Sair</button>
             </div>
         </header>
 
         <main class="max-w-5xl mx-auto p-6">
-            
-            <div id="admin-container" class="hidden">
+            <div id="admin-container">
                 <div class="bg-white p-6 rounded-lg shadow-md mb-8">
                     <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Adicionar Novo Produto</h2>
                     <form id="admin-gift-form" class="space-y-4">
@@ -76,25 +71,25 @@
     </div>
 
     <script type="module">
-        try {
-            const { 
-                auth, 
-                onAuthStateChanged,
-                signOut,
-                db,
-                collection,
-                addDoc,
-                onSnapshot,
-                query,
-                doc,
-                getDoc,
-                deleteDoc,
-                updateDoc,
-                orderBy 
-            } = await import('./auth.js');
+        import { auth, onAuthStateChanged, signOut, db, collection, addDoc, onSnapshot, query, doc, getDoc, deleteDoc, updateDoc, orderBy } from './auth.js';
 
-            const loadingScreen = document.getElementById('loading-screen');
-            const pageWrapper = document.getElementById('page-wrapper');
+        // --- LÓGICA DE GUARDA DE AUTENTICAÇÃO ---
+        const loadingScreen = document.getElementById('loading-screen');
+        const pageWrapper = document.getElementById('page-wrapper');
+
+        const unsubscribe = onAuthStateChanged(auth, user => {
+            unsubscribe(); // Executa esta verificação apenas uma vez no carregamento da página
+            if (user) {
+                // O Firebase confirmou que há um usuário logado.
+                initializeAdminPanel();
+            } else {
+                // O Firebase confirmou que NÃO há um usuário logado.
+                window.location.href = '/admin-login.html';
+            }
+        });
+
+        function initializeAdminPanel() {
+            // Todos os elementos e lógicas que dependem do login vão aqui dentro
             const adminContainer = document.getElementById('admin-container');
             const logoutBtn = document.getElementById('logout-btn');
             const form = document.getElementById('admin-gift-form');
@@ -112,33 +107,18 @@
             const catalogCollectionName = 'gift_catalog_master';
             const catalogCollectionRef = collection(db, catalogCollectionName);
 
-            function showPageContent() {
-                loadingScreen.style.display = 'none';
-                pageWrapper.style.display = 'block';
-            }
+            // Mostra o conteúdo da página e esconde o carregamento
+            pageWrapper.classList.remove('hidden');
+            loadingScreen.style.display = 'none';
 
-            // --- LÓGICA DE AUTENTICAÇÃO CORRIGIDA ---
-            onAuthStateChanged(auth, user => {
-                // Se um usuário estiver logado, ele tem acesso.
-                // A verificação de UID e a mensagem de "Acesso Negado" foram removidas.
-                if (user) {
-                    adminContainer.classList.remove('hidden');
-                    logoutBtn.classList.remove('hidden');
-                    listenForCatalogChanges();
-                    showPageContent();
-                } else {
-                    // Se não houver usuário, redireciona para a página de login.
-                    window.location.href = '/admin-login.html'; 
-                }
-            });
-
+            // Funções de Gerenciamento
             function listenForCatalogChanges() {
                 const q = query(catalogCollectionRef, orderBy("name"));
                 onSnapshot(q, (snapshot) => {
                     loadingMessage.style.display = 'none';
-                    catalogList.innerHTML = ''; 
+                    catalogList.innerHTML = '';
                     if (snapshot.empty) {
-                        catalogList.innerHTML = '<p class="text-gray-500">Nenhum produto no catálogo ainda. Adicione o primeiro no formulário acima.</p>';
+                        catalogList.innerHTML = '<p class="text-gray-500">Nenhum produto no catálogo ainda.</p>';
                         return;
                     }
                     snapshot.docs.forEach(doc => {
@@ -160,9 +140,6 @@
                         `;
                         catalogList.appendChild(giftElement);
                     });
-                }, error => {
-                    console.error("Erro ao escutar por mudanças no catálogo: ", error);
-                    catalogList.innerHTML = '<p class="text-red-500">Ocorreu um erro ao carregar os produtos.</p>';
                 });
             }
 
@@ -200,7 +177,7 @@
                         cancelEditBtn.classList.remove('hidden');
                         form.classList.add('form-highlight');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                    } else { alert("Produto não encontrado. Pode ter sido apagado."); }
+                    } else { alert("Produto não encontrado."); }
                 } catch (error) { console.error("Erro ao buscar produto para edição: ", error); }
             }
 
@@ -214,7 +191,7 @@
             }
 
             async function deleteGift(id) {
-                if (confirm("Tem certeza que deseja apagar este produto do catálogo?")) {
+                if (confirm("Tem certeza que deseja apagar este produto?")) {
                     try {
                         await deleteDoc(doc(db, catalogCollectionName, id));
                         alert("Produto apagado com sucesso!");
@@ -223,6 +200,7 @@
                 }
             }
 
+            // Listeners de Eventos
             form.addEventListener('submit', handleFormSubmit);
             cancelEditBtn.addEventListener('click', resetFormState);
             catalogList.addEventListener('click', (e) => {
@@ -235,11 +213,8 @@
                 signOut(auth).catch(error => console.error("Erro ao fazer logout:", error));
             });
 
-        } catch (error) {
-            console.error("Falha ao carregar o módulo de autenticação:", error);
-            const loadingText = document.getElementById('loading-text');
-            loadingText.textContent = "Erro Crítico: Não foi possível carregar 'auth.js'. Verifique o caminho do ficheiro e o console para mais detalhes.";
-            loadingText.classList.add('text-red-500', 'font-semibold');
+            // Inicia o carregamento dos dados do catálogo
+            listenForCatalogChanges();
         }
     </script>
 </body>
