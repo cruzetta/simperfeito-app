@@ -20,7 +20,7 @@
 <body class="bg-gray-100 font-sans">
 
     <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col items-center justify-center z-50">
-        <svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
@@ -37,11 +37,6 @@
 
         <main class="max-w-5xl mx-auto p-6">
             
-            <div id="access-denied" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
-                <p class="font-bold">Acesso Negado</p>
-                <p>Você não tem permissão para acessar esta página. Apenas administradores autorizados.</p>
-            </div>
-
             <div id="admin-container" class="hidden">
                 <div class="bg-white p-6 rounded-lg shadow-md mb-8">
                     <h2 id="form-title" class="text-xl font-semibold mb-4 text-gray-700">Adicionar Novo Produto</h2>
@@ -82,7 +77,6 @@
 
     <script type="module">
         try {
-            // Tenta importar tudo o que é necessário
             const { 
                 auth, 
                 onAuthStateChanged,
@@ -99,7 +93,6 @@
                 orderBy 
             } = await import('./auth.js');
 
-            // --- ELEMENTOS DA UI ---
             const loadingScreen = document.getElementById('loading-screen');
             const pageWrapper = document.getElementById('page-wrapper');
             const adminContainer = document.getElementById('admin-container');
@@ -116,29 +109,29 @@
             const loadingMessage = document.getElementById('loading-message');
             const cancelEditBtn = document.getElementById('cancel-edit-btn');
             
-            // *** CORREÇÃO APLICADA AQUI ***
             const catalogCollectionName = 'gift_catalog_master';
             const catalogCollectionRef = collection(db, catalogCollectionName);
 
-            // --- FUNÇÃO PARA MOSTRAR O CONTEÚDO ---
             function showPageContent() {
                 loadingScreen.style.display = 'none';
                 pageWrapper.style.display = 'block';
             }
 
-            // --- AUTENTICAÇÃO E SEGURANÇA ---
+            // --- LÓGICA DE AUTENTICAÇÃO CORRIGIDA ---
             onAuthStateChanged(auth, user => {
+                // Se um usuário estiver logado, ele tem acesso.
+                // A verificação de UID e a mensagem de "Acesso Negado" foram removidas.
                 if (user) {
                     adminContainer.classList.remove('hidden');
                     logoutBtn.classList.remove('hidden');
                     listenForCatalogChanges();
                     showPageContent();
                 } else {
+                    // Se não houver usuário, redireciona para a página de login.
                     window.location.href = '/admin-login.html'; 
                 }
             });
 
-            // --- FUNÇÕES DE GERENCIAMENTO (CRUD) ---
             function listenForCatalogChanges() {
                 const q = query(catalogCollectionRef, orderBy("name"));
                 onSnapshot(q, (snapshot) => {
@@ -181,7 +174,6 @@
                 submitBtn.disabled = true;
                 try {
                     if (giftId) { 
-                        // *** CORREÇÃO APLICADA AQUI ***
                         await updateDoc(doc(db, catalogCollectionName, giftId), giftData); 
                         alert("Produto atualizado com sucesso!"); 
                     } else { 
@@ -195,7 +187,6 @@
 
             async function prepareFormForEdit(id) {
                 try {
-                    // *** CORREÇÃO APLICADA AQUI ***
                     const docSnap = await getDoc(doc(db, catalogCollectionName, id));
                     if (docSnap.exists()) {
                         const gift = docSnap.data();
@@ -225,7 +216,6 @@
             async function deleteGift(id) {
                 if (confirm("Tem certeza que deseja apagar este produto do catálogo?")) {
                     try {
-                        // *** CORREÇÃO APLICADA AQUI ***
                         await deleteDoc(doc(db, catalogCollectionName, id));
                         alert("Produto apagado com sucesso!");
                         if (giftIdInput.value === id) resetFormState();
@@ -233,7 +223,6 @@
                 }
             }
 
-            // --- EVENT LISTENERS ---
             form.addEventListener('submit', handleFormSubmit);
             cancelEditBtn.addEventListener('click', resetFormState);
             catalogList.addEventListener('click', (e) => {
