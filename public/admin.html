@@ -53,9 +53,17 @@
                             <label for="gift-description" class="block text-sm font-medium text-gray-700">Descrição</label>
                             <textarea id="gift-description" rows="3" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required></textarea>
                         </div>
-                        <div>
-                            <label for="gift-price" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
-                            <input type="number" id="gift-price" step="0.01" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="gift-price" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
+                                <input type="number" id="gift-price" step="0.01" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                            </div>
+                            <div>
+                                <label for="gift-category" class="block text-sm font-medium text-gray-700">Categoria</label>
+                                <select id="gift-category" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+                                    <!-- Options will be populated by JS -->
+                                </select>
+                            </div>
                         </div>
                         
                         <div>
@@ -109,227 +117,229 @@
     <script type="module">
         import { auth, onAuthStateChanged, signOut, db, storage, ref, uploadBytes, getDownloadURL, collection, addDoc, onSnapshot, query, doc, getDoc, deleteDoc, updateDoc, orderBy, where, getDocs } from './auth.js';
 
-        // *** CATÁLOGO GIGANTE DE PRESENTES ***
+        const categories = ['Cozinha & Bar', 'Casa & Decoração', 'Tecnologia & Eletrônicos', 'Experiências & Lazer', 'Moda & Acessórios', 'Engraçados & Divertidos', 'Cotas & Contribuições', 'Outros'];
+
+        // *** CATÁLOGO GIGANTE E CATEGORIZADO DE PRESENTES ***
         const masterCatalogData = [
-            // Lista Original (100 itens)
-            { name: "Conjunto de Panelas Antiaderente", description: "5 peças para cozinhar com estilo e praticidade.", price: 299.90, imageUrl: "https://placehold.co/600x400/E9D5FF/581C87?text=Panelas" },
-            { name: "Fritadeira Elétrica (Air Fryer)", description: "Refeições mais saudáveis e crocantes sem óleo.", price: 349.00, imageUrl: "https://placehold.co/600x400/D1FAE5/065F46?text=Air+Fryer" },
-            { name: "Jogo de Jantar 20 Peças", description: "Elegância e sofisticação para servir os seus convidados.", price: 250.00, imageUrl: "https://placehold.co/600x400/FEF2F2/991B1B?text=Jantar" },
-            { name: "Aspirador de Pó Robô", description: "Mantenha a casa limpa sem esforço.", price: 1200.00, imageUrl: "https://placehold.co/600x400/E0E7FF/3730A3?text=Robô" },
-            { name: "Cafeteira Expresso", description: "Para os amantes de um bom café a qualquer hora.", price: 450.00, imageUrl: "https://placehold.co/600x400/FEF9C3/854D0E?text=Cafeteira" },
-            { name: "Liquidificador Potente", description: "Ideal para vitaminas, sopas e massas leves.", price: 180.00, imageUrl: "https://placehold.co/600x400/FCE7F3/9D2667?text=Liquidificador" },
-            { name: "Micro-ondas 32L", description: "Praticidade para aquecer e preparar alimentos.", price: 550.00, imageUrl: "https://placehold.co/600x400/F3F4F6/4B5563?text=Micro-ondas" },
-            { name: "Jogo de Toalhas de Banho (4 Peças)", description: "100% algodão, maciez e alta absorção.", price: 150.00, imageUrl: "https://placehold.co/600x400/DBEAFE/1E40AF?text=Toalhas" },
-            { name: "Edredom Queen Size", description: "Conforto e aquecimento para noites tranquilas.", price: 220.00, imageUrl: "https://placehold.co/600x400/E5E7EB/1F2937?text=Edredom" },
-            { name: "Smart TV 4K 50 Polegadas", description: "Cinema em casa com imagem e som de alta qualidade.", price: 2500.00, imageUrl: "https://placehold.co/600x400/1F2937/F9FAFB?text=Smart+TV" },
-            { name: "Churrasqueira Elétrica", description: "Para um churrasco prático na varanda.", price: 280.00, imageUrl: "https://placehold.co/600x400/FEE2E2/B91C1C?text=Churrasqueira" },
-            { name: "Kit de Ferramentas (129 Peças)", description: "Para pequenas reparações e projetos em casa.", price: 199.90, imageUrl: "https://placehold.co/600x400/FEF3C7/92400E?text=Ferramentas" },
-            { name: "Batedeira Planetária", description: "Prepare bolos e massas com perfeição.", price: 480.00, imageUrl: "https://placehold.co/600x400/FBCFE8/9D2667?text=Batedeira" },
-            { name: "Purificador de Água", description: "Água pura e gelada sempre à disposição.", price: 600.00, imageUrl: "https://placehold.co/600x400/E0F2FE/0891B2?text=Purificador" },
-            { name: "Jogo de Cama Queen (4 Peças)", description: "Lençóis e fronhas para uma cama aconchegante.", price: 180.00, imageUrl: "https://placehold.co/600x400/F5D0FE/701A75?text=Jogo+de+Cama" },
-            { name: "Aparelho de Fondue", description: "Para noites românticas e encontros com amigos.", price: 130.00, imageUrl: "https://placehold.co/600x400/FFF7ED/C2410C?text=Fondue" },
-            { name: "Mala de Viagem Média", description: "Resistente e com rodinhas 360º para as suas aventuras.", price: 350.00, imageUrl: "https://placehold.co/600x400/D4D4D8/3F3F46?text=Mala" },
-            { name: "Caixa de Som Bluetooth", description: "Leve a sua música para qualquer lugar.", price: 250.00, imageUrl: "https://placehold.co/600x400/C7D2FE/4338CA?text=Som" },
-            { name: "Adega Climatizada (12 Garrafas)", description: "Conserve os seus vinhos na temperatura ideal.", price: 800.00, imageUrl: "https://placehold.co/600x400/374151/E5E7EB?text=Adega" },
-            { name: "Câmara de Segurança Wi-Fi", description: "Monitorize a sua casa pelo telemóvel.", price: 220.00, imageUrl: "https://placehold.co/600x400/E2E8F0/334155?text=Câmara" },
-            { name: "Vale-Jantar Romântico", description: "Uma noite especial num restaurante a dois.", price: 300.00, imageUrl: "https://placehold.co/600x400/FFE4E6/9F1239?text=Jantar" },
-            { name: "Um Ano de Streaming de Filmes", description: "Acesso ilimitado a filmes e séries.", price: 400.00, imageUrl: "https://placehold.co/600x400/DC2626/FEF2F2?text=Streaming" },
-            { name: "Kit para Vinho com Acessórios", description: "Saca-rolhas, anel e bico doseador.", price: 90.00, imageUrl: "https://placehold.co/600x400/581C87/F3E8FF?text=Vinho" },
-            { name: "Robô Limpador de Janelas", description: "Janelas a brilhar sem esforço.", price: 950.00, imageUrl: "https://placehold.co/600x400/CCFBF1/134E4A?text=Limpa+Janela" },
-            { name: "Cadeira de Escritório Ergonómica", description: "Conforto para o home office.", price: 700.00, imageUrl: "https://placehold.co/600x400/F1F5F9/1E293B?text=Cadeira" },
-            { name: "Bicicleta Ergométrica", description: "Para se exercitar sem sair de casa.", price: 900.00, imageUrl: "https://placehold.co/600x400/F0FDF4/166534?text=Bicicleta" },
-            { name: "Kit de Jardinagem", description: "Para cultivar um pequeno jardim ou horta.", price: 120.00, imageUrl: "https://placehold.co/600x400/ECFCCB/4D7C0F?text=Jardim" },
-            { name: "Máquina de Waffle", description: "Pequenos-almoços mais deliciosos.", price: 150.00, imageUrl: "https://placehold.co/600x400/FEFCE8/A16207?text=Waffle" },
-            { name: "Projetor Portátil", description: "Transforme qualquer parede num ecrã de cinema.", price: 650.00, imageUrl: "https://placehold.co/600x400/EFEFEF/333333?text=Projetor" },
-            { name: "Assistente Virtual (Smart Speaker)", description: "Controle a casa e ouça música com a voz.", price: 300.00, imageUrl: "https://placehold.co/600x400/BFDBFE/1E3A8A?text=Assistente" },
-            { name: "Cota para a Lua de Mel", description: "Ajude a tornar a nossa viagem inesquecível.", price: 100.00, imageUrl: "https://placehold.co/600x400/E0F2FE/0E7490?text=Lua+de+Mel" },
-            { name: "Cota para a Lua de Mel (Premium)", description: "Uma contribuição especial para a nossa viagem de sonho.", price: 500.00, imageUrl: "https://placehold.co/600x400/CFFAFE/0891B2?text=Lua+de+Mel" },
-            { name: "Fogão 5 Bocas", description: "Moderno e com forno espaçoso.", price: 1500.00, imageUrl: "https://placehold.co/600x400/D1D5DB/1F2937?text=Fogão" },
-            { name: "Frigorífico Frost Free", description: "Espaçoso e económico para a cozinha nova.", price: 3200.00, imageUrl: "https://placehold.co/600x400/E5E7EB/374151?text=Frigorífico" },
-            { name: "Máquina de Lavar Roupa 12kg", description: "Para facilitar a rotina da casa.", price: 1800.00, imageUrl: "https://placehold.co/600x400/E0E7FF/312E81?text=Lava-Roupas" },
-            { name: "Faqueiro 24 Peças Inox", description: "Elegância e qualidade para o dia a dia.", price: 180.00, imageUrl: "https://placehold.co/600x400/9CA3AF/111827?text=Faqueiro" },
-            { name: "Jogo de Copos de Cristal (6 Peças)", description: "Para água e sumo, com design sofisticado.", price: 120.00, imageUrl: "https://placehold.co/600x400/F4F4F5/52525B?text=Copos" },
-            { name: "Tábua de Frios e Queijos", description: "Perfeita para receber os amigos em casa.", price: 95.00, imageUrl: "https://placehold.co/600x400/F59E0B/78350F?text=Tábua" },
-            { name: "Vaso Decorativo de Cerâmica", description: "Um toque de design para o novo lar.", price: 150.00, imageUrl: "https://placehold.co/600x400/DDE7C7/556B2F?text=Vaso" },
-            { name: "Luminária de Chão", description: "Iluminação aconchegante para a sala.", price: 280.00, imageUrl: "https://placehold.co/600x400/FDE68A/B45309?text=Luminária" },
-            { name: "Tapete para Sala (2.00x1.50m)", description: "Confortável e estiloso para o seu ambiente.", price: 400.00, imageUrl: "https://placehold.co/600x400/A3A3A3/262626?text=Tapete" },
-            { name: "Kit de Almofadas Decorativas (4 un.)", description: "Para decorar e trazer conforto ao sofá.", price: 130.00, imageUrl: "https://placehold.co/600x400/FAD1A2/7C2D12?text=Almofadas" },
-            { name: "Espelho Decorativo Adnet", description: "Redondo, para o hall de entrada ou quarto.", price: 200.00, imageUrl: "https://placehold.co/600x400/E7E5E4/44403C?text=Espelho" },
-            { name: "Pipoqueira Elétrica", description: "Pipocas de cinema sem usar óleo.", price: 140.00, imageUrl: "https://placehold.co/600x400/F87171/7F1D1D?text=Pipoqueira" },
-            { name: "Varinha Mágica 3 em 1", description: "Processa, bate e mistura com praticidade.", price: 160.00, imageUrl: "https://placehold.co/600x400/C4B5FD/4C1D95?text=Varinha" },
-            { name: "Sanduicheira e Grill", description: "Para lanches rápidos e saborosos.", price: 110.00, imageUrl: "https://placehold.co/600x400/A7F3D0/047857?text=Sanduicheira" },
-            { name: "Escova Secadora", description: "Cabelos secos e modelados com um só aparelho.", price: 210.00, imageUrl: "https://placehold.co/600x400/F9A8D4/831843?text=Escova" },
-            { name: "Máquina de Barbear Elétrica", description: "Barba perfeita com mais conforto.", price: 250.00, imageUrl: "https://placehold.co/600x400/60A5FA/1E3A8A?text=Barbeador" },
-            { name: "Auscultadores com Cancelamento de Ruído", description: "Imersão total em músicas e podcasts.", price: 500.00, imageUrl: "https://placehold.co/600x400/34D399/059669?text=Auscultadores" },
-            { name: "Kindle (Leitor Digital)", description: "Milhares de livros na palma da mão.", price: 450.00, imageUrl: "https://placehold.co/600x400/A5B4FC/312E81?text=Kindle" },
-            { name: "Mochila para Portátil", description: "Segurança e conforto para transportar os seus eletrónicos.", price: 180.00, imageUrl: "https://placehold.co/600x400/71717A/27272A?text=Mochila" },
-            { name: "Kit Churrasco com Maleta", description: "Facas e garfos especiais para o mestre churrasqueiro.", price: 160.00, imageUrl: "https://placehold.co/600x400/FCA5A5/991B1B?text=Kit+Churrasco" },
-            { name: "Cesta de Pequeno-almoço", description: "Uma surpresa deliciosa para começar o dia.", price: 200.00, imageUrl: "https://placehold.co/600x400/FDE047/B45309?text=Cesta" },
-            { name: "Assinatura de Flores Mensal", description: "Um lindo arranjo para alegrar a casa todo mês.", price: 150.00, imageUrl: "https://placehold.co/600x400/F472B6/9D2667?text=Flores" },
-            { name: "Sofá Retrátil e Reclinável", description: "Conforto máximo para a sala de TV.", price: 2800.00, imageUrl: "https://placehold.co/600x400/A8A29E/44403C?text=Sofá" },
-            { name: "Mesa de Jantar 6 Lugares", description: "Para reunir a família e os amigos.", price: 1600.00, imageUrl: "https://placehold.co/600x400/D2B48C/8B4513?text=Mesa" },
-            { name: "Painel para TV", description: "Organização e estilo para a sala.", price: 450.00, imageUrl: "https://placehold.co/600x400/BCA18D/5C4033?text=Painel+TV" },
-            { name: "Poltrona Decorativa", description: "Um ponto de cor e conforto no ambiente.", price: 600.00, imageUrl: "https://placehold.co/600x400/87CEEB/4682B4?text=Poltrona" },
-            { name: "Cortina Blackout para Quarto", description: "Bloqueia a luz e garante privacidade.", price: 190.00, imageUrl: "https://placehold.co/600x400/2F4F4F/F5F5F5?text=Cortina" },
-            { name: "Kit de Potes Herméticos (10 Peças)", description: "Para organizar e conservar os alimentos.", price: 140.00, imageUrl: "https://placehold.co/600x400/B0E0E6/4682B4?text=Potes" },
-            { name: "Balança Digital de Cozinha", description: "Precisão nas receitas.", price: 70.00, imageUrl: "https://placehold.co/600x400/E6E6FA/6A5ACD?text=Balança" },
-            { name: "Fruteira de Mesa Moderna", description: "Design e organização para a sua cozinha.", price: 85.00, imageUrl: "https://placehold.co/600x400/98FB98/2E8B57?text=Fruteira" },
-            { name: "Galheteiro (Azeite, Vinagre, Sal, Pimenta)", description: "Um toque de charme na mesa.", price: 60.00, imageUrl: "https://placehold.co/600x400/F5F5DC/808000?text=Galheteiro" },
-            { name: "Escorredor de Louça Inox", description: "Funcional e compacto para o lava-loiça.", price: 90.00, imageUrl: "https://placehold.co/600x400/778899/F8F8FF?text=Escorredor" },
-            { name: "Lixeira de Inox com Pedal (5L)", description: "Prática e higiénica para a cozinha.", price: 110.00, imageUrl: "https://placehold.co/600x400/C0C0C0/000000?text=Lixeira" },
-            { name: "Ferro de Engomar a Vapor", description: "Roupas lisinhas com mais facilidade.", price: 130.00, imageUrl: "https://placehold.co/600x400/ADD8E6/4169E1?text=Ferro" },
-            { name: "Tábua de Engomar", description: "Resistente e com altura regulável.", price: 150.00, imageUrl: "https://placehold.co/600x400/DCDCDC/696969?text=Tábua" },
-            { name: "Estendal de Chão", description: "Prático para secar roupas em apartamentos.", price: 100.00, imageUrl: "https://placehold.co/600x400/F5F5F5/808080?text=Estendal" },
-            { name: "Kit de Cabides (50 Unidades)", description: "Para organizar o guarda-roupa.", price: 80.00, imageUrl: "https://placehold.co/600x400/FFE4B5/D2691E?text=Cabides" },
-            { name: "Organizador de Sapatos", description: "Otimiza o espaço na sapateira.", price: 75.00, imageUrl: "https://placehold.co/600x400/DEB887/8B4513?text=Sapatos" },
-            { name: "Cesto de Roupa Suja", description: "Design moderno para a casa de banho ou lavandaria.", price: 95.00, imageUrl: "https://placehold.co/600x400/F5DEB3/A0522D?text=Cesto" },
-            { name: "Kit de Casa de Banho (3 Peças)", description: "Porta-sabonete, porta-escovas e lixeira.", price: 120.00, imageUrl: "https://placehold.co/600x400/AFEEEE/40E0D0?text=Kit+Banheiro" },
-            { name: "Chuveiro Elétrico Moderno", description: "Com mais opções de temperatura.", price: 250.00, imageUrl: "https://placehold.co/600x400/B0C4DE/708090?text=Chuveiro" },
-            { name: "Secador de Cabelo Profissional", description: "Potência e tecnologia para secagem rápida.", price: 280.00, imageUrl: "https://placehold.co/600x400/FFC0CB/DB7093?text=Secador" },
-            { name: "Manta para Sofá", description: "Um toque de aconchego e cor para a sala.", price: 110.00, imageUrl: "https://placehold.co/600x400/E9967A/CD5C5C?text=Manta" },
-            { name: "Quadro Decorativo (Conjunto com 3)", description: "Para compor a parede da sala ou quarto.", price: 180.00, imageUrl: "https://placehold.co/600x400/8FBC8F/2E8B57?text=Quadros" },
-            { name: "Relógio de Parede Minimalista", description: "Design moderno e silencioso.", price: 90.00, imageUrl: "https://placehold.co/600x400/20B2AA/F0FFFF?text=Relógio" },
-            { name: "Humidificador de Ar", description: "Melhora a qualidade do ar no ambiente.", price: 160.00, imageUrl: "https://placehold.co/600x400/66CDAA/3CB371?text=Humidificador" },
-            { name: "Ventilador de Coluna", description: "Silencioso e potente para os dias quentes.", price: 220.00, imageUrl: "https://placehold.co/600x400/48D1CC/008B8B?text=Ventilador" },
-            { name: "Ar-Condicionado Split 9000 BTUs", description: "Conforto térmico para o quarto.", price: 1900.00, imageUrl: "https://placehold.co/600x400/00CED1/2F4F4F?text=Ar-Condicionado" },
-            { name: "Cristaleira", description: "Para guardar e exibir louças e taças.", price: 800.00, imageUrl: "https://placehold.co/600x400/BDB76B/556B2F?text=Cristaleira" },
-            { name: "Aparador para Sala de Jantar", description: "Móvel versátil para decorar e organizar.", price: 450.00, imageUrl: "https://placehold.co/600x400/C19A6B/8B4513?text=Aparador" },
-            { name: "Cama Box Queen com Baú", description: "Colchão e base para noites de sono perfeitas.", price: 2300.00, imageUrl: "https://placehold.co/600x400/D3D3D3/696969?text=Cama" },
-            { name: "Cabeceira Estofada para Cama", description: "Mais conforto e estilo para o seu quarto.", price: 400.00, imageUrl: "https://placehold.co/600x400/BEBEBE/808080?text=Cabeceira" },
-            { name: "Mesa de Cabeceira (Par)", description: "Para apoiar e organizar ao lado da cama.", price: 300.00, imageUrl: "https://placehold.co/600x400/A9A9A9/2F4F4F?text=Mesa+Cabeceira" },
-            { name: "Cómoda com 4 Gavetas", description: "Para organizar roupas e acessórios.", price: 550.00, imageUrl: "https://placehold.co/600x400/808080/F5F5F5?text=Cómoda" },
-            { name: "Sapateira Vertical", description: "Mantenha os sapatos sempre organizados.", price: 250.00, imageUrl: "https://placehold.co/600x400/696969/DCDCDC?text=Sapateira" },
-            { name: "Portátil Ultrafino", description: "Para trabalho, estudos e entretenimento.", price: 3500.00, imageUrl: "https://placehold.co/600x400/708090/E6E6FA?text=Portátil" },
-            { name: "Impressora Multifuncional Wi-Fi", description: "Imprime, copia e digitaliza sem fios.", price: 600.00, imageUrl: "https://placehold.co/600x400/778899/F0F8FF?text=Impressora" },
-            { name: "Monitor 24 Polegadas Full HD", description: "Para mais produtividade e conforto visual.", price: 800.00, imageUrl: "https://placehold.co/600x400/1C1C1C/FFFFFF?text=Monitor" },
-            { name: "Teclado e Rato sem Fio", description: "Mais liberdade e menos fios na mesa.", price: 200.00, imageUrl: "https://placehold.co/600x400/36454F/E8E8E8?text=Teclado+Rato" },
-            { name: "HD Externo 1TB", description: "Para backup de fotos e ficheiros importantes.", price: 300.00, imageUrl: "https://placehold.co/600x400/000080/ADD8E6?text=HD+Externo" },
-            { name: "Cadeira Gamer", description: "Conforto extra para longas horas de uso.", price: 950.00, imageUrl: "https://placehold.co/600x400/FF0000/000000?text=Cadeira+Gamer" },
-            { name: "Consola de Última Geração", description: "Diversão garantida para o casal.", price: 4500.00, imageUrl: "https://placehold.co/600x400/00FF00/000000?text=Consola" },
-            { name: "Jogo de Tabuleiro Moderno", description: "Para noites divertidas com os amigos.", price: 180.00, imageUrl: "https://placehold.co/600x400/FFA500/4B0082?text=Jogo" },
-            { name: "Violão Acústico", description: "Para os momentos de inspiração musical.", price: 400.00, imageUrl: "https://placehold.co/600x400/8B4513/F5DEB3?text=Violão" },
-            { name: "Assinatura de Clube de Vinhos (6 meses)", description: "Receba rótulos selecionados em casa.", price: 500.00, imageUrl: "https://placehold.co/600x400/800000/FFE4E1?text=Clube+Vinho" },
-            
-            // --- NOVOS PRESENTES (MAIS DE 500) ---
-            
-            // --- Presentes Engraçados e Divertidos ---
-            { name: "Kit de Sobrevivência para Casados", description: "Tapa-ouvidos, manual de 'Sim, querida' e vales 'noite livre'.", price: 79.90, imageUrl: "https://placehold.co/600x400/f87171/7f1d1d?text=Socorro!" },
-            { name: "Meias Combinando 'Game Over'", description: "Um par para o noivo com 'Game Over' e para a noiva com 'She Wins!'.", price: 49.90, imageUrl: "https://placehold.co/600x400/a78bfa/5b21b6?text=Game+Over" },
-            { name: "Controle Remoto Universal de Desculpas", description: "Botões para 'Foi mal', 'Você tem razão' e 'A culpa foi minha'.", price: 59.90, imageUrl: "https://placehold.co/600x400/facc15/b45309?text=Desculpas" },
-            { name: "Cota para a Primeira Briga", description: "Para garantir o jantar de reconciliação. Pizza por nossa conta!", price: 60.00, imageUrl: "https://placehold.co/600x400/fca5a5/991b1b?text=Pizza+da+Paz" },
-            { name: "Curso de Culinária para Ele (para Ela não passar fome)", description: "Uma forma divertida de garantir que o macarrão instantâneo não seja a única opção.", price: 150.00, imageUrl: "https://placehold.co/600x400/fdba74/c2410c?text=Chef+Ele" },
-            { name: "Vale 'Um Dia de Spa' para Ela (para Ele ter paz)", description: "Um dia de relaxamento para a noiva e um dia de silêncio para o noivo.", price: 250.00, imageUrl: "https://placehold.co/600x400/f9a8d4/9d2667?text=Spa+dela" },
-            { name: "Manual 'Como Montar Móveis da IKEA sem Divórcio'", description: "Um guia passo a passo para o maior teste de um relacionamento.", price: 39.90, imageUrl: "https://placehold.co/600x400/60a5fa/1e3a8a?text=IKEA+Challenge" },
-            { name: "Kit 'Noite de Netflix' à Prova de Discussão", description: "Dois fones de ouvido sem fio. Cada um assiste o que quiser, juntos.", price: 300.00, imageUrl: "https://placehold.co/600x400/1f2937/ef4444?text=Netflix+em+Paz" },
-            { name: "Troféu 'Melhor Marido do Mundo' (Pré-datado)", description: "Um incentivo para ele começar o casamento com o pé direito.", price: 89.90, imageUrl: "https://placehold.co/600x400/fcd34d/b45309?text=Troféu" },
-            { name: "Almofada de Peido 'Quem Soltou?'", description: "Para quebrar o gelo em momentos de tensão. A culpa nunca é de ninguém.", price: 45.00, imageUrl: "https://placehold.co/600x400/a3e635/4d7c0f?text=Foi+você?" },
-            { name: "Placa Decorativa 'Nesta casa, a Wi-Fi é fraca mas o amor é forte'", description: "Um toque de humor e verdade para o novo lar.", price: 65.00, imageUrl: "https://placehold.co/600x400/94a3b8/1e293b?text=Placa+Wi-Fi" },
-            { name: "Kit de jardinagem para 'plantar o amor'", description: "Para ver o relacionamento florescer, literalmente.", price: 95.00, imageUrl: "https://placehold.co/600x400/4ade80/15803d?text=Plantar+o+Amor" },
-            { name: "Aventais 'Chef' e 'Sous-Chef'", description: "Para deixar claro quem manda na cozinha (e quem só ajuda).", price: 85.00, imageUrl: "https://placehold.co/600x400/eab308/854d0e?text=Aventais" },
-            { name: "Cofrinho 'Para Nossas Loucuras'", description: "Para juntar dinheiro para aquela viagem ou compra impulsiva.", price: 50.00, imageUrl: "https://placehold.co/600x400/f472b6/9d2667?text=Cofrinho" },
-            { name: "Canecas com termômetro de amor", description: "A estampa muda com o calor, mostrando o quanto o amor está 'quente'.", price: 75.00, imageUrl: "https://placehold.co/600x400/dc2626/fef2f2?text=Canecas+Mágicas" },
+            // Cozinha & Bar
+            { name: "Conjunto de Panelas Antiaderente", description: "5 peças para cozinhar com estilo e praticidade.", price: 299.90, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/E9D5FF/581C87?text=Panelas" },
+            { name: "Fritadeira Elétrica (Air Fryer)", description: "Refeições mais saudáveis e crocantes sem óleo.", price: 349.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/D1FAE5/065F46?text=Air+Fryer" },
+            { name: "Jogo de Jantar 20 Peças", description: "Elegância e sofisticação para servir os seus convidados.", price: 250.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/FEF2F2/991B1B?text=Jantar" },
+            { name: "Cafeteira Expresso", description: "Para os amantes de um bom café a qualquer hora.", price: 450.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/FEF9C3/854D0E?text=Cafeteira" },
+            { name: "Liquidificador Potente", description: "Ideal para vitaminas, sopas e massas leves.", price: 180.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/FCE7F3/9D2667?text=Liquidificador" },
+            { name: "Batedeira Planetária", description: "Prepare bolos e massas com perfeição.", price: 480.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/FBCFE8/9D2667?text=Batedeira" },
+            { name: "Aparelho de Fondue", description: "Para noites românticas e encontros com amigos.", price: 130.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/FFF7ED/C2410C?text=Fondue" },
+            { name: "Adega Climatizada (12 Garrafas)", description: "Conserve os seus vinhos na temperatura ideal.", price: 800.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/374151/E5E7EB?text=Adega" },
+            { name: "Kit para Vinho com Acessórios", description: "Saca-rolhas, anel e bico doseador.", price: 90.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/581C87/F3E8FF?text=Vinho" },
+            { name: "Máquina de Waffle", description: "Pequenos-almoços mais deliciosos.", price: 150.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/FEFCE8/A16207?text=Waffle" },
+            { name: "Faqueiro 24 Peças Inox", description: "Elegância e qualidade para o dia a dia.", price: 180.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/9CA3AF/111827?text=Faqueiro" },
+            { name: "Jogo de Copos de Cristal (6 Peças)", description: "Para água e sumo, com design sofisticado.", price: 120.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/F4F4F5/52525B?text=Copos" },
+            { name: "Tábua de Frios e Queijos", description: "Perfeita para receber os amigos em casa.", price: 95.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/F59E0B/78350F?text=Tábua" },
+            { name: "Pipoqueira Elétrica", description: "Pipocas de cinema sem usar óleo.", price: 140.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/F87171/7F1D1D?text=Pipoqueira" },
+            { name: "Varinha Mágica 3 em 1", description: "Processa, bate e mistura com praticidade.", price: 160.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/C4B5FD/4C1D95?text=Varinha" },
+            { name: "Sanduicheira e Grill", description: "Para lanches rápidos e saborosos.", price: 110.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/A7F3D0/047857?text=Sanduicheira" },
+            { name: "Balança Digital de Cozinha", description: "Precisão nas receitas.", price: 70.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/E6E6FA/6A5ACD?text=Balança" },
+            { name: "Galheteiro (Azeite, Vinagre, Sal, Pimenta)", description: "Um toque de charme na mesa.", price: 60.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/F5F5DC/808000?text=Galheteiro" },
+            { name: "Máquina de Gelo Portátil", description: "Gelo sempre à mão para as bebidas e para receber os amigos.", price: 750.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/67e8f9/155e75?text=Gelo" },
+            { name: "Panela de Pressão Elétrica", description: "Cozinhe mais rápido, com mais segurança e praticidade.", price: 420.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/71717a/e5e5e5?text=Panela+Elétrica" },
+            { name: "Máquina de Café Superautomática", description: "Mói os grãos e tira o expresso perfeito com um toque.", price: 2800.00, category: "Cozinha & Bar", imageUrl: "https://placehold.co/600x400/44403c/d6d3d1?text=Café+Super" },
 
-            // --- Experiências e Aventuras ---
-            { name: "Fim de Semana Romântico na Serra", description: "Dois dias numa pousada charmosa para relaxar após a festa.", price: 800.00, imageUrl: "https://placehold.co/600x400/22c55e/14532d?text=Serra" },
-            { name: "Aula de Culinária Tailandesa para o Casal", description: "Aprendam a fazer pratos exóticos juntos.", price: 350.00, imageUrl: "https://placehold.co/600x400/f97316/b45309?text=Culinária" },
-            { name: "Voo de Balão ao Nascer do Sol", description: "Uma experiência inesquecível com uma vista de tirar o fôlego.", price: 1200.00, imageUrl: "https://placehold.co/600x400/fde047/b45309?text=Balão" },
-            { name: "Salto Duplo de Paraquedas", description: "Para os noivos aventureiros que amam adrenalina.", price: 900.00, imageUrl: "https://placehold.co/600x400/38bdf8/075985?text=Paraquedas" },
-            { name: "Degustação de Vinhos numa Vinícola", description: "Uma tarde de sabores e descobertas para os amantes de vinho.", price: 400.00, imageUrl: "https://placehold.co/600x400/a855f7/581c87?text=Vinícola" },
-            { name: "Passeio a Cavalo na Praia", description: "Um cenário de filme para um momento a dois.", price: 380.00, imageUrl: "https://placehold.co/600x400/2dd4bf/134e4a?text=Cavalgada" },
-            { name: "Ingressos para um Grande Show ou Festival", description: "Para o casal curtir a banda ou artista favorito.", price: 600.00, imageUrl: "https://placehold.co/600x400/ec4899/831843?text=Show" },
-            { name: "Um Ano de Assinatura de Clube do Café", description: "Recebam cafés especiais de todo o Brasil em casa.", price: 550.00, imageUrl: "https://placehold.co/600x400/78350f/fef3c7?text=Clube+do+Café" },
-            { name: "Sessão de Fotos Pós-Casamento (Trash the Dress)", description: "Um ensaio fotográfico descontraído e artístico.", price: 1500.00, imageUrl: "https://placehold.co/600x400/64748b/1e293b?text=Ensaio" },
-            { name: "Aula de Dança de Salão para Dois", description: "Para aprenderem a dançar juntinhos para o resto da vida.", price: 280.00, imageUrl: "https://placehold.co/600x400/f43f5e/881337?text=Dança" },
-            { name: "Mergulho com Cilindro (Batismo)", description: "Descubram as maravilhas do fundo do mar juntos.", price: 700.00, imageUrl: "https://placehold.co/600x400/0ea5e9/0c4a6e?text=Mergulho" },
-            { name: "Viagem Surpresa de Fim de Semana", description: "Um destino secreto para a primeira escapada como casados.", price: 1000.00, imageUrl: "https://placehold.co/600x400/d946ef/701a75?text=Viagem+Surpresa" },
-            { name: "Workshop de Cerâmica para Casal", description: "Coloquem a mão na massa e criem peças de decoração para a casa.", price: 320.00, imageUrl: "https://placehold.co/600x400/a16207/fef9c3?text=Cerâmica" },
-            { name: "Day Use em Hotel Fazenda", description: "Um dia inteiro de lazer e contato com a natureza.", price: 450.00, imageUrl: "https://placehold.co/600x400/16a34a/14532d?text=Hotel+Fazenda" },
-            { name: "Passeio de Veleiro ao Pôr do Sol", description: "Uma experiência romântica e inesquecível no mar.", price: 650.00, imageUrl: "https://placehold.co/600x400/f59e0b/92400e?text=Veleiro" },
-            { name: "Cota para Jantar em Restaurante Estrelado", description: "Uma experiência gastronômica de altíssimo nível.", price: 750.00, imageUrl: "https://placehold.co/600x400/111827/fcd34d?text=Jantar+de+Luxo" },
+            // Casa & Decoração
+            { name: "Jogo de Toalhas de Banho (4 Peças)", description: "100% algodão, maciez e alta absorção.", price: 150.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/DBEAFE/1E40AF?text=Toalhas" },
+            { name: "Edredom Queen Size", description: "Conforto e aquecimento para noites tranquilas.", price: 220.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/E5E7EB/1F2937?text=Edredom" },
+            { name: "Jogo de Cama Queen (4 Peças)", description: "Lençóis e fronhas para uma cama aconchegante.", price: 180.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/F5D0FE/701A75?text=Jogo+de+Cama" },
+            { name: "Vaso Decorativo de Cerâmica", description: "Um toque de design para o novo lar.", price: 150.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/DDE7C7/556B2F?text=Vaso" },
+            { name: "Luminária de Chão", description: "Iluminação aconchegante para a sala.", price: 280.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/FDE68A/B45309?text=Luminária" },
+            { name: "Tapete para Sala (2.00x1.50m)", description: "Confortável e estiloso para o seu ambiente.", price: 400.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/A3A3A3/262626?text=Tapete" },
+            { name: "Kit de Almofadas Decorativas (4 un.)", description: "Para decorar e trazer conforto ao sofá.", price: 130.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/FAD1A2/7C2D12?text=Almofadas" },
+            { name: "Espelho Decorativo Adnet", description: "Redondo, para o hall de entrada ou quarto.", price: 200.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/E7E5E4/44403C?text=Espelho" },
+            { name: "Sofá Retrátil e Reclinável", description: "Conforto máximo para a sala de TV.", price: 2800.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/A8A29E/44403C?text=Sofá" },
+            { name: "Mesa de Jantar 6 Lugares", description: "Para reunir a família e os amigos.", price: 1600.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/D2B48C/8B4513?text=Mesa" },
+            { name: "Painel para TV", description: "Organização e estilo para a sala.", price: 450.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/BCA18D/5C4033?text=Painel+TV" },
+            { name: "Poltrona Decorativa", description: "Um ponto de cor e conforto no ambiente.", price: 600.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/87CEEB/4682B4?text=Poltrona" },
+            { name: "Cortina Blackout para Quarto", description: "Bloqueia a luz e garante privacidade.", price: 190.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/2F4F4F/F5F5F5?text=Cortina" },
+            { name: "Kit de Potes Herméticos (10 Peças)", description: "Para organizar e conservar os alimentos.", price: 140.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/B0E0E6/4682B4?text=Potes" },
+            { name: "Fruteira de Mesa Moderna", description: "Design e organização para a sua cozinha.", price: 85.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/98FB98/2E8B57?text=Fruteira" },
+            { name: "Escorredor de Louça Inox", description: "Funcional e compacto para o lava-loiça.", price: 90.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/778899/F8F8FF?text=Escorredor" },
+            { name: "Lixeira de Inox com Pedal (5L)", description: "Prática e higiénica para a cozinha.", price: 110.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/C0C0C0/000000?text=Lixeira" },
+            { name: "Ferro de Engomar a Vapor", description: "Roupas lisinhas com mais facilidade.", price: 130.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/ADD8E6/4169E1?text=Ferro" },
+            { name: "Tábua de Engomar", description: "Resistente e com altura regulável.", price: 150.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/DCDCDC/696969?text=Tábua" },
+            { name: "Estendal de Chão", description: "Prático para secar roupas em apartamentos.", price: 100.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/F5F5F5/808080?text=Estendal" },
+            { name: "Kit de Cabides (50 Unidades)", description: "Para organizar o guarda-roupa.", price: 80.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/FFE4B5/D2691E?text=Cabides" },
+            { name: "Organizador de Sapatos", description: "Otimiza o espaço na sapateira.", price: 75.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/DEB887/8B4513?text=Sapatos" },
+            { name: "Cesto de Roupa Suja", description: "Design moderno para a casa de banho ou lavandaria.", price: 95.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/F5DEB3/A0522D?text=Cesto" },
+            { name: "Kit de Casa de Banho (3 Peças)", description: "Porta-sabonete, porta-escovas e lixeira.", price: 120.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/AFEEEE/40E0D0?text=Kit+Banheiro" },
+            { name: "Chuveiro Elétrico Moderno", description: "Com mais opções de temperatura.", price: 250.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/B0C4DE/708090?text=Chuveiro" },
+            { name: "Manta para Sofá", description: "Um toque de aconchego e cor para a sala.", price: 110.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/E9967A/CD5C5C?text=Manta" },
+            { name: "Quadro Decorativo (Conjunto com 3)", description: "Para compor a parede da sala ou quarto.", price: 180.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/8FBC8F/2E8B57?text=Quadros" },
+            { name: "Relógio de Parede Minimalista", description: "Design moderno e silencioso.", price: 90.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/20B2AA/F0FFFF?text=Relógio" },
+            { name: "Humidificador de Ar", description: "Melhora a qualidade do ar no ambiente.", price: 160.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/66CDAA/3CB371?text=Humidificador" },
+            { name: "Ventilador de Coluna", description: "Silencioso e potente para os dias quentes.", price: 220.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/48D1CC/008B8B?text=Ventilador" },
+            { name: "Ar-Condicionado Split 9000 BTUs", description: "Conforto térmico para o quarto.", price: 1900.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/00CED1/2F4F4F?text=Ar-Condicionado" },
+            { name: "Cristaleira", description: "Para guardar e exibir louças e taças.", price: 800.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/BDB76B/556B2F?text=Cristaleira" },
+            { name: "Aparador para Sala de Jantar", description: "Móvel versátil para decorar e organizar.", price: 450.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/C19A6B/8B4513?text=Aparador" },
+            { name: "Cama Box Queen com Baú", description: "Colchão e base para noites de sono perfeitas.", price: 2300.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/D3D3D3/696969?text=Cama" },
+            { name: "Cabeceira Estofada para Cama", description: "Mais conforto e estilo para o seu quarto.", price: 400.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/BEBEBE/808080?text=Cabeceira" },
+            { name: "Mesa de Cabeceira (Par)", description: "Para apoiar e organizar ao lado da cama.", price: 300.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/A9A9A9/2F4F4F?text=Mesa+Cabeceira" },
+            { name: "Cómoda com 4 Gavetas", description: "Para organizar roupas e acessórios.", price: 550.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/808080/F5F5F5?text=Cómoda" },
+            { name: "Sapateira Vertical", description: "Mantenha os sapatos sempre organizados.", price: 250.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/696969/DCDCDC?text=Sapateira" },
+            { name: "Horta Inteligente de Apartamento", description: "Cultive temperos frescos em casa, sem trabalho.", price: 480.00, category: "Casa & Decoração", imageUrl: "https://placehold.co/600x400/84cc16/3f6212?text=Horta" },
 
-            // --- Casa e Tecnologia ---
-            { name: "Fechadura Digital Inteligente", description: "Chega de perder chaves! Mais segurança e praticidade.", price: 850.00, imageUrl: "https://placehold.co/600x400/475569/f1f5f9?text=Fechadura" },
-            { name: "Lâmpadas Inteligentes (Kit Inicial)", description: "Controle a iluminação da casa pelo celular ou por voz.", price: 320.00, imageUrl: "https://placehold.co/600x400/f59e0b/92400e?text=Luz+Inteligente" },
-            { name: "Soundbar para TV", description: "Som de cinema para as noites de filmes e séries.", price: 950.00, imageUrl: "https://placehold.co/600x400/1f2937/e5e7eb?text=Soundbar" },
-            { name: "Máquina de Gelo Portátil", description: "Gelo sempre à mão para as bebidas e para receber os amigos.", price: 750.00, imageUrl: "https://placehold.co/600x400/67e8f9/155e75?text=Gelo" },
-            { name: "Horta Inteligente de Apartamento", description: "Cultive temperos frescos em casa, sem trabalho.", price: 480.00, imageUrl: "https://placehold.co/600x400/84cc16/3f6212?text=Horta" },
-            { name: "Carregador Duplo sem Fio para Celulares", description: "Para carregar os dois celulares lado a lado durante a noite.", price: 250.00, imageUrl: "https://placehold.co/600x400/334155/e2e8f0?text=Carregador" },
-            { name: "Robô Limpador de Vidros", description: "Janelas e espelhos limpos sem esforço.", price: 1100.00, imageUrl: "https://placehold.co/600x400/06b6d4/164e63?text=Limpa+Vidro" },
-            { name: "Quadro Digital de Fotos Wi-Fi", description: "Exiba as fotos do casamento e da vida a dois, atualizado pelo celular.", price: 580.00, imageUrl: "https://placehold.co/600x400/4f46e5/e0e7ff?text=Porta-Retrato" },
-            { name: "Panela de Pressão Elétrica", description: "Cozinhe mais rápido, com mais segurança e praticidade.", price: 420.00, imageUrl: "https://placehold.co/600x400/71717a/e5e5e5?text=Panela+Elétrica" },
-            { name: "Máquina de Café Superautomática", description: "Mói os grãos e tira o expresso perfeito com um toque.", price: 2800.00, imageUrl: "https://placehold.co/600x400/44403c/d6d3d1?text=Café+Super" },
-            { name: "Filtro de Água com Ozônio", description: "Água purificada e livre de bactérias para uma vida mais saudável.", price: 680.00, imageUrl: "https://placehold.co/600x400/0284c7/e0f2fe?text=Filtro+Ozônio" },
-            { name: "Projetor 4K", description: "Transforme a sala em um verdadeiro cinema de alta definição.", price: 3500.00, imageUrl: "https://placehold.co/600x400/0f172a/f1f5f9?text=Projetor+4K" },
-            { name: "Tablet para o Casal", description: "Para ler, assistir séries e planejar as próximas viagens.", price: 1700.00, imageUrl: "https://placehold.co/600x400/4b5563/e5e7eb?text=Tablet" },
+            // Tecnologia & Eletrônicos
+            { name: "Aspirador de Pó Robô", description: "Mantenha a casa limpa sem esforço.", price: 1200.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/E0E7FF/3730A3?text=Robô" },
+            { name: "Smart TV 4K 50 Polegadas", description: "Cinema em casa com imagem e som de alta qualidade.", price: 2500.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/1F2937/F9FAFB?text=Smart+TV" },
+            { name: "Caixa de Som Bluetooth", description: "Leve a sua música para qualquer lugar.", price: 250.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/C7D2FE/4338CA?text=Som" },
+            { name: "Câmara de Segurança Wi-Fi", description: "Monitorize a sua casa pelo telemóvel.", price: 220.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/E2E8F0/334155?text=Câmara" },
+            { name: "Robô Limpador de Janelas", description: "Janelas a brilhar sem esforço.", price: 950.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/CCFBF1/134E4A?text=Limpa+Janela" },
+            { name: "Projetor Portátil", description: "Transforme qualquer parede num ecrã de cinema.", price: 650.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/EFEFEF/333333?text=Projetor" },
+            { name: "Assistente Virtual (Smart Speaker)", description: "Controle a casa e ouça música com a voz.", price: 300.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/BFDBFE/1E3A8A?text=Assistente" },
+            { name: "Auscultadores com Cancelamento de Ruído", description: "Imersão total em músicas e podcasts.", price: 500.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/34D399/059669?text=Auscultadores" },
+            { name: "Kindle (Leitor Digital)", description: "Milhares de livros na palma da mão.", price: 450.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/A5B4FC/312E81?text=Kindle" },
+            { name: "Portátil Ultrafino", description: "Para trabalho, estudos e entretenimento.", price: 3500.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/708090/E6E6FA?text=Portátil" },
+            { name: "Impressora Multifuncional Wi-Fi", description: "Imprime, copia e digitaliza sem fios.", price: 600.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/778899/F0F8FF?text=Impressora" },
+            { name: "Monitor 24 Polegadas Full HD", description: "Para mais produtividade e conforto visual.", price: 800.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/1C1C1C/FFFFFF?text=Monitor" },
+            { name: "Teclado e Rato sem Fio", description: "Mais liberdade e menos fios na mesa.", price: 200.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/36454F/E8E8E8?text=Teclado+Rato" },
+            { name: "HD Externo 1TB", description: "Para backup de fotos e ficheiros importantes.", price: 300.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/000080/ADD8E6?text=HD+Externo" },
+            { name: "Consola de Última Geração", description: "Diversão garantida para o casal.", price: 4500.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/00FF00/000000?text=Consola" },
+            { name: "Fechadura Digital Inteligente", description: "Chega de perder chaves! Mais segurança e praticidade.", price: 850.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/475569/f1f5f9?text=Fechadura" },
+            { name: "Lâmpadas Inteligentes (Kit Inicial)", description: "Controle a iluminação da casa pelo celular ou por voz.", price: 320.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/f59e0b/92400e?text=Luz+Inteligente" },
+            { name: "Soundbar para TV", description: "Som de cinema para as noites de filmes e séries.", price: 950.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/1f2937/e5e7eb?text=Soundbar" },
+            { name: "Carregador Duplo sem Fio para Celulares", description: "Para carregar os dois celulares lado a lado durante a noite.", price: 250.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/334155/e2e8f0?text=Carregador" },
+            { name: "Quadro Digital de Fotos Wi-Fi", description: "Exiba as fotos do casamento e da vida a dois, atualizado pelo celular.", price: 580.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/4f46e5/e0e7ff?text=Porta-Retrato" },
+            { name: "Filtro de Água com Ozônio", description: "Água purificada e livre de bactérias para uma vida mais saudável.", price: 680.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/0284c7/e0f2fe?text=Filtro+Ozônio" },
+            { name: "Projetor 4K", description: "Transforme a sala em um verdadeiro cinema de alta definição.", price: 3500.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/0f172a/f1f5f9?text=Projetor+4K" },
+            { name: "Tablet para o Casal", description: "Para ler, assistir séries e planejar as próximas viagens.", price: 1700.00, category: "Tecnologia & Eletrônicos", imageUrl: "https://placehold.co/600x400/4b5563/e5e7eb?text=Tablet" },
 
-            // --- Hobbies e Interesses ---
-            { name: "Kit de Cerveja Artesanal", description: "Para o casal que ama cerveja, que tal produzir a sua própria?", price: 380.00, imageUrl: "https://placehold.co/600x400/fbbf24/92400e?text=Cerveja+Artesanal" },
-            { name: "Toca-Discos de Vinil Moderno", description: "Para curtir um som de qualidade com estilo.", price: 850.00, imageUrl: "https://placehold.co/600x400/4b5563/f3f4f6?text=Vinil" },
-            { name: "Duas Pranchas de Stand Up Paddle", description: "Para os fins de semana de sol no mar ou na lagoa.", price: 2200.00, imageUrl: "https://placehold.co/600x400/34d399/065f46?text=SUP" },
-            { name: "Kit Completo de Acampamento para Casal", description: "Barraca, sacos de dormir e tudo para uma aventura na natureza.", price: 1300.00, imageUrl: "https://placehold.co/600x400/166534/dcfce7?text=Camping" },
-            { name: "Telescópio para Amadores", description: "Para observar as estrelas juntos nas noites de céu limpo.", price: 700.00, imageUrl: "https://placehold.co/600x400/1e293b/94a3b8?text=Telescópio" },
-            { name: "Câmera de Ação (GoPro ou similar)", description: "Para registrar todas as aventuras da lua de mel e da vida.", price: 1800.00, imageUrl: "https://placehold.co/600x400/0ea5e9/e0f2fe?text=GoPro" },
-            { name: "Kit de Pintura a Óleo para Iniciantes", description: "Para descobrirem um novo hobby artístico juntos.", price: 220.00, imageUrl: "https://placehold.co/600x400/8b5cf6/ddd6fe?text=Pintura" },
-            { name: "Duas Bicicletas Urbanas", description: "Para passeios no parque e um estilo de vida mais saudável.", price: 1600.00, imageUrl: "https://placehold.co/600x400/ef4444/fee2e2?text=Bicicletas" },
-            { name: "Drone para Iniciantes", description: "Capturem imagens aéreas incríveis das suas viagens.", price: 1200.00, imageUrl: "https://placehold.co/600x400/3f3f46/e5e5e5?text=Drone" },
-            { name: "Kit de Poker Profissional", description: "Para as noites de jogos com os amigos.", price: 280.00, imageUrl: "https://placehold.co/600x400/15803d/bbf7d0?text=Poker" },
-            { name: "Teclado Musical para Iniciantes", description: "Para aprender a tocar as músicas favoritas do casal.", price: 600.00, imageUrl: "https://placehold.co/600x400/1e293b/cbd5e1?text=Teclado" },
-            { name: "Equipamento de Escalada (Kit Básico)", description: "Para casais que buscam desafios nas alturas.", price: 950.00, imageUrl: "https://placehold.co/600x400/7c2d12/fed7aa?text=Escalada" },
+            // Experiências & Lazer
+            { name: "Vale-Jantar Romântico", description: "Uma noite especial num restaurante a dois.", price: 300.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/FFE4E6/9F1239?text=Jantar" },
+            { name: "Um Ano de Streaming de Filmes", description: "Acesso ilimitado a filmes e séries.", price: 400.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/DC2626/FEF2F2?text=Streaming" },
+            { name: "Bicicleta Ergométrica", description: "Para se exercitar sem sair de casa.", price: 900.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/F0FDF4/166534?text=Bicicleta" },
+            { name: "Kit de Jardinagem", description: "Para cultivar um pequeno jardim ou horta.", price: 120.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/ECFCCB/4D7C0F?text=Jardim" },
+            { name: "Assinatura de Flores Mensal", description: "Um lindo arranjo para alegrar a casa todo mês.", price: 150.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/F472B6/9D2667?text=Flores" },
+            { name: "Jogo de Tabuleiro Moderno", description: "Para noites divertidas com os amigos.", price: 180.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/FFA500/4B0082?text=Jogo" },
+            { name: "Violão Acústico", description: "Para os momentos de inspiração musical.", price: 400.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/8B4513/F5DEB3?text=Violão" },
+            { name: "Assinatura de Clube de Vinhos (6 meses)", description: "Receba rótulos selecionados em casa.", price: 500.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/800000/FFE4E1?text=Clube+Vinho" },
+            { name: "Fim de Semana Romântico na Serra", description: "Dois dias numa pousada charmosa para relaxar após a festa.", price: 800.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/22c55e/14532d?text=Serra" },
+            { name: "Aula de Culinária Tailandesa para o Casal", description: "Aprendam a fazer pratos exóticos juntos.", price: 350.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/f97316/b45309?text=Culinária" },
+            { name: "Voo de Balão ao Nascer do Sol", description: "Uma experiência inesquecível com uma vista de tirar o fôlego.", price: 1200.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/fde047/b45309?text=Balão" },
+            { name: "Salto Duplo de Paraquedas", description: "Para os noivos aventureiros que amam adrenalina.", price: 900.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/38bdf8/075985?text=Paraquedas" },
+            { name: "Degustação de Vinhos numa Vinícola", description: "Uma tarde de sabores e descobertas para os amantes de vinho.", price: 400.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/a855f7/581c87?text=Vinícola" },
+            { name: "Passeio a Cavalo na Praia", description: "Um cenário de filme para um momento a dois.", price: 380.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/2dd4bf/134e4a?text=Cavalgada" },
+            { name: "Ingressos para um Grande Show ou Festival", description: "Para o casal curtir a banda ou artista favorito.", price: 600.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/ec4899/831843?text=Show" },
+            { name: "Um Ano de Assinatura de Clube do Café", description: "Recebam cafés especiais de todo o Brasil em casa.", price: 550.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/78350f/fef3c7?text=Clube+do+Café" },
+            { name: "Sessão de Fotos Pós-Casamento (Trash the Dress)", description: "Um ensaio fotográfico descontraído e artístico.", price: 1500.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/64748b/1e293b?text=Ensaio" },
+            { name: "Aula de Dança de Salão para Dois", description: "Para aprenderem a dançar juntinhos para o resto da vida.", price: 280.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/f43f5e/881337?text=Dança" },
+            { name: "Mergulho com Cilindro (Batismo)", description: "Descubram as maravilhas do fundo do mar juntos.", price: 700.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/0ea5e9/0c4a6e?text=Mergulho" },
+            { name: "Viagem Surpresa de Fim de Semana", description: "Um destino secreto para a primeira escapada como casados.", price: 1000.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/d946ef/701a75?text=Viagem+Surpresa" },
+            { name: "Workshop de Cerâmica para Casal", description: "Coloquem a mão na massa e criem peças de decoração para a casa.", price: 320.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/a16207/fef9c3?text=Cerâmica" },
+            { name: "Day Use em Hotel Fazenda", description: "Um dia inteiro de lazer e contato com a natureza.", price: 450.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/16a34a/14532d?text=Hotel+Fazenda" },
+            { name: "Passeio de Veleiro ao Pôr do Sol", description: "Uma experiência romântica e inesquecível no mar.", price: 650.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/f59e0b/92400e?text=Veleiro" },
+            { name: "Cota para Jantar em Restaurante Estrelado", description: "Uma experiência gastronômica de altíssimo nível.", price: 750.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/111827/fcd34d?text=Jantar+de+Luxo" },
+            { name: "Kit de Cerveja Artesanal", description: "Para o casal que ama cerveja, que tal produzir a sua própria?", price: 380.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/fbbf24/92400e?text=Cerveja+Artesanal" },
+            { name: "Toca-Discos de Vinil Moderno", description: "Para curtir um som de qualidade com estilo.", price: 850.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/4b5563/f3f4f6?text=Vinil" },
+            { name: "Duas Pranchas de Stand Up Paddle", description: "Para os fins de semana de sol no mar ou na lagoa.", price: 2200.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/34d399/065f46?text=SUP" },
+            { name: "Kit Completo de Acampamento para Casal", description: "Barraca, sacos de dormir e tudo para uma aventura na natureza.", price: 1300.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/166534/dcfce7?text=Camping" },
+            { name: "Telescópio para Amadores", description: "Para observar as estrelas juntos nas noites de céu limpo.", price: 700.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/1e293b/94a3b8?text=Telescópio" },
+            { name: "Câmera de Ação (GoPro ou similar)", description: "Para registrar todas as aventuras da lua de mel e da vida.", price: 1800.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/0ea5e9/e0f2fe?text=GoPro" },
+            { name: "Kit de Pintura a Óleo para Iniciantes", description: "Para descobrirem um novo hobby artístico juntos.", price: 220.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/8b5cf6/ddd6fe?text=Pintura" },
+            { name: "Duas Bicicletas Urbanas", description: "Para passeios no parque e um estilo de vida mais saudável.", price: 1600.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/ef4444/fee2e2?text=Bicicletas" },
+            { name: "Drone para Iniciantes", description: "Capturem imagens aéreas incríveis das suas viagens.", price: 1200.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/3f3f46/e5e5e5?text=Drone" },
+            { name: "Kit de Poker Profissional", description: "Para as noites de jogos com os amigos.", price: 280.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/15803d/bbf7d0?text=Poker" },
+            { name: "Teclado Musical para Iniciantes", description: "Para aprender a tocar as músicas favoritas do casal.", price: 600.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/1e293b/cbd5e1?text=Teclado" },
+            { name: "Equipamento de Escalada (Kit Básico)", description: "Para casais que buscam desafios nas alturas.", price: 950.00, category: "Experiências & Lazer", imageUrl: "https://placehold.co/600x400/7c2d12/fed7aa?text=Escalada" },
 
-            // --- Mais Cotas e Contribuições ---
-            { name: "Cota para mobiliar o primeiro lar", description: "Ajude-nos a comprar os móveis para o nosso cantinho.", price: 250.00, imageUrl: "https://placehold.co/600x400/a16207/fefce8?text=Mobília" },
-            { name: "Cota para o Jantar de Ensaio", description: "Contribua para a celebração que antecede o grande dia.", price: 150.00, imageUrl: "https://placehold.co/600x400/be123c/fecdd3?text=Jantar+Ensaio" },
-            { name: "Cota para o Álbum de Casamento", description: "Ajude a eternizar nossas memórias em um lindo álbum.", price: 200.00, imageUrl: "https://placehold.co/600x400/9ca3af/f3f4f6?text=Álbum" },
-            { name: "Cota para Adoção de um Pet", description: "Ajude-nos a aumentar a família com um amigo de quatro patas!", price: 100.00, imageUrl: "https://placehold.co/600x400/ca8a04/fef9c3?text=Pet" },
-            { name: "Cota para a Entrada do Apartamento", description: "Uma ajuda para o nosso maior sonho: a casa própria.", price: 1000.00, imageUrl: "https://placehold.co/600x400/1d4ed8/dbeafe?text=Casa+Própria" },
-            { name: "Cota para a Festa de Chá de Casa Nova", description: "Ajude-nos a celebrar a nossa nova casa com os amigos.", price: 120.00, imageUrl: "https://placehold.co/600x400/059669/a7f3d0?text=Chá+de+Casa" },
-            { name: "Cota para um Fundo de Emergência", description: "Porque a vida a dois também é sobre segurança e planejamento.", price: 300.00, imageUrl: "https://placehold.co/600x400/4b5563/e5e7eb?text=Emergência" },
-            { name: "Cota para a Decoração do Quarto do Bebê", description: "Para casais que já estão pensando nos próximos passos!", price: 200.00, imageUrl: "https://placehold.co/600x400/60a5fa/dbeafe?text=Bebê" }
+            // Moda & Acessórios
+            { name: "Mala de Viagem Média", description: "Resistente e com rodinhas 360º para as suas aventuras.", price: 350.00, category: "Moda & Acessórios", imageUrl: "https://placehold.co/600x400/D4D4D8/3F3F46?text=Mala" },
+            { name: "Escova Secadora", description: "Cabelos secos e modelados com um só aparelho.", price: 210.00, category: "Moda & Acessórios", imageUrl: "https://placehold.co/600x400/F9A8D4/831843?text=Escova" },
+            { name: "Máquina de Barbear Elétrica", description: "Barba perfeita com mais conforto.", price: 250.00, category: "Moda & Acessórios", imageUrl: "https://placehold.co/600x400/60A5FA/1E3A8A?text=Barbeador" },
+            { name: "Mochila para Portátil", description: "Segurança e conforto para transportar os seus eletrónicos.", price: 180.00, category: "Moda & Acessórios", imageUrl: "https://placehold.co/600x400/71717A/27272A?text=Mochila" },
+            { name: "Secador de Cabelo Profissional", description: "Potência e tecnologia para secagem rápida.", price: 280.00, category: "Moda & Acessórios", imageUrl: "https://placehold.co/600x400/FFC0CB/DB7093?text=Secador" },
+
+            // Engraçados & Divertidos
+            { name: "Kit de Sobrevivência para Casados", description: "Tapa-ouvidos, manual de 'Sim, querida' e vales 'noite livre'.", price: 79.90, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/f87171/7f1d1d?text=Socorro!" },
+            { name: "Meias Combinando 'Game Over'", description: "Um par para o noivo com 'Game Over' e para a noiva com 'She Wins!'.", price: 49.90, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/a78bfa/5b21b6?text=Game+Over" },
+            { name: "Controle Remoto Universal de Desculpas", description: "Botões para 'Foi mal', 'Você tem razão' e 'A culpa foi minha'.", price: 59.90, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/facc15/b45309?text=Desculpas" },
+            { name: "Manual 'Como Montar Móveis da IKEA sem Divórcio'", description: "Um guia passo a passo para o maior teste de um relacionamento.", price: 39.90, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/60a5fa/1e3a8a?text=IKEA+Challenge" },
+            { name: "Kit 'Noite de Netflix' à Prova de Discussão", description: "Dois fones de ouvido sem fio. Cada um assiste o que quiser, juntos.", price: 300.00, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/1f2937/ef4444?text=Netflix+em+Paz" },
+            { name: "Troféu 'Melhor Marido do Mundo' (Pré-datado)", description: "Um incentivo para ele começar o casamento com o pé direito.", price: 89.90, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/fcd34d/b45309?text=Troféu" },
+            { name: "Almofada de Peido 'Quem Soltou?'", description: "Para quebrar o gelo em momentos de tensão. A culpa nunca é de ninguém.", price: 45.00, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/a3e635/4d7c0f?text=Foi+você?" },
+            { name: "Placa Decorativa 'Nesta casa, a Wi-Fi é fraca mas o amor é forte'", description: "Um toque de humor e verdade para o novo lar.", price: 65.00, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/94a3b8/1e293b?text=Placa+Wi-Fi" },
+            { name: "Aventais 'Chef' e 'Sous-Chef'", description: "Para deixar claro quem manda na cozinha (e quem só ajuda).", price: 85.00, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/eab308/854d0e?text=Aventais" },
+            { name: "Canecas com termômetro de amor", description: "A estampa muda com o calor, mostrando o quanto o amor está 'quente'.", price: 75.00, category: "Engraçados & Divertidos", imageUrl: "https://placehold.co/600x400/dc2626/fef2f2?text=Canecas+Mágicas" },
+
+            // Cotas & Contribuições
+            { name: "Cota para a Primeira Briga", description: "Para garantir o jantar de reconciliação. Pizza por nossa conta!", price: 60.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/fca5a5/991b1b?text=Pizza+da+Paz" },
+            { name: "Cota para a Lua de Mel", description: "Ajude a tornar a nossa viagem inesquecível.", price: 100.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/E0F2FE/0E7490?text=Lua+de+Mel" },
+            { name: "Cota para a Lua de Mel (Premium)", description: "Uma contribuição especial para a nossa viagem de sonho.", price: 500.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/CFFAFE/0891B2?text=Lua+de+Mel" },
+            { name: "Cota para mobiliar o primeiro lar", description: "Ajude-nos a comprar os móveis para o nosso cantinho.", price: 250.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/a16207/fefce8?text=Mobília" },
+            { name: "Cota para o Jantar de Ensaio", description: "Contribua para a celebração que antecede o grande dia.", price: 150.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/be123c/fecdd3?text=Jantar+Ensaio" },
+            { name: "Cota para o Álbum de Casamento", description: "Ajude a eternizar nossas memórias em um lindo álbum.", price: 200.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/9ca3af/f3f4f6?text=Álbum" },
+            { name: "Cota para Adoção de um Pet", description: "Ajude-nos a aumentar a família com um amigo de quatro patas!", price: 100.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/ca8a04/fef9c3?text=Pet" },
+            { name: "Cota para a Entrada do Apartamento", description: "Uma ajuda para o nosso maior sonho: a casa própria.", price: 1000.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/1d4ed8/dbeafe?text=Casa+Própria" },
+            { name: "Cota para a Festa de Chá de Casa Nova", description: "Ajude-nos a celebrar a nossa nova casa com os amigos.", price: 120.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/059669/a7f3d0?text=Chá+de+Casa" },
+            { name: "Cota para um Fundo de Emergência", description: "Porque a vida a dois também é sobre segurança e planejamento.", price: 300.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/4b5563/e5e7eb?text=Emergência" },
+            { name: "Cota para a Decoração do Quarto do Bebê", description: "Para casais que já estão pensando nos próximos passos!", price: 200.00, category: "Cotas & Contribuições", imageUrl: "https://placehold.co/600x400/60a5fa/dbeafe?text=Bebê" },
+
+            // Outros
+            { name: "Kit de Ferramentas (129 Peças)", description: "Para pequenas reparações e projetos em casa.", price: 199.90, category: "Outros", imageUrl: "https://placehold.co/600x400/FEF3C7/92400E?text=Ferramentas" },
+            { name: "Churrasqueira Elétrica", description: "Para um churrasco prático na varanda.", price: 280.00, category: "Outros", imageUrl: "https://placehold.co/600x400/FEE2E2/B91C1C?text=Churrasqueira" },
+            { name: "Cadeira Gamer", description: "Conforto extra para longas horas de uso.", price: 950.00, category: "Outros", imageUrl: "https://placehold.co/600x400/FF0000/000000?text=Cadeira+Gamer" },
+            { name: "Cofrinho 'Para Nossas Loucuras'", description: "Para juntar dinheiro para aquela viagem ou compra impulsiva.", price: 50.00, category: "Outros", imageUrl: "https://placehold.co/600x400/f472b6/9d2667?text=Cofrinho" },
+            { name: "Kit de jardinagem para 'plantar o amor'", description: "Para ver o relacionamento florescer, literalmente.", price: 95.00, category: "Outros", imageUrl: "https://placehold.co/600x400/4ade80/15803d?text=Plantar+o+Amor" }
         ];
 
-        // *** FUNÇÃO MELHORADA PARA POVOAR O CATÁLOGO SEM DUPLICATAS ***
-        async function syncMasterCatalog() {
+        // *** FUNÇÃO PARA ATUALIZAR/SINCRONIZAR O CATÁLOGO ***
+        async function updateCatalogWithCategories() {
             const catalogRef = collection(db, 'gift_catalog_master');
-            console.log("A iniciar a sincronização do catálogo mestre...");
+            console.log("A iniciar a atualização de categorias do catálogo...");
             
-            // 1. Pega os nomes de todos os presentes que já existem no banco de dados
-            const existingGiftsSnapshot = await getDocs(query(catalogRef, where("name", "!=", "")));
-            const existingGiftNames = new Set(existingGiftsSnapshot.docs.map(doc => doc.data().name));
-            console.log(`${existingGiftNames.size} presentes já existem no catálogo.`);
+            const existingGiftsSnapshot = await getDocs(catalogRef);
+            const giftsToUpdate = [];
+            
+            // Mapeia os dados locais para fácil acesso
+            const localDataMap = new Map(masterCatalogData.map(gift => [gift.name, gift]));
 
-            // 2. Filtra a lista local para encontrar apenas os presentes que são novos
-            const newGiftsToAdd = masterCatalogData.filter(gift => !existingGiftNames.has(gift.name));
-            
-            if (newGiftsToAdd.length === 0) {
-                console.log("Nenhum presente novo para adicionar. O catálogo está atualizado!");
-                alert("O seu catálogo de presentes já está totalmente atualizado!");
+            existingGiftsSnapshot.docs.forEach(doc => {
+                const docData = doc.data();
+                const localGiftData = localDataMap.get(docData.name);
+                
+                // Verifica se o presente do banco de dados não tem categoria E se encontramos uma categoria para ele na lista local
+                if (!docData.category && localGiftData && localGiftData.category) {
+                    giftsToUpdate.push({
+                        ref: doc.ref,
+                        category: localGiftData.category
+                    });
+                }
+            });
+
+            if (giftsToUpdate.length === 0) {
+                console.log("Nenhum presente precisou ser atualizado. As categorias estão em dia!");
+                alert("O seu catálogo de presentes já está com as categorias atualizadas!");
                 return;
             }
 
-            console.log(`A adicionar ${newGiftsToAdd.length} novos presentes...`);
+            console.log(`A atualizar categorias para ${giftsToUpdate.length} presentes...`);
             let successCount = 0;
 
-            // 3. Adiciona apenas os novos presentes
-            for (const gift of newGiftsToAdd) {
+            for (const gift of giftsToUpdate) {
                 try {
-                    await addDoc(catalogRef, gift);
+                    await updateDoc(gift.ref, { category: gift.category });
                     successCount++;
-                    console.log(`Presente "${gift.name}" adicionado com sucesso.`);
                 } catch (error) {
-                    console.error(`Erro ao adicionar o presente "${gift.name}":`, error);
+                    console.error(`Erro ao atualizar o presente "${gift.ref.id}":`, error);
                 }
             }
 
-            console.log(`Sincronização concluída! ${successCount} novos presentes foram adicionados.`);
-            alert(`${successCount} novos presentes foram adicionados ao catálogo mestre com sucesso!`);
+            console.log(`Atualização concluída! ${successCount} presentes foram atualizados com categorias.`);
+            alert(`${successCount} presentes foram atualizados com categorias com sucesso!`);
         }
-        // Expõe a nova função para a janela global
-        window.syncMasterCatalog = syncMasterCatalog;
-        // *** FIM DO SCRIPT DE POVOAMENTO ***
+        window.updateCatalogWithCategories = updateCatalogWithCategories;
+        // *** FIM DO SCRIPT DE ATUALIZAÇÃO ***
 
 
         const loadingScreen = document.getElementById('loading-screen');
         const pageWrapper = document.getElementById('page-wrapper');
+        const giftCategorySelect = document.getElementById('gift-category');
 
         const waitForAuthInit = () => {
             return new Promise((resolve, reject) => {
@@ -367,7 +377,6 @@
             const catalogList = document.getElementById('catalog-list');
             const loadingMessage = document.getElementById('loading-message');
             const cancelEditBtn = document.getElementById('cancel-edit-btn');
-            
             const imageDropZone = document.getElementById('image-drop-zone');
             const imageUploadPrompt = document.getElementById('image-upload-prompt');
             const imagePreviewContainer = document.getElementById('image-preview-container');
@@ -378,24 +387,23 @@
             const giftImageUrlInput = document.getElementById('gift-image-url');
 
             let selectedFile = null;
-
             const catalogCollectionName = 'gift_catalog_master';
             const catalogCollectionRef = collection(db, catalogCollectionName);
 
             pageWrapper.classList.remove('hidden');
             loadingScreen.style.display = 'none';
+            
+            // Popula o select de categorias no formulário
+            giftCategorySelect.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
 
             function showToast(message, isError = false) {
                 const toast = document.getElementById('toast-notification');
                 const toastMessage = document.getElementById('toast-message');
                 if (!toast || !toastMessage) return;
-
                 toastMessage.textContent = message;
                 toast.style.backgroundColor = isError ? '#ef4444' : '#22c55e';
-                
                 toast.classList.remove('hidden', 'translate-x-full');
                 toast.classList.add('translate-x-0');
-
                 setTimeout(() => {
                     toast.classList.remove('translate-x-0');
                     toast.classList.add('translate-x-full');
@@ -405,7 +413,6 @@
             function showConfirmModal(message, onConfirm) {
                 const confirmModalEl = document.getElementById('confirm-modal');
                 if (!confirmModalEl) return;
-
                 confirmModalEl.innerHTML = `
                     <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm mx-auto">
                         <h3 class="text-lg font-medium text-gray-900">Confirmar Ação</h3>
@@ -415,7 +422,6 @@
                             <button id="modal-confirm" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar</button>
                         </div>
                     </div>`;
-
                 confirmModalEl.classList.remove('hidden');
                 const closeModal = () => confirmModalEl.classList.add('hidden');
                 document.getElementById('modal-cancel').addEventListener('click', closeModal);
@@ -445,18 +451,10 @@
 
             imageUploadPrompt.addEventListener('click', () => fileUploadInput.click());
             fileUploadInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
-            
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                imageDropZone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
-            });
-            ['dragenter', 'dragover'].forEach(eventName => {
-                imageDropZone.addEventListener(eventName, () => imageDropZone.classList.add('drag-over'));
-            });
-            ['dragleave', 'drop'].forEach(eventName => {
-                imageDropZone.addEventListener(eventName, () => imageDropZone.classList.remove('drag-over'));
-            });
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => imageDropZone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }));
+            ['dragenter', 'dragover'].forEach(eventName => imageDropZone.addEventListener(eventName, () => imageDropZone.classList.add('drag-over')));
+            ['dragleave', 'drop'].forEach(eventName => imageDropZone.addEventListener(eventName, () => imageDropZone.classList.remove('drag-over')));
             imageDropZone.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
-
             removeImageBtn.addEventListener('click', () => {
                 selectedFile = null;
                 fileUploadInput.value = '';
@@ -477,6 +475,7 @@
                     const giftName = giftNameInput.value.trim();
                     const giftPrice = parseFloat(giftPriceInput.value);
                     const giftDescription = giftDescriptionInput.value.trim();
+                    const giftCategory = giftCategorySelect.value;
                     let imageUrl = giftImageUrlInput.value;
 
                     if (!giftName || isNaN(giftPrice) || giftPrice < 0) {
@@ -493,6 +492,7 @@
                         name: giftName,
                         description: giftDescription,
                         price: giftPrice,
+                        category: giftCategory,
                         imageUrl: imageUrl || ""
                     };
 
@@ -526,6 +526,7 @@
                         giftNameInput.value = gift.name;
                         giftDescriptionInput.value = gift.description;
                         giftPriceInput.value = gift.price;
+                        giftCategorySelect.value = gift.category || 'Outros';
                         
                         if (gift.imageUrl) {
                             giftImageUrlInput.value = gift.imageUrl;
@@ -571,16 +572,19 @@
                         const giftElement = document.createElement('div');
                         giftElement.className = 'bg-white p-4 rounded-md shadow-sm flex justify-between items-center border';
                         giftElement.innerHTML = `
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-4 flex-grow">
                                 <img src="${gift.imageUrl || 'https://placehold.co/60x60/E0E7FF/3730A3?text=Img'}" alt="${gift.name}" class="w-12 h-12 object-cover rounded-md">
-                                <div>
+                                <div class="flex-grow">
                                     <p class="font-bold text-gray-800">${gift.name}</p>
                                     <p class="text-sm text-gray-600">R$ ${Number(gift.price).toFixed(2)}</p>
                                 </div>
                             </div>
-                            <div class="space-x-3">
-                                <button data-id="${gift.id}" class="edit-btn text-blue-600 hover:text-blue-800 font-medium">Editar</button>
-                                <button data-id="${gift.id}" class="delete-btn text-red-600 hover:text-red-800 font-medium">Apagar</button>
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-700">${gift.category || 'Sem Categoria'}</span>
+                                <div class="space-x-3">
+                                    <button data-id="${gift.id}" class="edit-btn text-blue-600 hover:text-blue-800 font-medium">Editar</button>
+                                    <button data-id="${gift.id}" class="delete-btn text-red-600 hover:text-red-800 font-medium">Apagar</button>
+                                </div>
                             </div>
                         `;
                         catalogList.appendChild(giftElement);
