@@ -128,22 +128,22 @@
 
     <div id="edit-gift-modal" class="modal">
         <div class="modal-content">
-            <h3 class="text-xl font-bold mb-4">Editar Presente</h3>
+            <h3 class="text-xl font-bold mb-4">Editar Foto do Presente</h3>
             <form id="edit-gift-form">
                 <input type="hidden" id="editing-gift-id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-4">
                         <div>
-                            <label for="gift-name-input" class="block text-sm font-medium text-gray-700 mb-1">Nome do Presente</label>
-                            <input type="text" id="gift-name-input" class="w-full p-2 border border-gray-300 rounded-md" readonly>
+                            <label class="block text-sm font-medium text-gray-700">Presente</label>
+                            <p id="gift-name-display" class="mt-1 text-lg font-semibold text-gray-900"></p>
                         </div>
                         <div>
-                            <label for="gift-price-input" class="block text-sm font-medium text-gray-700 mb-1">Preço (R$)</label>
-                            <input type="text" id="gift-price-input" class="w-full p-2 border border-gray-300 rounded-md" readonly>
+                            <label class="block text-sm font-medium text-gray-700">Preço</label>
+                            <p id="gift-price-display" class="mt-1 text-gray-800"></p>
                         </div>
                         <div>
-                            <label for="gift-image-url-input" class="block text-sm font-medium text-gray-700 mb-1">URL da Imagem Atual</label>
-                            <input type="url" id="gift-image-url-input" class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" placeholder="Selecione uma imagem da galeria">
+                            <label for="gift-image-url-input" class="block text-sm font-medium text-gray-700 mb-1">URL da Imagem Selecionada</label>
+                            <input type="url" id="gift-image-url-input" class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" placeholder="Selecione uma imagem da galeria" readonly>
                         </div>
                          <div class="mt-4">
                             <img id="current-gift-image-preview" src="" alt="Pré-visualização da imagem" class="w-full h-48 object-cover rounded-md bg-gray-100 border">
@@ -172,42 +172,36 @@
         import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
         import { doc, getDoc, collection, onSnapshot, query, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
+        // --- Elementos da UI ---
         const loadingState = document.getElementById('loading-state');
         const adminContent = document.getElementById('admin-content');
         const logoutButton = document.getElementById('logout-button');
         const toast = document.getElementById('toast');
-
-        // Seção Gerenciar Presentes
         const userGiftListContainer = document.getElementById('user-gift-list');
         const userGiftListLoader = document.getElementById('user-gift-list-loader');
-
-        // Seção de Banco de Imagens
         const giftImageUpload = document.getElementById('gift-image-upload');
         const uploadGiftImagesBtn = document.getElementById('upload-gift-images-btn');
         const giftImagesGallery = document.getElementById('gift-images-gallery');
         const giftImagesLoader = document.getElementById('gift-images-gallery-loader');
-
-        // Seção de Evento
         const eventImagesGallery = document.getElementById('event-images-gallery');
         const eventImagesLoader = document.getElementById('event-images-gallery-loader');
-
-        // Modal de Edição
         const editGiftModal = document.getElementById('edit-gift-modal');
         const editGiftForm = document.getElementById('edit-gift-form');
         const editingGiftId = document.getElementById('editing-gift-id');
-        const giftNameInput = document.getElementById('gift-name-input');
-        const giftPriceInput = document.getElementById('gift-price-input');
+        const giftNameDisplay = document.getElementById('gift-name-display');
+        const giftPriceDisplay = document.getElementById('gift-price-display');
         const giftImageUrlInput = document.getElementById('gift-image-url-input');
         const currentGiftImagePreview = document.getElementById('current-gift-image-preview');
         const modalImageGallery = document.getElementById('modal-image-gallery');
 
-
         let currentUser;
         let unsubscribeGiftsListener = null;
 
+        // --- Inicialização ---
         onAuthStateChanged(auth, (user) => {
             if (user && !user.isAnonymous) {
                 currentUser = user;
+                console.log("Admin autenticado:", currentUser.uid);
                 initializeAdminPanel();
             } else {
                 window.location.href = '/login.html';
@@ -218,31 +212,31 @@
             loadingState.classList.add('hidden');
             adminContent.classList.remove('hidden');
 
+            loadUserGifts();
             loadGiftImages();
             loadEventImages();
-            loadUserGifts(); // Carrega a lista de presentes do usuário
-
+            
             logoutButton.addEventListener('click', () => signOut(auth));
             uploadGiftImagesBtn.addEventListener('click', handleGiftImageUpload);
-            
-            // Event listeners do modal
             editGiftModal.querySelector('.modal-close-btn').addEventListener('click', () => editGiftModal.classList.remove('is-open'));
             editGiftForm.addEventListener('submit', handleGiftUpdate);
         }
 
-        // --- LÓGICA PARA GERENCIAR A LISTA DE PRESENTES DO USUÁRIO ---
-
+        // --- Lógica para Gerenciar a Lista de Presentes do Usuário ---
         function loadUserGifts() {
-            if (unsubscribeGiftsListener) unsubscribeGiftsListener(); // Cancela listener anterior
+            if (unsubscribeGiftsListener) unsubscribeGiftsListener();
 
             const giftsRef = collection(db, 'users', currentUser.uid, 'gifts');
             const q = query(giftsRef);
             
             userGiftListLoader.style.display = 'block';
+            console.log("A carregar presentes de:", `users/${currentUser.uid}/gifts`);
 
             unsubscribeGiftsListener = onSnapshot(q, (snapshot) => {
                 userGiftListLoader.style.display = 'none';
                 userGiftListContainer.innerHTML = '';
+                console.log(`Encontrados ${snapshot.size} presentes.`);
+
                 if (snapshot.empty) {
                     userGiftListContainer.innerHTML = `<p class="text-gray-500 md:col-span-2 lg:col-span-4 text-center">Nenhum presente na lista ainda. Crie presentes na página "Lista de Presentes".</p>`;
                     return;
@@ -260,20 +254,25 @@
 
         function createUserGiftCard(gift) {
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg shadow-sm border flex flex-col overflow-hidden';
-            const formattedPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gift.price);
-            const placeholderImg = `https://placehold.co/600x400/FCE7F3/DB2777?text=${encodeURIComponent(gift.name)}`;
+            card.className = 'bg-gray-50 rounded-lg shadow-sm border flex flex-col overflow-hidden';
+            
+            // CORREÇÃO: Tratamento de dados potencialmente ausentes
+            const name = gift.name || 'Presente sem nome';
+            const description = gift.description || 'Sem descrição.';
+            const price = gift.price || 0;
+            const formattedPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
+            const placeholderImg = `https://placehold.co/600x400/FCE7F3/DB2777?text=${encodeURIComponent(name)}`;
             const imageSrc = gift.imageUrl || placeholderImg;
 
             card.innerHTML = `
-                <img src="${imageSrc}" alt="${gift.name}" class="w-full h-40 object-cover" onerror="this.onerror=null;this.src='${placeholderImg}';">
+                <img src="${imageSrc}" alt="${name}" class="w-full h-40 object-cover" onerror="this.onerror=null;this.src='${placeholderImg}';">
                 <div class="p-4 flex flex-col flex-grow">
-                    <h4 class="text-base font-bold text-gray-800">${gift.name}</h4>
-                    <p class="text-sm text-gray-600 mt-1 flex-grow">${gift.description || ''}</p>
+                    <h4 class="text-base font-bold text-gray-800">${name}</h4>
+                    <p class="text-sm text-gray-600 mt-1 flex-grow">${description}</p>
                     <p class="text-lg font-semibold text-pink-600 mt-2">${formattedPrice}</p>
                 </div>
-                <div class="p-3 border-t bg-gray-50">
-                    <button class="edit-gift-btn w-full bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600">
+                <div class="p-3 border-t bg-white">
+                    <button class="edit-gift-btn w-full bg-indigo-500 text-white font-semibold py-2 rounded-lg hover:bg-indigo-600 transition-colors">
                         Editar Foto
                     </button>
                 </div>
@@ -283,13 +282,11 @@
             return card;
         }
 
-
-        // --- LÓGICA PARA O MODAL DE EDIÇÃO ---
-
+        // --- Lógica para o Modal de Edição ---
         function openEditGiftModal(gift) {
             editingGiftId.value = gift.id;
-            giftNameInput.value = gift.name;
-            giftPriceInput.value = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gift.price);
+            giftNameDisplay.textContent = gift.name || 'Presente sem nome';
+            giftPriceDisplay.textContent = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gift.price || 0);
             giftImageUrlInput.value = gift.imageUrl || '';
             currentGiftImagePreview.src = gift.imageUrl || 'https://placehold.co/600x400/F3F4F6/9CA3AF?text=Sem+Imagem';
             
@@ -316,13 +313,13 @@
                     </div>
                 `).join('');
 
-                // Adiciona event listener para seleção
                 modalImageGallery.querySelectorAll('.image-select-card').forEach(card => {
                     card.addEventListener('click', () => {
                         modalImageGallery.querySelectorAll('.image-select-card').forEach(c => c.classList.remove('selected'));
                         card.classList.add('selected');
-                        giftImageUrlInput.value = card.dataset.url;
-                        currentGiftImagePreview.src = card.dataset.url;
+                        const newUrl = card.dataset.url;
+                        giftImageUrlInput.value = newUrl;
+                        currentGiftImagePreview.src = newUrl;
                     });
                 });
 
@@ -341,9 +338,7 @@
 
             const giftRef = doc(db, 'users', currentUser.uid, 'gifts', giftId);
             try {
-                await updateDoc(giftRef, {
-                    imageUrl: newImageUrl
-                });
+                await updateDoc(giftRef, { imageUrl: newImageUrl });
                 showToast("Presente atualizado com sucesso!", false);
                 editGiftModal.classList.remove('is-open');
             } catch (error) {
@@ -352,8 +347,7 @@
             }
         }
 
-
-        // --- LÓGICA PARA IMAGENS DE PRESENTES (BANCO DE IMAGENS) ---
+        // --- Lógica para Banco de Imagens e Fotos do Evento (sem alterações) ---
         async function loadGiftImages() {
             giftImagesLoader.style.display = 'block';
             giftImagesGallery.innerHTML = '';
@@ -379,67 +373,54 @@
                 showToast("Por favor, selecione pelo menos uma imagem.", true);
                 return;
             }
-
-            showToast(`A enviar ${files.length} imagem(ns)...`, false, true); // keep open
-
+            showToast(`A enviar ${files.length} imagem(ns)...`, false, true);
             const uploadPromises = Array.from(files).map(file => {
                 const imageRef = ref(storage, `users/${currentUser.uid}/gift_images/${Date.now()}-${file.name}`);
                 return uploadBytes(imageRef, file);
             });
-
             try {
                 await Promise.all(uploadPromises);
                 showToast("Imagens enviadas com sucesso!", false);
-                giftImageUpload.value = ''; // Limpa o input
-                loadGiftImages(); // Recarrega a galeria
+                giftImageUpload.value = '';
+                loadGiftImages();
             } catch (error) {
                 console.error("Erro no upload:", error);
                 showToast("Ocorreu um erro no envio.", true);
             }
         }
 
-        // --- LÓGICA PARA IMAGENS DO EVENTO ---
         async function loadEventImages() {
              eventImagesLoader.style.display = 'block';
             eventImagesGallery.innerHTML = '';
             try {
                 const pageDataRef = doc(db, 'users', currentUser.uid, 'eventPage', 'details');
                 const docSnap = await getDoc(pageDataRef);
-
                 if (!docSnap.exists()) {
                     eventImagesLoader.textContent = 'Dados da página do evento ainda não foram criados.';
                     return;
                 }
-
                 const pageData = docSnap.data();
                 const headerImage = pageData.header?.imageUrl;
                 const galleryPhotos = pageData.gallery?.photos?.map(p => p.url) || [];
-
                 const allEventImages = [];
                 if (headerImage && !headerImage.includes('placehold.co')) {
                     allEventImages.push(headerImage);
                 }
                 allEventImages.push(...galleryPhotos);
-
                  if (allEventImages.length === 0) {
                      eventImagesLoader.textContent = 'Nenhuma imagem configurada na página do evento.';
                      return;
                 }
-
                 eventImagesGallery.innerHTML = allEventImages.map(url => createImageCard(url, null, 'event')).join('');
                 eventImagesLoader.style.display = 'none';
-
             } catch (error) {
                  console.error("Erro ao carregar imagens do evento:", error);
                  eventImagesLoader.textContent = 'Erro ao carregar imagens.';
             }
         }
 
-
-        // --- FUNÇÕES AUXILIARES ---
         function createImageCard(url, fullPath = null, type) {
             const isEventPhoto = type === 'event';
-
             return `
                 <div class="image-card aspect-square bg-gray-100 rounded-lg overflow-hidden">
                     <img src="${url}" alt="Imagem" class="w-full h-full object-cover">
@@ -460,20 +441,18 @@
         window.copyToClipboard = (text) => {
             navigator.clipboard.writeText(text).then(() => {
                 showToast("URL copiada com sucesso!", false);
-            }, (err) => {
+            }, () => {
                 showToast("Falha ao copiar URL.", true);
             });
         }
 
         window.deleteImage = async (fullPath) => {
-            if (!confirm("Tem a certeza de que quer apagar esta imagem? Esta ação não pode ser desfeita.")) {
-                return;
-            }
+            if (!confirm("Tem a certeza de que quer apagar esta imagem? Esta ação não pode ser desfeita.")) return;
             try {
                 const imageRef = ref(storage, fullPath);
                 await deleteObject(imageRef);
                 showToast("Imagem apagada com sucesso!", false);
-                loadGiftImages(); // Recarrega a galeria
+                loadGiftImages();
             } catch (error) {
                 console.error("Erro ao apagar imagem:", error);
                 showToast("Erro ao apagar a imagem.", true);
@@ -490,8 +469,6 @@
                 }, 3000);
             }
         }
-
     </script>
-
 </body>
 </html>
