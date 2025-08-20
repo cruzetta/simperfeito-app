@@ -44,10 +44,18 @@
     <div id="page-content" class="hidden">
         <header class="flex items-center justify-between h-16 px-6 bg-white border-b sticky top-0 z-20 shadow-sm">
             <span class="text-xl font-bold text-gray-800 font-display">A Sua Lista de Presentes</span>
-            <button id="open-add-gift-modal-button" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors flex items-center gap-2 shadow-sm hover:shadow-md">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                Criar Presente Personalizado
-            </button>
+            <div class="flex items-center gap-4">
+                <button id="go-to-catalog-button" class="bg-gray-200 text-gray-800 font-semibold px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2 shadow-sm hover:shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    Adicionar do Catálogo
+                </button>
+                <button id="open-add-gift-modal-button" class="bg-pink-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors flex items-center gap-2 shadow-sm hover:shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                    Criar Presente do Zero
+                </button>
+            </div>
         </header>
 
         <main class="p-4 sm:p-6 md:p-8">
@@ -182,6 +190,7 @@
         const noGiftsMessage = document.getElementById('no-gifts-message');
         const noFilterResultsMessage = document.getElementById('no-filter-results-message');
         const openAddGiftModalButton = document.getElementById('open-add-gift-modal-button');
+        const goToCatalogButton = document.getElementById('go-to-catalog-button'); // NOVO
         const giftModal = document.getElementById('gift-modal');
         const giftForm = document.getElementById('gift-form');
         const modalTitle = document.getElementById('modal-title');
@@ -240,6 +249,7 @@
             myListTab.addEventListener('click', () => switchTab('my-list'));
             catalogTab.addEventListener('click', () => switchTab('catalog'));
             openAddGiftModalButton.addEventListener('click', openModalForCreate);
+            goToCatalogButton.addEventListener('click', () => switchTab('catalog')); // NOVO
             modalCancelButton.addEventListener('click', closeModal);
             giftForm.addEventListener('submit', handleFormSubmit);
             userGiftListContainer.addEventListener('click', handleUserListActions);
